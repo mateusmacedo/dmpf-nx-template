@@ -6,8 +6,9 @@
   "tags": ["type:lib", "scope:shared", "stack:node"],
   "targets": {
     "lint": {
+      "executor": "nx:run-commands",
       "options": {
-        "lintFilePatterns": ["libs/shared/types/**/*.ts"]
+        "command": "biome lint {projectRoot}"
       }
     }
   }

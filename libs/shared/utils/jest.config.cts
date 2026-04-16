@@ -1,5 +1,5 @@
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 const swcJestConfig = JSON.parse(readFileSync(join(__dirname, '../../../.spec.swcrc'), 'utf-8'));
 swcJestConfig.swcrc = false;

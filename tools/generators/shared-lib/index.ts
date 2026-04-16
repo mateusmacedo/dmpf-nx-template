@@ -1,12 +1,12 @@
+import { join } from 'node:path';
 import {
   type Tree,
-  generateFiles,
   addProjectConfiguration,
-  updateJson,
+  generateFiles,
   joinPathFragments,
   names,
+  updateJson,
 } from '@nx/devkit';
-import { join } from 'path';
 
 interface SharedLibSchema {
   name: string;
