@@ -1,0 +1,19 @@
+{
+  "name": "@nx-base-template/shared-utils",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/shared/utils/src",
+  "projectType": "library",
+  "tags": ["type:lib", "scope:shared", "stack:node"],
+  "targets": {
+    "test": {
+      "options": {
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "options": {
+        "lintFilePatterns": ["libs/shared/utils/**/*.ts"]
+      }
+    }
+  }
+}

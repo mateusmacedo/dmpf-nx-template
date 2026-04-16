@@ -1,0 +1,14 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist/spec",
+    "rootDir": "./src",
+    "tsBuildInfoFile": "./dist/tsconfig.spec.tsbuildinfo",
+    "types": ["jest", "node"],
+    "noUnusedLocals": false
+  },
+  "include": ["src/**/*.ts"],
+  "references": [
+    { "path": "./tsconfig.lib.json" }
+  ]
+}
