@@ -15,10 +15,7 @@
       "!{projectRoot}/src/test-setup.[jt]s",
       "!{projectRoot}/test-setup.[jt]s"
     ],
-    "sharedGlobals": [
-      "{workspaceRoot}/tsconfig.base.json",
-      "{workspaceRoot}/nx.json"
-    ]
+    "sharedGlobals": ["{workspaceRoot}/tsconfig.base.json", "{workspaceRoot}/nx.json"]
   },
   "plugins": [
     {
@@ -79,6 +76,5 @@
     "e2e": {
       "cache": true
     }
-  },
-  "nxCloudId": "69e1011c8443a25a1dfcd97b"
+  }
 }

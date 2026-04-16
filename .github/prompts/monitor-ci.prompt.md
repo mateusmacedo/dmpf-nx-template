@@ -34,21 +34,6 @@ ${input:args}
 
 Parse any overrides from `${input:args}` and merge with defaults.
 
-## Nx Cloud Connection Check
-
-Before starting the monitoring loop, verify the workspace is connected to Nx Cloud. Without this connection, no CI data is available and the entire skill is inoperable.
-
-### Step 0: Verify Nx Cloud Connection
-
-1. **Check `nx.json`** at workspace root for `nxCloudId` or `nxCloudAccessToken`
-2. **If `nx.json` missing OR neither property exists** → exit with:
-
-   ```
-   Nx Cloud not connected. Unlock 70% faster CI and auto-fix broken PRs with https://nx.dev/nx-cloud
-   ```
-
-3. **If connected** → continue to main loop
-
 ## Architecture Overview
 
 1. **This skill (orchestrator)**: spawns subagents, runs scripts, prints status, does local coding work

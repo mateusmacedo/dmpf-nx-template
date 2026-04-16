@@ -58,43 +58,23 @@ export default tsEslint.config(
             // Isolamento de stacks: Angular não pode usar libs React/Next e vice-versa
             {
               sourceTag: 'stack:angular',
-              onlyDependOnLibsWithTags: [
-                'stack:angular',
-                'stack:node',
-                'scope:shared',
-              ],
+              onlyDependOnLibsWithTags: ['stack:angular', 'stack:node', 'scope:shared'],
             },
             {
               sourceTag: 'stack:next',
-              onlyDependOnLibsWithTags: [
-                'stack:next',
-                'stack:node',
-                'scope:shared',
-              ],
+              onlyDependOnLibsWithTags: ['stack:next', 'stack:node', 'scope:shared'],
             },
             {
               sourceTag: 'stack:nest',
-              onlyDependOnLibsWithTags: [
-                'stack:nest',
-                'stack:node',
-                'scope:shared',
-              ],
+              onlyDependOnLibsWithTags: ['stack:nest', 'stack:node', 'scope:shared'],
             },
             {
               sourceTag: 'stack:express',
-              onlyDependOnLibsWithTags: [
-                'stack:express',
-                'stack:node',
-                'scope:shared',
-              ],
+              onlyDependOnLibsWithTags: ['stack:express', 'stack:node', 'scope:shared'],
             },
             {
               sourceTag: 'stack:fastify',
-              onlyDependOnLibsWithTags: [
-                'stack:fastify',
-                'stack:node',
-                'scope:shared',
-              ],
+              onlyDependOnLibsWithTags: ['stack:fastify', 'stack:node', 'scope:shared'],
             },
           ],
         },
@@ -116,5 +96,5 @@ export default tsEslint.config(
         { prefer: 'type-imports', fixStyle: 'inline-type-imports' },
       ],
     },
-  }
+  },
 );

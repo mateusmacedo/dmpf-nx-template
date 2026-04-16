@@ -17,18 +17,18 @@ preset focado em framework (nest, next, angular).
 
 ### Fundamentos técnicos escolhidos
 
-| Decisão | Justificativa |
-|---|---|
-| `preset=ts` como ponto de partida | Menor acoplamento inicial; tsconfig correto gerado de início |
-| `module: "nodenext"` no tsconfig.base | ESM moderno, compatível com Node.js LTS |
-| `composite: true` + `emitDeclarationOnly` | TypeScript Project References — typecheck incremental |
+| Decisão                                           | Justificativa                                                                               |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `preset=ts` como ponto de partida                 | Menor acoplamento inicial; tsconfig correto gerado de início                                |
+| `module: "nodenext"` no tsconfig.base             | ESM moderno, compatível com Node.js LTS                                                     |
+| `composite: true` + `emitDeclarationOnly`         | TypeScript Project References — typecheck incremental                                       |
 | `emitDecoratorMetadata` **fora** do tsconfig.base | Evita conflito com Angular compiler; cada app NestJS configura no próprio tsconfig.app.json |
-| `customConditions` **fora** do tsconfig.base | Evita conflito cross-stack; configurado por projeto quando necessário |
-| pnpm-workspace com `apps/*`, `libs/**`, `tools/*` | Todos os pacotes são workspace packages reais (`workspace:^`) |
-| `@nx/enforce-module-boundaries` com tagging 3D | Governança por `type:`, `scope:`, `stack:` |
-| SWC como transformador de testes | Velocidade superior ao ts-jest; suporte a decorators via `.spec.swcrc` |
-| `project.json` externos (não inline) | Melhor para generators automatizados e diffs legíveis |
-| `@nx/docker` no nx.json | Targets docker:build e docker:run disponíveis para qualquer app Node |
+| `customConditions` **fora** do tsconfig.base      | Evita conflito cross-stack; configurado por projeto quando necessário                       |
+| pnpm-workspace com `apps/*`, `libs/**`, `tools/*` | Todos os pacotes são workspace packages reais (`workspace:^`)                               |
+| `@nx/enforce-module-boundaries` com tagging 3D    | Governança por `type:`, `scope:`, `stack:`                                                  |
+| SWC como transformador de testes                  | Velocidade superior ao ts-jest; suporte a decorators via `.spec.swcrc`                      |
+| `project.json` externos (não inline)              | Melhor para generators automatizados e diffs legíveis                                       |
+| `@nx/docker` no nx.json                           | Targets docker:build e docker:run disponíveis para qualquer app Node                        |
 
 ## Consequências
 

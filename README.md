@@ -4,14 +4,14 @@ Baseline de monorepo Nx multistack — Express, Fastify, NestJS, Next.js e Angul
 
 ## Stack suportada
 
-| Stack | Tipo | Plugin Nx |
-|---|---|---|
-| Node.js / TypeScript puro | libs | `@nx/js` |
-| Express | apps | `@nx/express` + `@nx/webpack` |
-| Fastify | apps | `@nx/node` + `@nx/webpack` |
-| NestJS | apps + libs | `@nx/nest` + `@nx/webpack` |
-| Next.js | apps + libs | `@nx/next` |
-| Angular | apps + libs | `@nx/angular` |
+| Stack                     | Tipo        | Plugin Nx                     |
+| ------------------------- | ----------- | ----------------------------- |
+| Node.js / TypeScript puro | libs        | `@nx/js`                      |
+| Express                   | apps        | `@nx/express` + `@nx/webpack` |
+| Fastify                   | apps        | `@nx/node` + `@nx/webpack`    |
+| NestJS                    | apps + libs | `@nx/nest` + `@nx/webpack`    |
+| Next.js                   | apps + libs | `@nx/next`                    |
+| Angular                   | apps + libs | `@nx/angular`                 |
 
 ## Estrutura de diretórios
 
@@ -60,10 +60,10 @@ Cada projeto deve declarar uma tag de cada dimensão:
 }
 ```
 
-| Dimensão | Valores |
-|---|---|
-| `type:` | `app`, `lib`, `e2e` |
-| `scope:` | `shared`, `backend`, `frontend` |
+| Dimensão | Valores                                                 |
+| -------- | ------------------------------------------------------- |
+| `type:`  | `app`, `lib`, `e2e`                                     |
+| `scope:` | `shared`, `backend`, `frontend`                         |
 | `stack:` | `node`, `express`, `fastify`, `nest`, `next`, `angular` |
 
 ## Comandos principais

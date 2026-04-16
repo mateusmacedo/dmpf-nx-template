@@ -13,10 +13,7 @@ interface SharedLibSchema {
   description?: string;
 }
 
-export default async function sharedLibGenerator(
-  tree: Tree,
-  options: SharedLibSchema,
-) {
+export default async function sharedLibGenerator(tree: Tree, options: SharedLibSchema) {
   const libNames = names(options.name);
   const projectName = `@nx-base-template/shared-${libNames.fileName}`;
   const projectRoot = `libs/shared/${libNames.fileName}`;
@@ -45,9 +42,7 @@ export default async function sharedLibGenerator(
   // Adicionar path alias no tsconfig.base.json
   updateJson(tree, 'tsconfig.base.json', (json) => {
     json.compilerOptions.paths ??= {};
-    json.compilerOptions.paths[importPath] = [
-      `${projectRoot}/src/index.ts`,
-    ];
+    json.compilerOptions.paths[importPath] = [`${projectRoot}/src/index.ts`];
     return json;
   });
 
@@ -55,9 +50,7 @@ export default async function sharedLibGenerator(
   updateJson(tree, 'tsconfig.json', (json) => {
     json.references ??= [];
     const refPath = `./${projectRoot}`;
-    const alreadyExists = json.references.some(
-      (r: { path: string }) => r.path === refPath,
-    );
+    const alreadyExists = json.references.some((r: { path: string }) => r.path === refPath);
     if (!alreadyExists) {
       json.references.push({ path: refPath });
     }
