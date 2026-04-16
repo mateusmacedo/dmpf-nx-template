@@ -1,0 +1,10 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/master/packages/nx/schemas/nx-schema.json#/definitions/GeneratorsJson",
+  "generators": {
+    "shared-lib": {
+      "factory": "./generators/shared-lib/index",
+      "schema": "./generators/shared-lib/schema.json",
+      "description": "Gera uma lib compartilhada em libs/shared/<name>"
+    }
+  }
+}

@@ -1,0 +1,2 @@
+// Ponto de entrada da lib <%= importPath %>
+// Exporte seus módulos aqui, ex: export * from './lib/<%= fileName %>.js';
