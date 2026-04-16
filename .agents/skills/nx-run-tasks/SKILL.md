@@ -45,7 +45,7 @@ nx affected -t build test lint
 
 By default it compares against the base branch. You can customize this:
 
-- `nx affected -t test --base=master --head=HEAD` — compare against a specific base and head
+- `nx affected -t test --base=main --head=HEAD` — compare against a specific base and head
 - `nx affected -t test --files=libs/mylib/src/index.ts` — specify changed files directly
 
 ## Useful flags

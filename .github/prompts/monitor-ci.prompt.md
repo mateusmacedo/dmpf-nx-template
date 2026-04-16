@@ -34,6 +34,21 @@ ${input:args}
 
 Parse any overrides from `${input:args}` and merge with defaults.
 
+## Nx Cloud Connection Check
+
+Before starting the monitoring loop, verify the workspace is connected to Nx Cloud. Without this connection, no CI data is available and the entire skill is inoperable.
+
+### Step 0: Verify Nx Cloud Connection
+
+1. **Check `nx.json`** at workspace root for `nxCloudId` or `nxCloudAccessToken`
+2. **If `nx.json` missing OR neither property exists** → exit with:
+
+   ```
+   Nx Cloud not connected. Unlock 70% faster CI and auto-fix broken PRs with https://nx.dev/nx-cloud
+   ```
+
+3. **If connected** → continue to main loop
+
 ## Architecture Overview
 
 1. **This skill (orchestrator)**: spawns subagents, runs scripts, prints status, does local coding work
@@ -96,7 +111,7 @@ The decision script returns one of the following statuses. This table defines th
 | `cipe_canceled`         | Exit, CI was canceled                                                                                            |
 | `cipe_timed_out`        | Exit, CI timed out                                                                                               |
 | `polling_timeout`       | Exit, polling timeout reached                                                                                    |
-| `circuit_breaker`       | Exit, no progress after 5 consecutive polls                                                                      |
+| `circuit_breaker`       | Exit, no progress after 13 consecutive polls                                                                     |
 | `environment_rerun_cap` | Exit, environment reruns exhausted                                                                               |
 | `fix_auto_applying`     | Self-healing is handling it — just record `last_cipe_url`, enter wait mode. No MCP call or local git ops needed. |
 | `error`                 | Wait 60s and loop                                                                                                |
