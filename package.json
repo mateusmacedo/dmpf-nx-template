@@ -29,6 +29,7 @@
     "@nx/angular": "22.6.5",
     "@nx/docker": "22.6.5",
     "@nx/express": "22.6.5",
+    "@nx-go/nx-go": "4.0.0-beta.0",
     "@nx/jest": "22.6.5",
     "@nx/js": "22.6.5",
     "@nx/nest": "22.6.5",
@@ -56,7 +57,5 @@
     "typescript": "~5.9.2",
     "webpack-cli": "^5.1.4"
   },
-  "dependencies": {
-    "@nx-go/nx-go": "4.0.0-beta.0"
-  }
+  "dependencies": {}
 }
