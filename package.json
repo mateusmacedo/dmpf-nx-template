@@ -20,6 +20,7 @@
   },
   "private": true,
   "devDependencies": {
+    "@biomejs/biome": "^1.9.0",
     "@nestjs/common": "^11.1.19",
     "@nestjs/core": "^11.1.19",
     "@nestjs/platform-express": "^11.1.19",
@@ -37,7 +38,6 @@
     "@nx/web": "22.6.5",
     "@nx/webpack": "22.6.5",
     "@nx/workspace": "22.6.5",
-    "@biomejs/biome": "^1.9.0",
     "@swc-node/register": "1.11.1",
     "@swc/core": "1.15.8",
     "@swc/helpers": "0.5.18",
@@ -55,5 +55,8 @@
     "tslib": "^2.3.0",
     "typescript": "~5.9.2",
     "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "@nx-go/nx-go": "4.0.0-beta.0"
   }
 }
