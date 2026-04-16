@@ -13,7 +13,7 @@ permissions:
 jobs:
   main:
     name: Nx Affected Pipeline
-    runs-on: ubuntu-latest
+    runs-on: k8s-actions-runner
 
     steps:
       - name: Checkout
