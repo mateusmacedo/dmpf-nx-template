@@ -1,0 +1,14 @@
+{
+  "name": "@nx-base-template/shared-types",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/shared/types/src",
+  "projectType": "library",
+  "tags": ["type:lib", "scope:shared", "stack:node"],
+  "targets": {
+    "lint": {
+      "options": {
+        "lintFilePatterns": ["libs/shared/types/**/*.ts"]
+      }
+    }
+  }
+}

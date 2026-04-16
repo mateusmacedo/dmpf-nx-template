@@ -18,6 +18,7 @@
     "target": "es2022",
     "baseUrl": ".",
     "paths": {
+      "@nx-base-template/shared-types": ["libs/shared/types/src/index.ts"]
     }
   }
 }
