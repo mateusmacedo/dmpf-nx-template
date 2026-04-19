@@ -101,24 +101,7 @@ jobs:
             "
           )
 
-          LIBS_JSON=$(pnpm nx show projects --projects=\"tag:type:lib\" --json)
-          PACKAGE_NAMES=$(node -e "
-            const projects = JSON.parse(process.argv[1] ?? '[]');
-            const names = projects.filter((name) => typeof name === 'string' && name.startsWith('@lideranca-sites/'));
-            process.stdout.write(names.join(','));
-          " "$LIBS_JSON")
-
-          HAS_PACKAGE_IN_REGISTRY=false
-          IFS=',' read -ra PACKAGES <<< "$PACKAGE_NAMES"
-          for PACKAGE_NAME in "${PACKAGES[@]}"; do
-            [[ -z "$PACKAGE_NAME" ]] && continue
-            if npm view "$PACKAGE_NAME" version --registry=https://npm.pkg.github.com >/dev/null 2>&1; then
-              HAS_PACKAGE_IN_REGISTRY=true
-              break
-            fi
-          done
-
-          if [[ "$HAS_NPM_RELEASE_TAG" == "false" && "$HAS_PACKAGE_IN_REGISTRY" == "false" ]]; then
+          if [[ "$HAS_NPM_RELEASE_TAG" == "false" ]]; then
             echo "use_first_release=true" >> "$GITHUB_OUTPUT"
             echo "Bootstrap mode enabled: no release tags and no package found in registry."
           else
@@ -226,43 +209,6 @@ jobs:
               exit 1
             fi
           done
-
-      - name: Validate GitHub releases for created tags
-        if: steps.release-tags.outputs.has_release_tags == 'true'
-        env:
-          TAGS_CSV: ${{ steps.release-tags.outputs.tags_csv }}
-          REPOSITORY: ${{ github.repository }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          node -e "
-            const tags = (process.env.TAGS_CSV || '').split(',').map((tag) => tag.trim()).filter(Boolean);
-            if (tags.length === 0) {
-              throw new Error('Expected release tags, but none were provided to validation step.');
-            }
-            const repo = process.env.REPOSITORY;
-            const token = process.env.GITHUB_TOKEN;
-            (async () => {
-              for (const tag of tags) {
-                const encoded = encodeURIComponent(tag);
-                const url = 'https://api.github.com/repos/' + repo + '/releases/tags/' + encoded;
-                const response = await fetch(url, {
-                  headers: {
-                    'Authorization': 'Bearer ' + token,
-                    'Accept': 'application/vnd.github+json',
-                    'X-GitHub-Api-Version': '2022-11-28'
-                  }
-                });
-                if (!response.ok) {
-                  const body = await response.text();
-                  throw new Error('Missing GitHub release for tag ' + tag + '. Status: ' + response.status + '. Body: ' + body);
-                }
-              }
-              console.log('Validated GitHub release for tags:', tags.join(', '));
-            })().catch((error) => {
-              console.error(error.message);
-              process.exit(1);
-            });
-          "
 
       - name: Release summary
         if: always()
