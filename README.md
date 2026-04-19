@@ -70,7 +70,7 @@ Cada projeto deve declarar uma tag de cada dimensão:
 
 ```bash
 # Rodar testes da lib shared/utils
-pnpm nx test @nx-base-template/shared-utils
+pnpm nx test @lideranca-sites/shared-utils
 
 # Rodar lint apenas nos projetos afetados pelo último commit
 pnpm nx affected -t lint
