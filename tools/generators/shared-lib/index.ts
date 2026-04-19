@@ -15,9 +15,9 @@ interface SharedLibSchema {
 
 export default async function sharedLibGenerator(tree: Tree, options: SharedLibSchema) {
   const libNames = names(options.name);
-  const projectName = `@nx-base-template/shared-${libNames.fileName}`;
+  const projectName = `@lideranca-sites/shared-${libNames.fileName}`;
   const projectRoot = `libs/shared/${libNames.fileName}`;
-  const importPath = `@nx-base-template/shared-${libNames.fileName}`;
+  const importPath = `@lideranca-sites/shared-${libNames.fileName}`;
 
   // Criar projeto no grafo Nx
   addProjectConfiguration(tree, projectName, {
