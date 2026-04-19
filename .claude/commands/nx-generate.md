@@ -1,13 +1,13 @@
 ---
-name: nx-generate
-description: Generate code using nx generators. INVOKE IMMEDIATELY when user mentions scaffolding, setup, structure, creating apps/libs, or setting up project structure. Trigger words - scaffold, setup, create a ... app, create a ... lib, project structure, generate, add a new project. ALWAYS use this BEFORE calling nx_docs or exploring - this skill handles discovery internally.
+description: Generate code using nx generators. INVOKE IMMEDIATELY when user mentions scaffolding, setup, structure, creating apps/libs, or setting up project structure. Trigger words - scaffold, setup, create a ... app, create a ... lib, project structure, generate, add a new project. ALWAYS use this BEFORE calling nx_docs or exploring - this command handles discovery internally.
+allowed-tools: Bash, Read, Glob, Grep
 ---
 
 # Run Nx Generator
 
 Nx generators are powerful tools that scaffold projects, make automated code migrations or automate repetitive tasks in a monorepo. They ensure consistency across the codebase and reduce boilerplate work.
 
-This skill applies when the user wants to:
+This command applies when the user wants to:
 
 - Create new projects like libraries or applications
 - Scaffold features or boilerplate code
@@ -38,7 +38,7 @@ Identify which generator(s) could fulfill the user's needs. Consider what artifa
 
 **IMPORTANT**: When both a local workspace generator and an external plugin generator could satisfy the request, **always prefer the local workspace generator**. Local generators are customized for the specific repo's patterns.
 
-If no suitable generator exists, you can stop using this skill. However, the burden of proof is high—carefully consider all available generators before deciding none apply.
+If no suitable generator exists, you can stop using this command. However, the burden of proof is high—carefully consider all available generators before deciding none apply.
 
 ### 3. Get Generator Options
 
@@ -96,11 +96,9 @@ After reading the source, reconsider: Is this the right generator? If not, go ba
 > ```bash
 > # ✅ Correct - directory is the full path for the library
 > nx g @nx/react:library --directory=libs/my-lib
-> # generates libs/my-lib/package.json and more
 >
 > # ❌ Wrong - this will create files at libs and libs/src/...
 > nx g @nx/react:library --name=my-lib --directory=libs
-> # generates libs/package.json and more
 > ```
 
 ### 5. Examine Existing Patterns
@@ -132,7 +130,7 @@ Execute the generator:
 nx generate <generator-name> <options> --no-interactive
 ```
 
-> **Tip:** New packages often need workspace dependencies wired up (e.g., importing shared types, being consumed by apps). The `link-workspace-packages` skill can help add these correctly.
+> **Tip:** New packages often need workspace dependencies wired up. The `/link-workspace-packages` command can help add these correctly.
 
 ### 8. Modify Generated Code (If Needed)
 
@@ -149,18 +147,13 @@ Generators provide a starting point. Modify the output as needed to:
 Format all generated/modified files:
 
 ```bash
-nx format --fix
+pnpm biome format --write .
 ```
 
-This example is for built-in nx formatting with prettier. There might be other formatting tools for this workspace, use these when appropriate.
-
-Then verify the generated code works. Keep in mind that the changes you make with a generator or subsequent modifications might impact various projects so it's usually not enough to only run targets for the artifact you just created.
+Then verify the generated code works:
 
 ```bash
-# these targets are just an example!
-nx run-many -t build,lint,test,typecheck
+pnpm nx run-many -t build,lint,test,typecheck
 ```
-
-These targets are common examples used across many workspaces. You should do research into other targets available for this workspace and its projects. CI configuration is usually a good guide for what the critical targets are that have to pass.
 
 If verification fails with manageable issues (a few lint errors, minor type issues), fix them. If issues are extensive, attempt obvious fixes first, then escalate to the user with details about what was generated, what's failing, and what you've attempted.

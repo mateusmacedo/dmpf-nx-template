@@ -1,6 +1,6 @@
 ---
-name: link-workspace-packages
-description: 'Link workspace packages in monorepos (npm, yarn, pnpm, bun). USE WHEN: (1) you just created or generated new packages and need to wire up their dependencies, (2) user imports from a sibling package and needs to add it as a dependency, (3) you get resolution errors for workspace packages (@org/*) like "cannot find module", "failed to resolve import", "TS2307", or "cannot resolve". DO NOT patch around with tsconfig paths or manual package.json edits - use the package manager''s workspace commands to fix actual linking.'
+description: Link workspace packages in monorepos (npm, yarn, pnpm, bun). USE WHEN you just created or generated new packages and need to wire up their dependencies, user imports from a sibling package and needs to add it as a dependency, or you get resolution errors for workspace packages like "cannot find module", "failed to resolve import", "TS2307", or "cannot resolve".
+allowed-tools: Bash, Read, Edit
 ---
 
 # Link Workspace Packages
@@ -125,3 +125,4 @@ npm install @org/data-access @org/ui --workspace @org/dashboard
   - pnpm: no hoisting (strict isolation, prevents phantom deps)
   - yarn berry: uses Plug'n'Play by default (no `node_modules`)
 - Root `package.json` should have `"private": true` to prevent accidental publish
+- Publishable lib `package.json` files must **not** have `"private": true`; use `publishConfig` with the target registry instead

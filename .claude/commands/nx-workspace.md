@@ -1,6 +1,6 @@
 ---
-name: nx-workspace
-description: "Explore and understand Nx workspaces. USE WHEN answering questions about the workspace, projects, or tasks. ALSO USE WHEN an nx command fails or you need to check available targets/configuration before running a task. EXAMPLES: 'What projects are in this workspace?', 'How is project X configured?', 'What depends on library Y?', 'What targets can I run?', 'Cannot find configuration for task', 'debug nx task failure'."
+description: Explore and understand Nx workspaces. USE WHEN answering questions about the workspace, projects, or tasks. ALSO USE WHEN an nx command fails or you need to check available targets/configuration before running a task.
+allowed-tools: Bash, Read
 ---
 
 # Nx Workspace Exploration
@@ -60,7 +60,6 @@ nx show project my-app --json | jq '.targets'
 nx show project my-app --json | jq '.targets.build'
 nx show project my-app --json | jq '.targets | keys'
 
-
 # Check project metadata
 nx show project my-app --json | jq '{name, root, sourceRoot, projectType, tags}'
 ```
@@ -113,11 +112,10 @@ Key nx.json sections:
 - `targetDefaults` - Default configuration applied to all targets of a given name
 - `namedInputs` - Reusable input definitions for caching
 - `plugins` - Nx plugins and their configuration
-- ...and much more, read the schema or nx.json for details
 
 ## Affected Projects
 
-If the user is asking about affected projects, read the [affected projects reference](references/AFFECTED.md) for detailed commands and examples.
+If the user is asking about affected projects, read the [affected projects reference](.agents/skills/nx-workspace/references/AFFECTED.md) for detailed commands and examples.
 
 ## Common Exploration Patterns
 
@@ -139,27 +137,12 @@ nx show project X --json | jq '.targets.build'
 ### "What depends on library Y?"
 
 ```bash
-# Use the project graph to find dependents
 nx graph --print | jq '.graph.dependencies | to_entries[] | select(.value[].target == "Y") | .key'
 ```
 
 ## Programmatic Answers
 
-When processing nx CLI results, use command-line tools to compute the answer programmatically rather than counting or parsing output manually. Always use `--json` flags to get structured output that can be processed with `jq`, `grep`, or other tools you have installed locally.
-
-### Listing Projects
-
-```bash
-nx show projects --json
-```
-
-Example output:
-
-```json
-["my-app", "my-app-e2e", "shared-ui", "shared-utils", "api"]
-```
-
-Common operations:
+When processing nx CLI results, use command-line tools to compute the answer programmatically rather than counting or parsing output manually. Always use `--json` flags to get structured output that can be processed with `jq`, `grep`, or other tools.
 
 ```bash
 # Count projects
@@ -170,99 +153,6 @@ nx show projects --json | jq '.[] | select(startswith("shared-"))'
 
 # Get affected projects as array
 nx show projects --affected --json | jq '.'
-```
-
-### Project Details
-
-```bash
-nx show project my-app --json
-```
-
-Example output:
-
-```json
-{
-  "root": "apps/my-app",
-  "name": "my-app",
-  "sourceRoot": "apps/my-app/src",
-  "projectType": "application",
-  "tags": ["type:app", "scope:client"],
-  "targets": {
-    "build": {
-      "executor": "@nx/vite:build",
-      "options": { "outputPath": "dist/apps/my-app" }
-    },
-    "serve": {
-      "executor": "@nx/vite:dev-server",
-      "options": { "buildTarget": "my-app:build" }
-    },
-    "test": {
-      "executor": "@nx/vite:test",
-      "options": {}
-    }
-  },
-  "implicitDependencies": []
-}
-```
-
-Common operations:
-
-```bash
-# Get target names
-nx show project my-app --json | jq '.targets | keys'
-
-# Get specific target config
-nx show project my-app --json | jq '.targets.build'
-
-# Get tags
-nx show project my-app --json | jq '.tags'
-
-# Get project root
-nx show project my-app --json | jq -r '.root'
-```
-
-### Project Graph
-
-```bash
-nx graph --print
-```
-
-Example output:
-
-```json
-{
-  "graph": {
-    "nodes": {
-      "my-app": {
-        "name": "my-app",
-        "type": "app",
-        "data": { "root": "apps/my-app", "tags": ["type:app"] }
-      },
-      "shared-ui": {
-        "name": "shared-ui",
-        "type": "lib",
-        "data": { "root": "libs/shared-ui", "tags": ["type:ui"] }
-      }
-    },
-    "dependencies": {
-      "my-app": [{ "source": "my-app", "target": "shared-ui", "type": "static" }],
-      "shared-ui": []
-    }
-  }
-}
-```
-
-Common operations:
-
-```bash
-# Get all project names from graph
-nx graph --print | jq '.graph.nodes | keys'
-
-# Find dependencies of a project
-nx graph --print | jq '.graph.dependencies["my-app"]'
-
-# Find projects that depend on a library
-nx graph --print | jq '.graph.dependencies | to_entries[] | select(.value[].target == "shared-ui") | .key'
 ```
 
 ## Troubleshooting
