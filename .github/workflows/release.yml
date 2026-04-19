@@ -131,7 +131,7 @@ jobs:
         id: release-plan-bootstrap
         run: |
           DRY_RUN_LOG=$(mktemp)
-          pnpm nx release version --groups=npm-libs --first-release --dry-run 2>&1 | tee "$DRY_RUN_LOG"
+          pnpm nx release --groups=npm-libs --first-release --skip-publish --dry-run 2>&1 | tee "$DRY_RUN_LOG"
           if grep -q "No files changed as a result of running versioning" "$DRY_RUN_LOG"; then
             echo "would_release=false" >> "$GITHUB_OUTPUT"
             echo "::notice::No release changes detected in bootstrap dry-run."
@@ -145,17 +145,40 @@ jobs:
         id: release-plan-standard
         run: |
           DRY_RUN_LOG=$(mktemp)
-          pnpm nx release version --groups=npm-libs --dry-run 2>&1 | tee "$DRY_RUN_LOG"
-          if grep -q "No files changed as a result of running versioning" "$DRY_RUN_LOG"; then
-            echo "would_release=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::No release changes detected in standard dry-run."
+          set +e
+          pnpm nx release --groups=npm-libs --skip-publish --dry-run 2>&1 | tee "$DRY_RUN_LOG"
+          STANDARD_EXIT_CODE=$?
+          set -e
+
+          if [[ $STANDARD_EXIT_CODE -eq 0 ]]; then
+            echo "fallback_to_bootstrap=false" >> "$GITHUB_OUTPUT"
+            if grep -q "No files changed as a result of running versioning" "$DRY_RUN_LOG"; then
+              echo "would_release=false" >> "$GITHUB_OUTPUT"
+              echo "::notice::No release changes detected in standard dry-run."
+            else
+              echo "would_release=true" >> "$GITHUB_OUTPUT"
+              echo "Release changes detected in standard dry-run."
+            fi
+          elif grep -q "Unable to determine previous version ref" "$DRY_RUN_LOG"; then
+            echo "fallback_to_bootstrap=true" >> "$GITHUB_OUTPUT"
+            echo "::warning::Standard dry-run failed due to unresolved previous version ref. Falling back to first-release dry-run."
+
+            BOOTSTRAP_DRY_RUN_LOG=$(mktemp)
+            pnpm nx release --groups=npm-libs --first-release --skip-publish --dry-run 2>&1 | tee "$BOOTSTRAP_DRY_RUN_LOG"
+            if grep -q "No files changed as a result of running versioning" "$BOOTSTRAP_DRY_RUN_LOG"; then
+              echo "would_release=false" >> "$GITHUB_OUTPUT"
+              echo "::notice::No release changes detected in fallback bootstrap dry-run."
+            else
+              echo "would_release=true" >> "$GITHUB_OUTPUT"
+              echo "Release changes detected in fallback bootstrap dry-run."
+            fi
           else
-            echo "would_release=true" >> "$GITHUB_OUTPUT"
-            echo "Release changes detected in standard dry-run."
+            echo "::error::Standard dry-run failed with an unexpected error."
+            exit $STANDARD_EXIT_CODE
           fi
 
       - name: Execute release (bootstrap)
-        if: steps.npm-bootstrap.outputs.use_first_release == 'true' && steps.release-plan-bootstrap.outputs.would_release == 'true'
+        if: (steps.npm-bootstrap.outputs.use_first_release == 'true' && steps.release-plan-bootstrap.outputs.would_release == 'true') || (steps.release-plan-standard.outputs.fallback_to_bootstrap == 'true' && steps.release-plan-standard.outputs.would_release == 'true')
         run: pnpm nx release --groups=npm-libs --first-release --yes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -163,7 +186,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Execute release (standard)
-        if: steps.npm-bootstrap.outputs.use_first_release != 'true' && steps.release-plan-standard.outputs.would_release == 'true'
+        if: steps.npm-bootstrap.outputs.use_first_release != 'true' && steps.release-plan-standard.outputs.fallback_to_bootstrap != 'true' && steps.release-plan-standard.outputs.would_release == 'true'
         run: pnpm nx release --groups=npm-libs --yes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -245,6 +268,7 @@ jobs:
         if: always()
         run: |
           echo "first_release=${{ steps.npm-bootstrap.outputs.use_first_release }}"
+          echo "fallback_to_bootstrap=${{ steps.release-plan-standard.outputs.fallback_to_bootstrap }}"
           echo "would_release=${{ steps.release-plan-bootstrap.outputs.would_release || steps.release-plan-standard.outputs.would_release }}"
           echo "has_release_tags=${{ steps.release-tags.outputs.has_release_tags }}"
           echo "tags=${{ steps.release-tags.outputs.tags_csv }}"
