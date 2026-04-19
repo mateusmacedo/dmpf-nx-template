@@ -38,6 +38,13 @@ jobs:
       - name: Fetch all branches
         run: git fetch --all
 
+      - name: Validate GitHub CLI availability
+        run: |
+          if ! command -v gh >/dev/null 2>&1; then
+            echo "::error::GitHub CLI (gh) is required on the runner."
+            exit 1
+          fi
+
       - name: Resolve bump type
         id: bump
         run: |
@@ -91,6 +98,12 @@ jobs:
       - name: Create and push release branch
         run: |
           BRANCH="release/${{ steps.version.outputs.value }}"
+
+          if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
+            echo "::error::Branch $BRANCH already exists on origin."
+            exit 1
+          fi
+
           git checkout -b "$BRANCH"
           git push origin "$BRANCH"
 
