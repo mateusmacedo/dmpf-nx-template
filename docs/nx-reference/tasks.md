@@ -1,0 +1,215 @@
+# Referência: Configuração de Tasks no NX
+
+Guia de referência para configurar tasks, cache e pipelines neste workspace.
+Baseado na documentação oficial do NX v22.
+
+---
+
+## Modelo mental
+
+```
+Plugin (inferido)  →  targetDefaults (nx.json)  →  project.json / package.json
+    [prioridade 1]          [prioridade 2]                  [prioridade 3]
+       (mais baixa)                                            (mais alta)
+```
+
+**Regra prática:** coloque o máximo possível em `targetDefaults`. Use `project.json`
+apenas para *exceções* ou opções que variam por projeto (ex: `passWithNoTests`).
+
+---
+
+## O que já está em targetDefaults (não repetir em project.json)
+
+| Target | O que o default já cobre |
+|--------|--------------------------|
+| `build` | `dependsOn: ["^build"]`, `cache: true` |
+| `test` | `dependsOn: ["^build"]`, `cache: true` |
+| `lint` | `executor`, `command: biome lint`, `cache: true`, `inputs` |
+| `typecheck` | `dependsOn: ["^typecheck"]`, `cache: true` |
+| `e2e` | `cache: true` |
+
+### O que o plugin `@nx/js/typescript` já infere automaticamente
+
+Para targets `build` e `typecheck`, o plugin lê o `tsconfig.lib.json` e infere:
+
+- `inputs` — arquivos `.ts` do projeto, excluindo spec/test
+- `outputs` — `{projectRoot}/dist/**/*.d.ts`, `tsbuildinfo`
+- `executor` — `nx:run-commands` (tsc via tsconfig references)
+
+**Não declare esses campos em `targetDefaults` nem em `project.json`** — você
+sobrescreveria informações mais precisas que o plugin derivou do tsconfig.
+
+### O que o plugin `@nx/jest/plugin` já infere automaticamente
+
+Para o target `test`, o plugin lê o `jest.config.cts` e infere:
+
+- `inputs` — inclui `jest.preset.js` e dependências externas (`jest`, `ts-jest`, `@swc/jest`)
+- `outputs` — `{projectRoot}/test-output/jest/coverage`
+
+---
+
+## O que colocar em project.json
+
+Apenas overrides específicos do projeto. Todo projeto **deve** declarar `"lint": {}`
+para que o `targetDefault` seja aplicado (`targetDefaults` estende targets existentes,
+não cria novos):
+
+```json
+{
+  "name": "@lideranca-sites/minha-lib",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/minha-lib/src",
+  "projectType": "library",
+  "tags": ["type:lib", "scope:shared", "stack:node"],
+  "targets": {
+    "lint": {},
+    "test": {
+      "options": { "passWithNoTests": true }
+    }
+  }
+}
+```
+
+**`"lint": {}`** — target vazio: o `targetDefault` preenche `executor`, `options`,
+`cache` e `inputs` automaticamente. Nunca declare o `executor` ou `command` aqui —
+isso sobrescreve as propriedades herdadas do default, incluindo `cache: true`.
+
+---
+
+## Convenção de tags (obrigatórias em todo projeto)
+
+Todo projeto deve ter **exatamente três tags**, uma de cada dimensão:
+
+| Dimensão | Valores válidos | Exemplo |
+|----------|----------------|---------|
+| `type:` | `lib`, `app` | `type:lib` |
+| `scope:` | `shared`, `<domínio>` | `scope:shared`, `scope:auth` |
+| `stack:` | `node`, `react`, `angular`, `universal` | `stack:node` |
+
+### Significado de `stack:`
+
+| Valor | Quando usar |
+|-------|-------------|
+| `node` | Lib que usa APIs de Node.js (fs, http, process) ou frameworks como NestJS/Express |
+| `react` | Lib com componentes React ou hooks |
+| `angular` | Lib com módulos/componentes Angular |
+| `universal` | Lib sem dependência de runtime (tipos puros, utilitários de string/data) |
+
+---
+
+## Como criar uma nova lib
+
+### Via generator (recomendado)
+
+```bash
+pnpm nx g @lideranca-sites/source:shared-lib minha-lib
+```
+
+O generator pergunta o nome e a stack, e cria:
+- `libs/shared/<name>/` com tsconfig, package.json e src/index.ts
+- Tags corretas no `project.json`
+- Path alias em `tsconfig.base.json`
+- Reference em `tsconfig.json` raiz
+
+### Manualmente
+
+1. Crie o diretório `libs/<scope>/<name>/`
+2. Crie o `project.json` com as três tags obrigatórias
+3. Crie o `package.json` com `"version": "0.0.0"` e `"type": "module"`
+4. Crie `tsconfig.json`, `tsconfig.lib.json` e (se tiver testes) `tsconfig.spec.json`
+5. Adicione o path alias em `tsconfig.base.json`
+6. Adicione a reference em `tsconfig.json` raiz
+
+---
+
+## Caching: o que afeta o hash
+
+O NX computa um hash antes de rodar qualquer task cacheável. Se o hash bater
+com uma execução anterior, o resultado é restaurado sem rodar o comando.
+
+### Inputs configurados globalmente (`namedInputs`)
+
+| Named input | Conteúdo |
+|-------------|----------|
+| `default` | Todos os arquivos do projeto + `sharedGlobals` |
+| `production` | `default` sem arquivos de teste/spec |
+| `sharedGlobals` | `tsconfig.base.json`, `nx.json`, `biome.json` |
+
+O prefixo `^` significa "inclui os inputs dos projetos dependentes também".
+Ex: `"^production"` → mudanças nos arquivos de produção de qualquer dependência
+invalidam o cache desta task.
+
+### Depurar cache misses
+
+```bash
+# Ver a configuração completa resolvida de um projeto
+pnpm nx show project @lideranca-sites/shared-types
+
+# Versão visual no browser
+pnpm nx show project @lideranca-sites/shared-types --web
+
+# Limpar o cache local
+pnpm nx reset
+```
+
+---
+
+## Pipeline de dependências (`dependsOn`)
+
+```
+typecheck ──depends──▶ ^typecheck (typecheck de dependências)
+build     ──depends──▶ ^build     (build de dependências)
+test      ──depends──▶ ^build     (build de dependências antes do teste)
+```
+
+O símbolo `^` antes do nome do target significa "o mesmo target nos projetos
+dos quais este projeto depende". Sem `^`, é um target do próprio projeto.
+
+### Exemplo: adicionar um pre-build customizado
+
+```json
+// project.json
+{
+  "targets": {
+    "build": {
+      "dependsOn": ["^build", "gerar-tipos"]
+    },
+    "gerar-tipos": {
+      "command": "node scripts/gerar-tipos.mjs"
+    }
+  }
+}
+```
+
+---
+
+## Sync generators
+
+O workspace usa `@nx/js:typescript-sync` para manter as referências de
+TypeScript Project References sincronizadas automaticamente.
+
+**Em máquinas de desenvolvedor:** as mudanças são aplicadas automaticamente
+(`sync.applyChanges: true` em `nx.json`).
+
+**Em CI:** o `nx sync:check` é executado antes de qualquer task. Se há
+divergências, o CI falha com diff claro do que precisa ser sincronizado.
+
+```bash
+# Verificar sincronização manualmente
+pnpm nx sync:check
+
+# Aplicar sincronização manualmente
+pnpm nx sync
+```
+
+---
+
+## Referências
+
+- [nx.json reference](https://nx.dev/reference/nx-json)
+- [Project configuration reference](https://nx.dev/reference/project-configuration)
+- [Inputs reference](https://nx.dev/reference/inputs)
+- [Cache task results](https://nx.dev/docs/features/cache-task-results)
+- [Task pipeline configuration](https://nx.dev/docs/concepts/task-pipeline-configuration)
+- [Inferred tasks](https://nx.dev/docs/concepts/inferred-tasks)
+- [Sync generators](https://nx.dev/docs/concepts/sync-generators)
