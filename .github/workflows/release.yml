@@ -16,7 +16,7 @@ on:
         default: production
 
 concurrency:
-  group: release-${{ github.sha }}
+  group: release-${{ github.workflow }}-${{ github.event.pull_request.base.ref || github.ref_name }}
   cancel-in-progress: false
 
 permissions:
@@ -43,22 +43,28 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          fetch-tags: true
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
+      - name: Validate manual dispatch branch
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          if [[ "${GITHUB_REF_NAME}" != "master" ]]; then
+            echo "::error::Manual release is allowed only from master. Current ref: ${GITHUB_REF_NAME}"
+            exit 1
+          fi
 
-      - name: Setup Node.js
+      - name: Setup Node and pnpm
+        uses: ./.github/actions/setup-node-pnpm
+        with:
+          node-version: '22'
+          pnpm-version: '9'
+
+      - name: Setup npm registry auth
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: pnpm
           registry-url: https://npm.pkg.github.com
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
 
       - name: Configure git identity
         run: |
@@ -76,7 +82,38 @@ jobs:
             echo "value=production" >> $GITHUB_OUTPUT
           fi
 
-      - name: Release — npm libs
+      - name: Detect npm first release
+        id: npm-first-release
+        run: |
+          HAS_NPM_RELEASE_TAG=$(
+            node -e "
+              const { execSync } = require('node:child_process');
+              const tags = execSync('git tag --list', { encoding: 'utf8' })
+                .split('\n')
+                .map((tag) => tag.trim())
+                .filter(Boolean);
+              const hasProjectReleaseTag = tags.some((tag) => /^@[^/]+\/[^@]+@.+$/.test(tag));
+              process.stdout.write(hasProjectReleaseTag ? 'true' : 'false');
+            "
+          )
+
+          if [[ \"$HAS_NPM_RELEASE_TAG\" == \"true\" ]]; then
+            echo "is_first_npm_release=false" >> "$GITHUB_OUTPUT"
+            echo "Found existing npm release tags. Running standard npm release flow."
+          else
+            echo "is_first_npm_release=true" >> "$GITHUB_OUTPUT"
+            echo "No npm release tags found. Running bootstrap npm release with --first-release."
+          fi
+
+      - name: Release — npm libs (first release)
+        if: steps.npm-first-release.outputs.is_first_npm_release == 'true'
+        run: pnpm nx release --groups=npm-libs --first-release --yes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Release — npm libs (standard)
+        if: steps.npm-first-release.outputs.is_first_npm_release != 'true'
         run: pnpm nx release --groups=npm-libs --yes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
