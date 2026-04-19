@@ -74,17 +74,17 @@
     "version": {
       "conventionalCommits": true
     },
+    "changelog": {
+      "projectChangelogs": {
+        "createRelease": "github",
+        "entryWhenNoChanges": "Initial release"
+      }
+    },
     "groups": {
       "npm-libs": {
         "projects": ["tag:type:lib"],
         "releaseTag": {
           "pattern": "{projectName}@{version}"
-        },
-        "changelog": {
-          "projectChangelogs": {
-            "createRelease": "github",
-            "entryWhenNoChanges": "Initial release"
-          }
         }
       }
     },

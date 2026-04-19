@@ -176,6 +176,10 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Push release commits and tags
+        if: steps.release-plan-bootstrap.outputs.would_release == 'true' || steps.release-plan-standard.outputs.would_release == 'true'
+        run: git push --follow-tags
+
       - name: Collect release tags from current commit
         id: release-tags
         run: |
