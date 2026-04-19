@@ -183,6 +183,22 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Generate changelog and GitHub releases (bootstrap)
+        if: steps.release-tags.outputs.has_release_tags == 'true' && steps.npm-bootstrap.outputs.use_first_release == 'true'
+        run: pnpm nx release changelog --groups=npm-libs --first-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate changelog and GitHub releases (standard)
+        if: steps.release-tags.outputs.has_release_tags == 'true' && steps.npm-bootstrap.outputs.use_first_release != 'true'
+        run: pnpm nx release changelog --groups=npm-libs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Validate GitHub releases for created tags
         if: steps.release-tags.outputs.has_release_tags == 'true'
         env:
