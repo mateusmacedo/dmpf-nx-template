@@ -77,7 +77,7 @@
     },
     "version": {
       "conventionalCommits": true,
-      "updateDependents": "auto",
+      "updateDependents": "always",
       "fallbackCurrentVersionResolver": "disk"
     },
     "changelog": {
@@ -88,7 +88,6 @@
       }
     },
     "docker": {
-      "skipVersionActions": true,
       "registryUrl": "ghcr.io",
       "versionSchemes": {
         "production": "{currentDate|YYMM.DD}.{shortCommitSha}",
