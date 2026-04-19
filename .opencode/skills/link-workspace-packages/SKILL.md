@@ -125,4 +125,3 @@ npm install @org/data-access @org/ui --workspace @org/dashboard
   - pnpm: no hoisting (strict isolation, prevents phantom deps)
   - yarn berry: uses Plug'n'Play by default (no `node_modules`)
 - Root `package.json` should have `"private": true` to prevent accidental publish
-- Publishable lib `package.json` files must **not** have `"private": true`; use `publishConfig` with the target registry instead

@@ -48,16 +48,16 @@ jobs:
         run: pnpm biome ci .
 
       - name: Lint (affected)
-        run: pnpm nx affected -t lint --parallel=3 --exclude=@nx-base-template/source
+        run: pnpm nx affected -t lint --base=$NX_BASE --head=$NX_HEAD --parallel=3 --exclude=@nx-base-template/source
 
       - name: Typecheck (affected)
-        run: pnpm nx affected -t typecheck --parallel=3 --exclude=@nx-base-template/source
+        run: pnpm nx affected -t typecheck --base=$NX_BASE --head=$NX_HEAD --parallel=3 --exclude=@nx-base-template/source
 
       - name: Test (affected)
-        run: pnpm nx affected -t test --parallel=3 --ci --coverage --exclude=@nx-base-template/source
+        run: pnpm nx affected -t test --base=$NX_BASE --head=$NX_HEAD --parallel=3 --ci --coverage --exclude=@nx-base-template/source
 
       - name: Build (affected)
-        run: pnpm nx affected -t build --parallel=3 --exclude=@nx-base-template/source
+        run: pnpm nx affected -t build --base=$NX_BASE --head=$NX_HEAD --parallel=3 --exclude=@nx-base-template/source
 
       - name: E2E (affected)
-        run: pnpm nx affected -t e2e --parallel=1 --exclude=@nx-base-template/source
+        run: pnpm nx affected -t e2e --base=$NX_BASE --head=$NX_HEAD --parallel=1 --exclude=@nx-base-template/source
