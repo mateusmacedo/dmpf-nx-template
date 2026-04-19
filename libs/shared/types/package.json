@@ -1,5 +1,5 @@
 {
-  "name": "@nx-base-template/shared-types",
+  "name": "@lideranca-sites/shared-types",
   "version": "0.0.1",
   "type": "module",
   "publishConfig": {
