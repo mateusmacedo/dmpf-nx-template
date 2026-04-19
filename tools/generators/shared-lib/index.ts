@@ -1,37 +1,30 @@
 import { join } from 'node:path';
-import {
-  type Tree,
-  addProjectConfiguration,
-  generateFiles,
-  joinPathFragments,
-  names,
-  updateJson,
-} from '@nx/devkit';
+import { type Tree, addProjectConfiguration, generateFiles, names, updateJson } from '@nx/devkit';
 
 interface SharedLibSchema {
   name: string;
   description?: string;
+  stack?: 'node' | 'react' | 'angular' | 'universal';
 }
 
 export default async function sharedLibGenerator(tree: Tree, options: SharedLibSchema) {
   const libNames = names(options.name);
+  const stack = options.stack ?? 'node';
   const projectName = `@lideranca-sites/shared-${libNames.fileName}`;
   const projectRoot = `libs/shared/${libNames.fileName}`;
   const importPath = `@lideranca-sites/shared-${libNames.fileName}`;
 
-  // Criar projeto no grafo Nx
   addProjectConfiguration(tree, projectName, {
     root: projectRoot,
     sourceRoot: `${projectRoot}/src`,
     projectType: 'library',
-    tags: ['type:lib', 'scope:shared', 'stack:node'],
+    tags: ['type:lib', 'scope:shared', `stack:${stack}`],
     targets: {
       test: { options: { passWithNoTests: true } },
-      lint: { options: { lintFilePatterns: [`${projectRoot}/**/*.ts`] } },
+      lint: {},
     },
   });
 
-  // Gerar arquivos a partir dos templates
   generateFiles(tree, join(__dirname, 'files'), projectRoot, {
     ...libNames,
     importPath,
@@ -39,14 +32,12 @@ export default async function sharedLibGenerator(tree: Tree, options: SharedLibS
     tmpl: '',
   });
 
-  // Adicionar path alias no tsconfig.base.json
   updateJson(tree, 'tsconfig.base.json', (json) => {
     json.compilerOptions.paths ??= {};
     json.compilerOptions.paths[importPath] = [`${projectRoot}/src/index.ts`];
     return json;
   });
 
-  // Adicionar reference no tsconfig.json raiz
   updateJson(tree, 'tsconfig.json', (json) => {
     json.references ??= [];
     const refPath = `./${projectRoot}`;
@@ -57,8 +48,8 @@ export default async function sharedLibGenerator(tree: Tree, options: SharedLibS
     return json;
   });
 
-  // Adicionar package na pnpm-workspace (já coberto pelo glob libs/**)
-  console.log(`✅  Lib criada: ${projectName}`);
-  console.log(`   Root: ${projectRoot}`);
-  console.log(`   Import: ${importPath}`);
+  console.log(`\n  Lib criada: ${projectName}`);
+  console.log(`  Root:   ${projectRoot}`);
+  console.log(`  Import: ${importPath}`);
+  console.log(`  Stack:  ${stack}\n`);
 }

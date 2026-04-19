@@ -15,6 +15,22 @@
       "type": "string",
       "description": "Descrição curta da lib",
       "default": ""
+    },
+    "stack": {
+      "type": "string",
+      "description": "Runtime/framework alvo da lib",
+      "enum": ["node", "react", "angular", "universal"],
+      "default": "node",
+      "x-prompt": {
+        "message": "Qual a stack da lib?",
+        "type": "list",
+        "items": [
+          { "value": "node", "label": "Node.js" },
+          { "value": "react", "label": "React / Next.js" },
+          { "value": "angular", "label": "Angular" },
+          { "value": "universal", "label": "Universal (sem dependência de runtime)" }
+        ]
+      }
     }
   },
   "required": ["name"]
