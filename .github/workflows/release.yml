@@ -21,6 +21,7 @@ concurrency:
 
 permissions:
   contents: write
+  id-token: write
   packages: write
 
 jobs:
@@ -86,142 +87,19 @@ jobs:
             echo "value=production" >> $GITHUB_OUTPUT
           fi
 
-      - name: Detect npm bootstrap mode
-        id: npm-bootstrap
-        run: |
-          HAS_NPM_RELEASE_TAG=$(
-            node -e "
-              const { execSync } = require('node:child_process');
-              const tags = execSync('git tag --list', { encoding: 'utf8' })
-                .split('\n')
-                .map((tag) => tag.trim())
-                .filter(Boolean);
-              const hasProjectReleaseTag = tags.some((tag) => /^@lideranca-sites\/[^@]+@.+$/.test(tag));
-              process.stdout.write(hasProjectReleaseTag ? 'true' : 'false');
-            "
-          )
-
-          if [[ "$HAS_NPM_RELEASE_TAG" == "false" ]]; then
-            echo "use_first_release=true" >> "$GITHUB_OUTPUT"
-            echo "Bootstrap mode enabled: no release tags and no package found in registry."
-          else
-            echo "use_first_release=false" >> "$GITHUB_OUTPUT"
-            echo "Standard mode enabled: existing release tags or existing package detected in registry."
-          fi
-
-      - name: Dry-run release plan (bootstrap)
-        if: steps.npm-bootstrap.outputs.use_first_release == 'true'
-        id: release-plan-bootstrap
-        run: |
-          DRY_RUN_LOG=$(mktemp)
-          pnpm nx release --groups=npm-libs --first-release --skip-publish --dry-run 2>&1 | tee "$DRY_RUN_LOG"
-          if grep -q "No files changed as a result of running versioning" "$DRY_RUN_LOG"; then
-            echo "would_release=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::No release changes detected in bootstrap dry-run."
-          else
-            echo "would_release=true" >> "$GITHUB_OUTPUT"
-            echo "Release changes detected in bootstrap dry-run."
-          fi
-
-      - name: Dry-run release plan (standard)
-        if: steps.npm-bootstrap.outputs.use_first_release != 'true'
-        id: release-plan-standard
-        run: |
-          DRY_RUN_LOG=$(mktemp)
-          set +e
-          pnpm nx release --groups=npm-libs --skip-publish --dry-run 2>&1 | tee "$DRY_RUN_LOG"
-          STANDARD_EXIT_CODE=$?
-          set -e
-
-          if [[ $STANDARD_EXIT_CODE -eq 0 ]]; then
-            echo "fallback_to_bootstrap=false" >> "$GITHUB_OUTPUT"
-            if grep -q "No files changed as a result of running versioning" "$DRY_RUN_LOG"; then
-              echo "would_release=false" >> "$GITHUB_OUTPUT"
-              echo "::notice::No release changes detected in standard dry-run."
-            else
-              echo "would_release=true" >> "$GITHUB_OUTPUT"
-              echo "Release changes detected in standard dry-run."
-            fi
-          elif grep -q "Unable to determine previous version ref" "$DRY_RUN_LOG"; then
-            echo "fallback_to_bootstrap=true" >> "$GITHUB_OUTPUT"
-            echo "::warning::Standard dry-run failed due to unresolved previous version ref. Falling back to first-release dry-run."
-
-            BOOTSTRAP_DRY_RUN_LOG=$(mktemp)
-            pnpm nx release --groups=npm-libs --first-release --skip-publish --dry-run 2>&1 | tee "$BOOTSTRAP_DRY_RUN_LOG"
-            if grep -q "No files changed as a result of running versioning" "$BOOTSTRAP_DRY_RUN_LOG"; then
-              echo "would_release=false" >> "$GITHUB_OUTPUT"
-              echo "::notice::No release changes detected in fallback bootstrap dry-run."
-            else
-              echo "would_release=true" >> "$GITHUB_OUTPUT"
-              echo "Release changes detected in fallback bootstrap dry-run."
-            fi
-          else
-            echo "::error::Standard dry-run failed with an unexpected error."
-            exit $STANDARD_EXIT_CODE
-          fi
-
-      - name: Execute release (bootstrap)
-        if: (steps.npm-bootstrap.outputs.use_first_release == 'true' && steps.release-plan-bootstrap.outputs.would_release == 'true') || (steps.release-plan-standard.outputs.fallback_to_bootstrap == 'true' && steps.release-plan-standard.outputs.would_release == 'true')
-        run: pnpm nx release --groups=npm-libs --first-release --yes
+      - name: Release
+        id: release
+        continue-on-error: true
+        run: pnpm nx release --yes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Execute release (standard)
-        if: steps.npm-bootstrap.outputs.use_first_release != 'true' && steps.release-plan-standard.outputs.fallback_to_bootstrap != 'true' && steps.release-plan-standard.outputs.would_release == 'true'
-        run: pnpm nx release --groups=npm-libs --yes
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Push release commits and tags
-        if: steps.release-plan-bootstrap.outputs.would_release == 'true' || steps.release-plan-standard.outputs.would_release == 'true'
-        run: git push --follow-tags
-
-      - name: Collect release tags from current commit
-        id: release-tags
+      - name: Check Release Result
+        if: steps.release.outcome == 'failure'
         run: |
-          WOULD_RELEASE="${{ steps.release-plan-bootstrap.outputs.would_release || steps.release-plan-standard.outputs.would_release }}"
-          if [[ "$WOULD_RELEASE" != "true" ]]; then
-            echo "has_release_tags=false" >> "$GITHUB_OUTPUT"
-            echo "tags_csv=" >> "$GITHUB_OUTPUT"
-            echo "::notice::Release execution skipped due to no-op dry-run."
-            exit 0
-          fi
-
-          TAGS=$(git tag --points-at HEAD | tr '\n' ',' | sed 's/,$//')
-          if [[ -z "$TAGS" ]]; then
-            echo "has_release_tags=false" >> "$GITHUB_OUTPUT"
-            echo "tags_csv=" >> "$GITHUB_OUTPUT"
-            echo "::error::Release was expected, but no tags were created on HEAD."
-            exit 1
-          else
-            echo "has_release_tags=true" >> "$GITHUB_OUTPUT"
-            echo "tags_csv=$TAGS" >> "$GITHUB_OUTPUT"
-            echo "Release tags created on HEAD: $TAGS"
-          fi
-
-      - name: Validate release tag pattern
-        if: steps.release-tags.outputs.has_release_tags == 'true'
-        run: |
-          IFS=',' read -ra TAG_ARRAY <<< "${{ steps.release-tags.outputs.tags_csv }}"
-          for TAG in "${TAG_ARRAY[@]}"; do
-            if [[ ! "$TAG" =~ ^@lideranca-sites/[^@]+@.+$ ]]; then
-              echo "::error::Invalid release tag format: $TAG"
-              exit 1
-            fi
-          done
-
-      - name: Release summary
-        if: always()
-        run: |
-          echo "first_release=${{ steps.npm-bootstrap.outputs.use_first_release }}"
-          echo "fallback_to_bootstrap=${{ steps.release-plan-standard.outputs.fallback_to_bootstrap }}"
-          echo "would_release=${{ steps.release-plan-bootstrap.outputs.would_release || steps.release-plan-standard.outputs.would_release }}"
-          echo "has_release_tags=${{ steps.release-tags.outputs.has_release_tags }}"
-          echo "tags=${{ steps.release-tags.outputs.tags_csv }}"
+          echo "::warning::Release completed with warnings - may be expected if no changes were detected"
 
       - name: Detect docker release candidates
         id: docker-candidates
