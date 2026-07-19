@@ -1,8 +1,6 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
-  "organizeImports": {
-    "enabled": true
-  },
+  "$schema": "https://biomejs.dev/schemas/2.4.16/schema.json",
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "formatter": {
     "enabled": true,
     "indentStyle": "space",
@@ -33,20 +31,21 @@
     }
   },
   "files": {
-    "ignore": [
-      "dist",
-      "coverage",
-      ".nx",
-      "node_modules",
-      "pnpm-lock.yaml",
-      "**/*.swcrc",
-      ".agents",
-      ".claude",
-      ".cursor",
-      ".gemini",
-      ".github/skills",
-      ".github/prompts",
-      ".opencode"
+    "includes": [
+      "**",
+      "!**/dist",
+      "!**/coverage",
+      "!**/.nx",
+      "!**/node_modules",
+      "!**/pnpm-lock.yaml",
+      "!**/*.swcrc",
+      "!**/.agents",
+      "!**/.claude",
+      "!**/.cursor",
+      "!**/.gemini",
+      "!**/.github/skills",
+      "!**/.github/prompts",
+      "!**/.opencode"
     ]
   }
 }
