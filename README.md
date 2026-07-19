@@ -2,6 +2,22 @@
 
 Baseline de monorepo Nx multistack — Express, Fastify, NestJS, Next.js e Angular no mesmo workspace.
 
+## Pré-requisitos
+
+- Node.js `24` (ver `.nvmrc` / `.node-version`)
+- pnpm `11` (habilite via `corepack enable`)
+
+## Quick Start
+
+```bash
+corepack enable          # ativa o pnpm na versão de packageManager
+pnpm install             # instala deps e registra os git hooks (Lefthook)
+pnpm nx run-many -t build # build incremental de tudo
+```
+
+As versões de dependências são centralizadas no `catalog:` do
+`pnpm-workspace.yaml` — cada `package.json` referencia `"catalog:"`.
+
 ## Stack suportada
 
 | Stack                     | Tipo        | Plugin Nx                     |
@@ -43,8 +59,8 @@ nx-base-template/
 ├── .github/workflows/ci.yml     # CI com nx affected
 ├── nx.json
 ├── tsconfig.base.json           # TypeScript Project References (nodenext)
-├── pnpm-workspace.yaml          # apps/*, libs/**, tools/*
-├── eslint.config.mjs            # ESLint + module boundaries
+├── pnpm-workspace.yaml          # apps/*, libs/**, tools/* + catalog de versões
+├── biome.json                   # Biome (lint + formatação)
 ├── jest.config.ts               # Jest root
 ├── jest.preset.js               # Preset SWC
 └── .spec.swcrc                  # Config SWC para testes (suporta decorators)
@@ -111,12 +127,37 @@ Sempre adicione as tags obrigatórias no `project.json` gerado.
 O pipeline em `.github/workflows/ci.yml` executa sobre os projetos **afetados**
 pela mudança (`nx affected`), na ordem:
 
-1. `format:check` — Prettier
-2. `lint` — ESLint + module boundaries
+1. `format:check` — Biome (`biome ci`)
+2. `lint` — Biome
 3. `typecheck` — TypeScript Project References
 4. `test` — Jest + SWC
 5. `build` — build incremental
 6. `e2e` — testes E2E
+
+## Testes
+
+Os testes usam Jest com transform via SWC (`.spec.swcrc`).
+
+```bash
+# Testar uma lib específica
+pnpm nx test @lideranca-sites/shared-utils
+
+# Testar apenas os projetos afetados
+pnpm nx affected -t test
+
+# Testar tudo
+pnpm nx run-many -t test
+```
+
+## Troubleshooting
+
+- **`ERR_PNPM_IGNORED_BUILDS`**: um pacote com script de build não está em
+  `allowBuilds` no `pnpm-workspace.yaml`. Adicione o pacote com valor `true`.
+- **Versão de Node/pnpm incompatível**: rode `corepack enable` e use a versão
+  do `.nvmrc` (`nvm use`). O `engines` do `package.json` exige Node `^24` / pnpm `^11`.
+- **Cache desatualizado do Nx**: rode com `--skip-nx-cache` ou `pnpm nx reset`.
+- **Erro de dependência no lockfile**: rode `pnpm install` e confira o diff de
+  `pnpm-lock.yaml`; para CI use `pnpm install --frozen-lockfile`.
 
 ## Decisões arquiteturais
 
