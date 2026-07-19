@@ -1,4 +1,4 @@
-# @lideranca-sites/shared-types
+# @Lidercap-apps/shared-types
 
 Biblioteca de tipos compartilhados para contratos de API e paginacao.
 
@@ -10,7 +10,7 @@ Biblioteca de tipos compartilhados para contratos de API e paginacao.
 ## Exemplo de uso
 
 ```ts
-import type { ApiResponse, PaginatedResponse } from '@lideranca-sites/shared-types';
+import type { ApiResponse, PaginatedResponse } from '@Lidercap-apps/shared-types';
 
 type User = { id: string; name: string };
 
@@ -24,4 +24,4 @@ const response: ApiResponse<PaginatedResponse<User>> = {
 
 ## Publicacao
 
-Este pacote e publicado no GitHub Packages no escopo `@lideranca-sites`.
+Este pacote e publicado no GitHub Packages no escopo `@Lidercap-apps`.

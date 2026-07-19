@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       release-type:
-        description: 'Release type (affects docker versioning)'
+        description: "Release type (affects docker versioning)"
         type: choice
         options:
           - production
@@ -61,15 +61,15 @@ jobs:
       - name: Setup Node and pnpm
         uses: ./.github/actions/setup-node-pnpm
         with:
-          node-version: '24'
-          pnpm-version: '11'
+          node-version: "24"
+          pnpm-version: "11"
 
       - name: Setup npm registry auth
         uses: actions/setup-node@v4
         with:
           node-version: 24
           registry-url: https://npm.pkg.github.com
-          scope: '@lideranca-sites'
+          scope: "@Lidercap-apps"
 
       - name: Configure git identity
         run: |

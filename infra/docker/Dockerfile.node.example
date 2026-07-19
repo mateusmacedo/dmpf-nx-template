@@ -1,0 +1,46 @@
+# Dockerfile de REFERÊNCIA para uma app Node/NestJS deste monorepo.
+#
+# Como usar (ao criar uma app real):
+#   1. Copie este arquivo para a raiz da app (ex: apps/<sua-app>/Dockerfile).
+#   2. Substitua os ARGs APP_NAME e APP_OUTPUT_PATH pelos valores da sua app.
+#   3. Ajuste a porta EXPOSE conforme a app.
+#
+# Build a partir da RAIZ do repositório (o contexto precisa do workspace inteiro):
+#   docker build -f apps/<sua-app>/Dockerfile --build-arg APP_NAME=<projeto-nx> \
+#     --build-arg APP_OUTPUT_PATH=dist/apps/<sua-app> -t <sua-app> .
+#
+# APP_OUTPUT_PATH deve apontar para o `outputPath` real da app no Nx
+# (confira no project.json). Convenções comuns: `dist/apps/<sua-app>` (webpack
+# na raiz do workspace) ou `apps/<sua-app>/dist` (Project Crystal).
+
+ARG NODE_VERSION=24
+
+# ---- Stage 1: deps — instala dependências do workspace com pnpm ----
+FROM node:${NODE_VERSION}-alpine AS deps
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+WORKDIR /workspace
+COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
+# Copia os manifests dos projetos para resolver o grafo do workspace.
+COPY libs ./libs
+COPY apps ./apps
+COPY tools ./tools
+RUN pnpm install --frozen-lockfile
+
+# ---- Stage 2: build — compila a app-alvo via Nx ----
+FROM deps AS build
+ARG APP_NAME
+COPY . .
+RUN pnpm nx build "${APP_NAME}" --configuration=production
+
+# ---- Stage 3: runtime — imagem final enxuta ----
+FROM node:${NODE_VERSION}-alpine AS runtime
+ARG APP_OUTPUT_PATH
+ENV NODE_ENV=production
+WORKDIR /app
+# Copia apenas o artefato buildado (outputPath do Nx) e os node_modules necessários.
+COPY --from=build /workspace/${APP_OUTPUT_PATH} ./
+COPY --from=build /workspace/node_modules ./node_modules
+EXPOSE 3000
+CMD ["node", "main.js"]

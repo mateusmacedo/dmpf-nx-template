@@ -38,9 +38,9 @@ consistente e completa.
   - `docs/adr/002-nx-task-configuration.md` — config de tasks e cache
   - `docs/nx-reference/tasks.md` — referência de tasks
 - **Referências externas**:
-  - Contributor Covenant 2.1 — https://www.contributor-covenant.org/version/2/1/code_of_conduct/
-  - Renovate `config:recommended` — https://docs.renovatebot.com/presets-config/
-  - pnpm catalogs — https://pnpm.io/catalogs
+  - Contributor Covenant 2.1 — <https://www.contributor-covenant.org/version/2/1/code_of_conduct/>
+  - Renovate `config:recommended` — <https://docs.renovatebot.com/presets-config/>
+  - pnpm catalogs — <https://pnpm.io/catalogs>
 
 > **Achado da pesquisa (importante)**: no repo fonte `jusdocs` os arquivos
 > `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `LICENSE`, `CODEOWNERS` e
@@ -170,6 +170,7 @@ nx-base-template/
 ```
 
 **Arquivos a modificar**:
+
 - `pnpm-workspace.yaml` — adicionar `catalog:` sem alterar versões efetivas
 - `package.json` — trocar versões literais por `catalog:`, add packageManager/engines
 - `nx.json` — incluir `renovate.json`, `.nvmrc` em `sharedGlobals` se relevante ao cache
@@ -182,7 +183,7 @@ nx-base-template/
 
 Mudanças são majoritariamente de configuração e documentação, sem código de
 runtime. O modelo de referência é o `jusdocs`, adaptado ao escopo do template
-(multi-stack Node/React/Angular/Go, `defaultBase: master`, escopo `@lideranca-sites`).
+(multi-stack Node/React/Angular/Go, `defaultBase: master`, escopo `@Lidercap-apps`).
 
 ### Fluxo principal (execução por fase)
 
@@ -259,6 +260,7 @@ ENTÃO a validação passa sem erro
 ```
 
 <critical_constraints>
+
 - [P0] `.gitignore` DEVE ignorar `.env*` — nenhum segredo commitável
 - [P0] Migração para `catalog:` DEVE preservar versões efetivas (sem downgrade)
 - [P0] Todo global novo que afeta build entra em `sharedGlobals` de `nx.json`

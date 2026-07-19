@@ -86,7 +86,7 @@ Cada projeto deve declarar uma tag de cada dimensão:
 
 ```bash
 # Rodar testes da lib shared/utils
-pnpm nx test @lideranca-sites/shared-utils
+pnpm nx test @Lidercap-apps/shared-utils
 
 # Rodar lint apenas nos projetos afetados pelo último commit
 pnpm nx affected -t lint
@@ -140,7 +140,7 @@ Os testes usam Jest com transform via SWC (`.spec.swcrc`).
 
 ```bash
 # Testar uma lib específica
-pnpm nx test @lideranca-sites/shared-utils
+pnpm nx test @Lidercap-apps/shared-utils
 
 # Testar apenas os projetos afetados
 pnpm nx affected -t test
