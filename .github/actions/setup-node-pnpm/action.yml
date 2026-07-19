@@ -4,11 +4,11 @@ inputs:
   node-version:
     description: Node.js version used in CI
     required: false
-    default: "22"
+    default: "24"
   pnpm-version:
     description: pnpm version used in CI
     required: false
-    default: "9"
+    default: "11"
 runs:
   using: composite
   steps:
