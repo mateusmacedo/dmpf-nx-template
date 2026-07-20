@@ -5,10 +5,10 @@ on:
     branches:
       - master
       - develop
-      - 'release/**'
+      - "release/**"
     paths-ignore:
-      - '**/*.md'
-      - '.github/ISSUE_TEMPLATE/**'
+      - "**/*.md"
+      - ".github/ISSUE_TEMPLATE/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -21,7 +21,7 @@ permissions:
 jobs:
   main:
     name: Nx Affected Pipeline
-    runs-on: k8s-actions-runner
+    runs-on: gitea-runner
     timeout-minutes: 30
     env:
       NX_EXCLUDE: "@nx-base-template/source"
@@ -35,8 +35,8 @@ jobs:
       - name: Setup Node and pnpm
         uses: ./.github/actions/setup-node-pnpm
         with:
-          node-version: '24'
-          pnpm-version: '11'
+          node-version: "24"
+          pnpm-version: "11"
 
       - name: Set Nx SHAs for affected (base/head)
         uses: nrwl/nx-set-shas@v5

@@ -27,7 +27,7 @@ Verdaccio (não cobre migração de runner nem Gitea).
   com Node 24 / pnpm 11, `nx_exclude: @nx-base-template/source`,
   `scope: @lidercap-apps`, `build_projects_filter: tag:type:lib`.
 - **Manter no template**: Docker GHCR + `release-type`, bot GitHub,
-  `create-release.yml` via `gh`, runner `k8s-actions-runner`, pins 24/11,
+  `create-release.yml` via `gh`, runner `gitea-runner`, pins 24/11,
   `changelog.createRelease: github`, `[skip ci]` no commit de release.
 - **Sem `publishConfig` nas libs**: parity com lidercap; registry vem do auth
   do reusable. Risco conhecido: package names usam `@Lidercap-apps` (casing)
@@ -38,7 +38,7 @@ Verdaccio (não cobre migração de runner nem Gitea).
 
 | Item do lidercap | Motivo de não portar |
 |------------------|----------------------|
-| Runner `gitea-runner` | Identidade do template é GitHub + `k8s-actions-runner` |
+| Runner `gitea-runner` | Identidade do template é GitHub + `gitea-runner` |
 | Node 22 / pnpm 9 | Template pinado em 24/11 (ADR-003) |
 | API Gitea no create-release | Template hospedado no GitHub; manter `gh pr create` |
 | `createRelease: false` no changelog | Template mantém releases GitHub (`github`) |
