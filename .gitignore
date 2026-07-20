@@ -40,11 +40,12 @@ Thumbs.db
 
 .nx/
 .cursor/rules/nx-rules.mdc
+.cursor/hooks/state/
+.cursor/plans
 
 .claude/worktrees
 .claude/settings.local.json
 
-.cursor/plans
 plans
 .serena
 
@@ -72,3 +73,4 @@ plans
 *.tfstate.*
 crash.log
 *.tfplan
+.pnpm-store
