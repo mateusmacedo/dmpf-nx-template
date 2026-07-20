@@ -21,7 +21,6 @@ concurrency:
 
 permissions:
   contents: write
-  id-token: write
   packages: write
 
 jobs:
@@ -40,12 +39,12 @@ jobs:
     timeout-minutes: 30
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
-      - name: Checkout
+      - name: Checkout master
         uses: actions/checkout@v4
         with:
+          ref: master
           fetch-depth: 0
           fetch-tags: true
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -64,13 +63,6 @@ jobs:
           node-version: "24"
           pnpm-version: "11"
 
-      - name: Setup npm registry auth
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          registry-url: https://npm.pkg.github.com
-          scope: "@Lidercap-apps"
-
       - name: Configure git identity
         run: |
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -88,19 +80,26 @@ jobs:
             echo "value=production" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Release
-        id: release
-        continue-on-error: true
-        run: pnpm nx release --yes
+      # Versiona (bump + changelog + commit + tag) SEM publicar. A publicação no
+      # Verdaccio roda no publish-libs.yml, disparado pelo push das tags geradas
+      # abaixo. Na primeira release (sem tags {projectName}@{version}) usa
+      # --first-release para não exigir um git tag anterior no changelog.
+      # --yes e --skip-publish são mutuamente exclusivos no Nx; usar só skip-publish.
+      # Sem continue-on-error: falha real do nx release NÃO deve empurrar tags.
+      - name: Nx Release (skip publish)
+        run: |
+          FIRST_RELEASE=""
+          if [ -z "$(git tag -l '*@*')" ]; then
+            echo 'Nenhuma tag de release existente; usando --first-release.'
+            FIRST_RELEASE="--first-release"
+          fi
+          pnpm nx release --skip-publish $FIRST_RELEASE
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Check Release Result
-        if: steps.release.outcome == 'failure'
-        run: |
-          echo "::warning::Release completed with warnings - may be expected if no changes were detected"
+      - name: Push version commit and tags
+        run: git push --follow-tags origin master
 
       - name: Detect docker release candidates
         id: docker-candidates
@@ -129,6 +128,8 @@ jobs:
 
       - name: Release — docker apps
         if: steps.docker-candidates.outputs.has_docker_apps == 'true'
-        run: pnpm nx release --projects="${{ steps.docker-candidates.outputs.projects_csv }}" --dockerVersionScheme=${{ steps.docker-scheme.outputs.value }} --yes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PROJECTS_CSV: ${{ steps.docker-candidates.outputs.projects_csv }}
+          DOCKER_SCHEME: ${{ steps.docker-scheme.outputs.value }}
+        run: pnpm nx release --projects="$PROJECTS_CSV" --dockerVersionScheme="$DOCKER_SCHEME" --yes
