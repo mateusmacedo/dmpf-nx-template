@@ -10,25 +10,29 @@ A SPEC-YWAWQHPX reativou CI/release no template, mas o `release.yml` ainda
 versionava e publicava no mesmo job (GitHub Packages). O monorepo de referência
 `lidercap-platform` separa versionamento (`nx release --skip-publish` + push de
 tags) da publicação no Verdaccio (`publish-libs.yml` via reusable em
-`actions-templates`). Esta evolução alinha o template a esse modelo sem portar
-identidade de runner/plataforma do lidercap.
+`actions-templates`). Esta evolução alinha o template a esse modelo de release,
+adotando o label de runner da org e preservando pins Node/pnpm e `gh` do
+template.
 
 Fecha o follow-up de portabilidade de registry mencionado no ADR-003, no recorte
-Verdaccio (não cobre migração de runner nem Gitea).
+Verdaccio (não cobre migração da plataforma para Gitea).
 
 ## Decisão
 
 - **`release.yml` version-only**: checkout `ref: master`,
   `pnpm nx release --skip-publish` (com `--first-release` quando não há tags
   `*@*`), `git push --follow-tags origin master`. Removido setup
-  `npm.pkg.github.com` / `NODE_AUTH_TOKEN` do job de versionamento.
+  `npm.pkg.github.com` / `NODE_AUTH_TOKEN` do job de versionamento. Sem
+  `continue-on-error` no versionamento (falha real não deve empurrar tags).
 - **`publish-libs.yml`**: dispara em tags `**@*` e `workflow_dispatch`; chama
   `lidercap-apps/actions-templates/.github/workflows/publish-libs.yaml@main`
   com Node 24 / pnpm 11, `nx_exclude: @nx-base-template/source`,
   `scope: @lidercap-apps`, `build_projects_filter: tag:type:lib`.
+- **Runner `gitea-runner`**: adoção deliberada da org (parity de label com
+  lidercap). Não implica API Gitea nem troca de host GitHub.
 - **Manter no template**: Docker GHCR + `release-type`, bot GitHub,
-  `create-release.yml` via `gh`, runner `gitea-runner`, pins 24/11,
-  `changelog.createRelease: github`, `[skip ci]` no commit de release.
+  `create-release.yml` via `gh`, pins 24/11, `changelog.createRelease: github`,
+  `[skip ci]` no commit de release.
 - **Sem `publishConfig` nas libs**: parity com lidercap; registry vem do auth
   do reusable. Risco conhecido: package names usam `@Lidercap-apps` (casing)
   enquanto o caller passa `scope: @lidercap-apps` — se publish falhar por
@@ -38,7 +42,6 @@ Verdaccio (não cobre migração de runner nem Gitea).
 
 | Item do lidercap | Motivo de não portar |
 |------------------|----------------------|
-| Runner `gitea-runner` | Identidade do template é GitHub + `gitea-runner` |
 | Node 22 / pnpm 9 | Template pinado em 24/11 (ADR-003) |
 | API Gitea no create-release | Template hospedado no GitHub; manter `gh pr create` |
 | `createRelease: false` no changelog | Template mantém releases GitHub (`github`) |

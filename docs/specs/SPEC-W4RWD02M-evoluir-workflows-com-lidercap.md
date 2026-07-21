@@ -49,11 +49,11 @@ publiquem libs no Verdaccio sem misturar versionamento e publicação.
 | `create-release.yml` | `gh pr create` | Gitea API (`curl` + `jq`) | **Manter `gh`** (template é GitHub) |
 | `release.yml` | version+publish GH Packages + docker no mesmo job; input `release-type`; checkout sem `ref: master` forçado | só version (`--skip-publish`), `--first-release`, checkout `ref: master`, push `--follow-tags`; sem docker | **Portar split + first-release + push**; **manter** docker scheme / `release-type` / bot GitHub |
 | `publish-libs.yml` | ausente | tag `**@*` → reusable Verdaccio | **Criar**, alvo Verdaccio |
-| Runner / Node / pnpm | k8s + 24/11 | gitea + 22/9 | **NÃO portar** versões/runner do lidercap |
+| Runner / Node / pnpm | `gitea-runner` + 24/11 (após alinhamento org) | gitea + 22/9 | **Adotar** `gitea-runner`; **NÃO portar** Node 22 / pnpm 9 |
 | Auth npm no release | `npm.pkg.github.com` + `@Lidercap-apps` | ausente (publish separado) | **Remover** do release; auth fica no publish Verdaccio |
 
 <constraints>
-- [P0] NUNCA portar runner `gitea-runner`, Node 22, pnpm 9 ou API Gitea para o template
+- [P0] NUNCA portar Node 22, pnpm 9 ou API Gitea (`curl`/`jq`) para o template
 - [P0] NUNCA publicar no GitHub Packages neste fluxo — alvo de publish de libs É o Verdaccio
 - [P0] NUNCA misturar `--yes` e `--skip-publish` no mesmo `nx release` (mutuamente exclusivos no Nx)
 - [P0] NUNCA hardcodar segredos; auth Verdaccio via o mesmo padrão do `actions-templates` (SSM / secrets), não em texto plano
@@ -113,7 +113,7 @@ publiquem libs no Verdaccio sem misturar versionamento e publicação.
   runner, Node, pnpm e `gh pr create` permanecem.
 - [x] **[P2] Documentar matriz de não-portabilidade**: ADR curto em
   `docs/adr/` (ou seção no ADR-003) listando o que NÃO foi portado e por quê
-  (Gitea, runner, Node/pnpm do lidercap, createRelease false).
+  (API Gitea, Node/pnpm 22/9, createRelease false).
 
 ### Não-funcionais
 
@@ -215,6 +215,9 @@ pnpm nx release publish --tag=$DIST_TAG
   GHCR; lidercap ainda não espelha isso no release — NÃO remover.
 - **Manter `gh` no create-release**: template hospedado no GitHub; API Gitea
   fica fora.
+- **Runner `gitea-runner`**: alinhamento deliberado com a org (mesmo label do
+  lidercap). Não implica migrar a plataforma para Gitea nem adotar a API
+  Gitea no create-release. Pins Node 24 / pnpm 11 permanecem (ADR-003).
 - **Reusable preferido, inline se ausente**: o lidercap referencia
   `publish-libs.yaml`, mas o clone local de `actions-templates` só tem
   `publish-lib.yaml` (loop npm legado). A implementação valida a existência
@@ -266,7 +269,7 @@ ENTÃO abre PR via gh contra master (não via API Gitea)
 
 <critical_constraints>
 
-- [P0] NUNCA portar runner `gitea-runner`, Node 22, pnpm 9 ou API Gitea para o template
+- [P0] NUNCA portar Node 22, pnpm 9 ou API Gitea (`curl`/`jq`) para o template
 - [P0] NUNCA publicar no GitHub Packages neste fluxo — alvo de publish de libs É o Verdaccio
 - [P0] NUNCA misturar `--yes` e `--skip-publish` no mesmo `nx release`
 - [P0] NUNCA hardcodar segredos; auth Verdaccio via padrão actions-templates (SSM / secrets)
@@ -276,8 +279,9 @@ ENTÃO abre PR via gh contra master (não via API Gitea)
 
 ## Escopo fora
 
-- **Migrar CI para Gitea / mudar runner**: identidade do template é GitHub +
-  `gitea-runner`; pertence a outra iniciativa de portabilidade.
+- **Migrar a plataforma para Gitea / API Gitea no create-release**: o template
+  permanece no GitHub com `gh pr create`; só o label do runner foi alinhado
+  (`gitea-runner`).
 - **Downgrade Node/pnpm para 22/9**: template já pinado em 24/11 (ADR-003).
 - **Publicar no GitHub Packages**: substituído por Verdaccio nesta spec.
 - **Criar/alterar o reusable `publish-libs.yaml` no actions-templates**: pode
