@@ -4,6 +4,17 @@
 
 Aceito — 2026-07-20. Implementa SPEC-W4RWD02M.
 
+> **Addendum (2026-07-30)** — parcialmente superseded pelo
+> [ADR-005](./005-plataforma-gitea.md). A premissa de que o template estaria
+> hospedado no GitHub é falsa: `git remote -v` aponta para
+> `gitea.lidercap.com.br`. Ficam substituídos os itens deste ADR sobre host de
+> hospedagem e uso do `gh` — em especial "API Gitea no create-release / Template
+> hospedado no GitHub; manter `gh pr create`" (matriz abaixo), a ressalva de que
+> o runner `gitea-runner` "não implica API Gitea nem troca de host GitHub" e o
+> item "manter no template: `create-release.yml` via `gh`". O texto original é
+> preservado como registro histórico. As decisões de split version/publish e de
+> alvo Verdaccio permanecem válidas.
+
 ## Contexto
 
 A SPEC-YWAWQHPX reativou CI/release no template, mas o `release.yml` ainda
