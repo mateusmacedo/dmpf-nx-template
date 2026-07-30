@@ -53,7 +53,7 @@
   "packageManager": "pnpm@11.14.0",
   "private": true,
   "scripts": {
-    "prepare": "lefthook install",
+    "prepare": "lefthook install || true",
     "format": "biome format --write .",
     "format:check": "biome ci .",
     "lint": "nx run-many -t lint",
