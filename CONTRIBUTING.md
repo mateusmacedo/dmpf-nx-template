@@ -24,6 +24,9 @@ pnpm lefthook install
 
 ## Fluxo de trabalho
 
+O guia `docs/guides/development-workflow.md` detalha o fluxo completo do dia a
+dia (branches, commits, pull requests e validação); esta seção é o resumo.
+
 Trabalhe sempre fora de `master` e `develop`.
 
 1. Crie uma branch seguindo o padrão `tipo/descricao-curta`
