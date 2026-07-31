@@ -22,6 +22,16 @@ concurrency:
   group: publish-libs
   cancel-in-progress: true
 
+# Least-privilege explícito, em vez de herdar o token default do repositório.
+# `contents: read` cobre o checkout do reusable; `id-token: write` cobre a troca
+# OIDC que o template usa para obter a credencial de publicação (ver ADR-004:
+# "role/SSM de auth Verdaccio configurada na org"). Mesmo par usado pelo
+# `cd-dev-hmg.yml`. Se o reusable passar a exigir outra permissão, ela precisa ser
+# declarada aqui — o contrato dele não é versionado neste repositório.
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   publish:
     uses: lidercap-apps/actions-templates/.github/workflows/publish-libs.yaml@main

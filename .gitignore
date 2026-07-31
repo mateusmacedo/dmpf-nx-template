@@ -4,6 +4,7 @@
 dist
 tmp
 out-tsc
+test-output
 
 # dependencies
 node_modules
@@ -32,6 +33,7 @@ node_modules
 npm-debug.log
 yarn-error.log
 testem.log
+newrelic_agent.log
 /typings
 
 # System Files
@@ -48,6 +50,8 @@ Thumbs.db
 
 plans
 .serena
+.tokensave/
+.headroom/
 
 # build info
 *.tsbuildinfo

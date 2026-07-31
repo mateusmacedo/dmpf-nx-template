@@ -36,7 +36,6 @@ jobs:
         uses: ./.github/actions/setup-node-pnpm
         with:
           node-version: "24"
-          pnpm-version: "11"
 
       - name: Set Nx SHAs for affected (base/head)
         uses: nrwl/nx-set-shas@v5
