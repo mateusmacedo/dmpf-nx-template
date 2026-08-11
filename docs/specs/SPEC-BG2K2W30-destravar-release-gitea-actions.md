@@ -37,7 +37,7 @@ O workflow `Release` versiona as libs compartilhadas corretamente, mas não cons
 - [P0] NUNCA enfraquecer as proteções que valem para contribuidores humanos: `required_approvals: 2`, as whitelists de times e a tag protection permanecem intactas.
 - [P0] NUNCA conceder ao token de CI permissão de `Owner` na organização — a autorização deve ser por nome de usuário, com o menor escopo que resolve.
 - [P0] Segredos NUNCA são versionados: o `RELEASE_TOKEN` existe apenas como secret do Gitea, referenciado por expressão no workflow.
-- [P0] NUNCA usar `--no-verify` para contornar validação. Neutralizar o `pre-push` do Lefthook no runner via `LEFTHOOK: "0"` escopado ao step de push é admitido: o hook roda `nx affected` de quatro targets já executados no CI do PR, e a validação segue valendo integralmente para quem trabalha localmente.
+- [P0] NUNCA usar `--no-verify` nem desabilitar hooks para contornar validação.
 - [P1] O push ao remoto DEVE acontecer em exatamente um step do workflow, e esse step DEVE ser `Push version commit and tags`.
 </constraints>
 
@@ -51,7 +51,7 @@ O workflow `Release` versiona as libs compartilhadas corretamente, mas não cons
   - Configuração feita no painel do Gitea ou via API autenticada como `Owner` — fora do repositório, portanto não versionável.
   - Edge case: se `ci-runner-bot` for removido da organização, o release volta a falhar com a mesma mensagem; o relacionamento DEVE estar registrado no ADR.
 - [ ] **[P0] Prover o token da automação ao workflow**: um token pessoal de `ci-runner-bot` com escopo `write:repository` DEVE existir como secret `RELEASE_TOKEN`, e o `actions/checkout` do step `Checkout master` DEVE usá-lo no lugar de `secrets.GITHUB_TOKEN`.
-- [ ] **[P0] Separar versionamento de push**: a chave `changelog.projectChangelogs.createRelease` DEVE ser removida do `nx.json` e `"push": false` DEVE ser declarado no bloco `release.git`, na mesma edição. Remover `createRelease` é o que de fato desliga o push do `nx release` — e elimina o provider incompatível; `push: false` entra como guardrail contra a reintrodução do comportamento. O step `Push version commit and tags` volta a ser o único ponto de escrita no remoto, com `--atomic` para preservar a semântica all-or-nothing das três refs.
+- [ ] **[P0] Separar versionamento de push**: a chave `changelog.projectChangelogs.createRelease` DEVE ser removida do `nx.json` e `"push": false` DEVE ser declarado no bloco `release.git`, na mesma edição. Remover `createRelease` é o que de fato desliga o push do `nx release` — e elimina o provider incompatível; `push: false` entra como guardrail contra a reintrodução do comportamento. O step `Push version commit and tags` volta a ser o único ponto de escrita no remoto, com o mesmo comando usado pelo `lidercap-platform-legacy`.
   - As duas chaves são inseparáveis: `push: false` mantendo `createRelease` faz o Nx abortar com `GIT_PUSH_FALSE_WITH_CREATE_RELEASE`.
   - Nenhum dos providers suportados pelo Nx (`github`, `github-enterprise-server`, `gitlab`) atende ao Gitea.
   - Os arquivos `CHANGELOG.md` continuam sendo gerados, versionados e commitados — comportamento já observado no run 4803.
@@ -70,7 +70,7 @@ O workflow `Release` versiona as libs compartilhadas corretamente, mas não cons
 | Camada | Afetada? | Descrição |
 |--------|----------|-----------|
 | Configuração do workspace (`nx.json`) | [x] | `changelog.projectChangelogs.createRelease` é removida; `release.git.push` passa a `false`; `[skip ci]` sai do `commitMessage` |
-| CI/CD (`.github/workflows/`) | [x] | `release.yml` passa a usar `secrets.RELEASE_TOKEN` no checkout e reforça o step de push com `--atomic` |
+| CI/CD (`.github/workflows/`) | [x] | `release.yml` passa a usar `secrets.RELEASE_TOKEN` no checkout e alinha nome do job, identidade git e comando de push ao `lidercap-platform-legacy` |
 | Plataforma (Gitea) | [x] | Whitelists de branch e tag protection recebem `ci-runner-bot`; secret `RELEASE_TOKEN` criado — fora do repositório |
 | Documentação (`docs/adr/`) | [x] | ADR registrando a identidade de automação e a ausência de provider Gitea |
 | Libs (`libs/shared/*`) | [ ] | Nenhuma mudança de código; apenas voltam a ser versionadas pelo pipeline |
@@ -89,7 +89,7 @@ nx-base-template/
 **Arquivos a modificar**:
 
 - `nx.json` — remover `changelog.projectChangelogs.createRelease`; adicionar `"push": false` em `release.git`; remover `[skip ci]` do `commitMessage`
-- `.github/workflows/release.yml` — trocar `token: ${{ secrets.GITHUB_TOKEN }}` por `token: ${{ secrets.RELEASE_TOKEN }}` no step `Checkout master`; acrescentar `--atomic` e `LEFTHOOK: "0"` ao step `Push version commit and tags`; remover as envs `GITHUB_TOKEN`/`GH_TOKEN` do step de versionamento e o `env` de nível de job
+- `.github/workflows/release.yml` — trocar `token: ${{ secrets.GITHUB_TOKEN }}` por `token: ${{ secrets.RELEASE_TOKEN }}` no step `Checkout master`; remover as envs `GITHUB_TOKEN`/`GH_TOKEN` do step de versionamento e o `env` de nível de job; alinhar nome do job, identidade git e comando de push ao `lidercap-platform-legacy`
 - `docs/adr/008-identidade-automacao-release.md` — ADR novo (numeração seguinte ao ADR-007)
 - `docs/adr/README.md` — linha do ADR-008 no índice
 
@@ -115,7 +115,7 @@ nx release --skip-publish             nx release --skip-publish
   ├─ tag                                ├─ tag
   └─ push  ◄── RECUSADO                 └─ (push desabilitado)
         │                                     │
-  [step nunca executa]           git push --follow-tags --atomic  ◄── ACEITO
+  [step nunca executa]                git push --follow-tags  ◄── ACEITO
                                               │
                                         publish-libs.yml
 ```
@@ -125,7 +125,7 @@ nx release --skip-publish             nx release --skip-publish
 1. Merge de PR `release/*` ou `hotfix/*` para `master` dispara o workflow `Release`.
 2. `Checkout master` autentica com `RELEASE_TOKEN`, gravando o header de credencial usado nas operações git subsequentes.
 3. `Nx Release (skip publish)` resolve o bump pelos Conventional Commits, escreve os manifestos, gera changelogs, commita e cria as tags — sem empurrar.
-4. `Push version commit and tags` executa `git push --follow-tags --atomic origin master`, com `LEFTHOOK: "0"` no step. O pre-receive do Gitea reconhece `ci-runner-bot` nas whitelists e aceita as três refs.
+4. `Push version commit and tags` executa `git push --follow-tags origin master`. O pre-receive do Gitea reconhece `ci-runner-bot` nas whitelists e aceita as três refs.
 5. As tags criadas disparam `publish-libs.yml`, que publica no Verdaccio conforme o ADR-004.
 
 ### Ordem de aplicação
@@ -185,7 +185,7 @@ ENTÃO o push é recusado com pre-receive hook declined
 - [P0] NUNCA enfraquecer as proteções que valem para contribuidores humanos: `required_approvals: 2`, as whitelists de times e a tag protection permanecem intactas.
 - [P0] NUNCA conceder ao token de CI permissão de `Owner` na organização — a autorização deve ser por nome de usuário, com o menor escopo que resolve.
 - [P0] Segredos NUNCA são versionados: o `RELEASE_TOKEN` existe apenas como secret do Gitea, referenciado por expressão no workflow.
-- [P0] NUNCA usar `--no-verify` para contornar validação. Neutralizar o `pre-push` do Lefthook no runner via `LEFTHOOK: "0"` escopado ao step de push é admitido: o hook roda `nx affected` de quatro targets já executados no CI do PR, e a validação segue valendo integralmente para quem trabalha localmente.
+- [P0] NUNCA usar `--no-verify` nem desabilitar hooks para contornar validação.
 - [P1] O push ao remoto DEVE acontecer em exatamente um step do workflow, e esse step DEVE ser `Push version commit and tags`.
 </critical_constraints>
 

@@ -68,9 +68,13 @@ workflow do repositório dispara em `push` para `master` — o `release.yml`
 dispara em `pull_request` e `workflow_dispatch`, e o `ci.yml` em
 `pull_request`.
 
-**O push acontece em um único step**, `Push version commit and tags`, com
-`--atomic` para preservar a semântica all-or-nothing que o Nx aplicava ao
-empurrar as três refs de uma vez.
+**O push acontece em um único step**, `Push version commit and tags`, com o
+mesmo comando (`git push --follow-tags origin master`), o mesmo nome de job e a
+mesma identidade git (`gitea-actions[bot]@noreply.lidercap.com.br`) usados pelo
+`lidercap-platform-legacy` — que é a referência de workflow da organização. As
+únicas divergências mantidas são as que têm causa declarada: o token do
+checkout (imposto pelas proteções deste repositório), as versões de Node e pnpm
+(fixadas pelo ADR-003) e os steps de release Docker (previstos pelo ADR-004).
 
 **A permissão base de escrita é pré-requisito, não consequência das
 whitelists.** No Gitea, a ACL do usuário sobre o repositório é avaliada antes
@@ -121,7 +125,7 @@ melhor; é a ausência do problema.
 | Manter o push dentro do `nx release` | Não é possível sem release remota: o comando agregado deriva `shouldPush` de `createRelease`, então preservar o push exigiria manter a chave — e com ela o provider incompatível e a chamada a `api.github.com`. Mesmo se fosse viável, a falha voltaria a ocorrer no meio do comando, com commit e tags já criados e sem controle sobre a retentativa. |
 | Trocar o provider de `createRelease` em vez de removê-lo | Nenhum dos providers suportados aponta para o servidor correto; não há troca possível. |
 | Criar releases via API do Gitea (`POST /api/v1/repos/{owner}/{repo}/releases`) | É capacidade nova, não correção do push. Fica para uma spec própria, depois que o pipeline estiver verde. |
-| Usar `--no-verify` no push | Replicaria o que o Nx fazia, mas a spec proíbe contornar validação com a flag. O `pre-push` do runner é neutralizado de forma escopada ao step (`LEFTHOOK: "0"`), sem desabilitar hooks no repositório. |
+| Usar `--no-verify`, ou neutralizar o `pre-push` do Lefthook com `LEFTHOOK: "0"` no step | Ambas contornariam o hook que o `pnpm install` registra no runner, que roda `nx affected` de quatro targets. Rejeitadas por não haver problema comprovado: o `lidercap-platform-legacy` tem o mesmo `pre-push` e o mesmo `prepare: lefthook install`, roda o release sem neutralizar nada e conclui. Contornar validação também colide com a constraint P0 da spec. |
 
 ## Consequências
 
