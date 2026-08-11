@@ -1,10 +1,11 @@
 ---
 paths:
-  - "eslint*"
-  - ".prettierrc*"
-  - ".husky/"
+  - "biome.json"
+  - "lefthook.yml"
+  - "nx.json"
   - "package.json"
-  - "tsconfig.json"
+  - "tsconfig*.json"
+  - ".github/workflows/**"
 ---
 
 # CI e qualidade
