@@ -45,9 +45,9 @@ Verdaccio (não cobre migração da plataforma para Gitea).
   `create-release.yml` via `gh`, pins 24/11, `changelog.createRelease: github`,
   `[skip ci]` no commit de release.
 - **Sem `publishConfig` nas libs**: parity com lidercap; registry vem do auth
-  do reusable. Risco conhecido: package names usam `@Lidercap-apps` (casing)
-  enquanto o caller passa `scope: @lidercap-apps` — se publish falhar por
-  scope, ajustar em follow-up.
+  do reusable. O escopo dos pacotes (`@lidercap-apps`) precisa bater com o
+  `scope` passado ao reusable — o Nx resolve o registry pelo escopo do pacote,
+  e divergir faz o publish cair no registry público.
 
 ### Matriz do que NÃO foi portado
 

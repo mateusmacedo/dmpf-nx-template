@@ -1,4 +1,4 @@
-# @Lidercap-apps/shared-utils
+# @lidercap-apps/shared-utils
 
 Biblioteca de utilitarios compartilhados para manipulacao de strings e objetos.
 
@@ -15,7 +15,7 @@ import {
   omitNullish,
   toCamelCase,
   toKebabCase,
-} from '@Lidercap-apps/shared-utils';
+} from '@lidercap-apps/shared-utils';
 
 const label = toKebabCase('Hello World');
 const field = toCamelCase('user-name');
@@ -25,4 +25,4 @@ const payload = omitNullish({ a: 1, b: null, c: undefined });
 
 ## Publicacao
 
-Este pacote e publicado no GitHub Packages no escopo `@Lidercap-apps`.
+Este pacote é publicado no Verdaccio no escopo `@lidercap-apps`.

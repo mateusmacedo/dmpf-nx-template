@@ -113,8 +113,8 @@ nx-base-template/
 │   ├── backend/                    # placeholder — sem projeto Nx
 │   ├── frontend/                   # placeholder — sem projeto Nx
 │   └── shared/
-│       ├── types/                  # @Lidercap-apps/shared-types
-│       └── utils/                  # @Lidercap-apps/shared-utils
+│       ├── types/                  # @lidercap-apps/shared-types
+│       └── utils/                  # @lidercap-apps/shared-utils
 ├── docs/
 │   ├── adr/                        # ADR-00N (baseline, tasks, hardening, release, plataforma, fechamento, fronteira)
 │   ├── specs/                      # catálogo e template de specs (SPEC-XXXX)
@@ -146,12 +146,12 @@ Nenhuma. `apps/backend`, `apps/frontend` e `apps/serverless` são diretórios de
 
 | Projeto Nx | Caminho | Papel |
 | --- | --- | --- |
-| `@Lidercap-apps/shared-types` | `libs/shared/types` | Tipos compartilhados entre projetos |
-| `@Lidercap-apps/shared-utils` | `libs/shared/utils` | Utilitários de string e objeto |
+| `@lidercap-apps/shared-types` | `libs/shared/types` | Tipos compartilhados entre projetos |
+| `@lidercap-apps/shared-utils` | `libs/shared/utils` | Utilitários de string e objeto |
 
 `libs/backend` e `libs/frontend` existem apenas como destino de novas libs — ainda não são projetos Nx. O `go.work` declara `go 1.25`, mas não há módulos nem arquivos `.go` no workspace.
 
-O prefixo dos pacotes é `@Lidercap-apps/`, com o casing exatamente como aparece na tabela acima e em `tsconfig.base.json`. Divergências de casing entre esse prefixo e o escopo usado na publicação são débito conhecido — não "corrija" por conta própria.
+O prefixo dos pacotes é `@lidercap-apps/`, tudo em minúsculas — o mesmo escopo usado no Verdaccio, no `publish-libs.yml` e nos demais repositórios da organização. O casing precisa bater exatamente entre o `name` de cada `package.json`, o `tsconfig.base.json` e o `scope` passado ao template de publicação: o Nx resolve o registry pelo escopo do pacote, e qualquer divergência faz o `pnpm publish` cair no registry público e falhar.
 
 ---
 
@@ -173,11 +173,11 @@ pnpm nx affected -t test
 pnpm nx affected -t build
 
 # Um único projeto
-pnpm nx test @Lidercap-apps/shared-utils
-pnpm nx build @Lidercap-apps/shared-types
+pnpm nx test @lidercap-apps/shared-utils
+pnpm nx build @lidercap-apps/shared-types
 
 # Um único arquivo de teste (passthrough p/ Jest)
-pnpm nx test @Lidercap-apps/shared-utils --testPathPatterns="string"
+pnpm nx test @lidercap-apps/shared-utils --testPathPatterns="string"
 
 # Formatação (Biome — não Prettier)
 pnpm biome format --write . # aplica
@@ -215,7 +215,7 @@ Scripts raiz (`pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm fo
 
   Esta tabela é a **fonte canônica** da taxonomia; `docs/nx-reference/tasks.md` a repete e não deve divergir. `stack:universal` é para libs sem dependência de runtime (tipos puros, utilitários); `stack:node` cobre libs que usam APIs de Node ou frameworks de servidor.
 - **Não redeclarar targets** que um plugin ou `targetDefaults` (em `nx.json`) já fornece. Redeclarar quebra o cache silenciosamente (ver `docs/adr/002-nx-task-configuration.md`).
-- **Commits (Conventional Commits, em PT-BR):** formato `<tipo>(<scope>): <descrição imperativa>`, máx. 72 chars no assunto. `scope` = nome do projeto Nx **sem** o prefixo da org (`shared-utils`, não `@Lidercap-apps/shared-utils`). Projetos distintos vão em commits separados (nunca misture libs). Tipos: `feat`, `fix`, `refactor`, `chore`, `docs`, `ci`. Body só quando o motivo não é óbvio. Detalhes na skill `.agents/skills/nx-commit/`.
+- **Commits (Conventional Commits, em PT-BR):** formato `<tipo>(<scope>): <descrição imperativa>`, máx. 72 chars no assunto. `scope` = nome do projeto Nx **sem** o prefixo da org (`shared-utils`, não `@lidercap-apps/shared-utils`). Projetos distintos vão em commits separados (nunca misture libs). Tipos: `feat`, `fix`, `refactor`, `chore`, `docs`, `ci`. Body só quando o motivo não é óbvio. Detalhes na skill `.agents/skills/nx-commit/`.
 
 ---
 
