@@ -24,8 +24,8 @@ permissions:
   packages: write
 
 jobs:
-  release:
-    name: Nx Release
+  version:
+    name: Nx Release (version, changelog, tags)
     if: |
       github.event_name == 'workflow_dispatch' ||
       (
@@ -37,8 +37,6 @@ jobs:
       )
     runs-on: gitea-runner
     timeout-minutes: 30
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - name: Checkout master
@@ -64,8 +62,8 @@ jobs:
 
       - name: Configure git identity
         run: |
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git config user.name "github-actions[bot]"
+          git config user.email "gitea-actions[bot]@noreply.lidercap.com.br"
+          git config user.name "gitea-actions[bot]"
 
       - name: Resolve docker version scheme
         id: docker-scheme
@@ -79,12 +77,17 @@ jobs:
             echo "value=production" >> "$GITHUB_OUTPUT"
           fi
 
-      # Versiona (bump + changelog + commit + tag) SEM publicar. A publicação no
-      # Verdaccio roda no publish-libs.yml, disparado pelo push das tags geradas
-      # abaixo. Na primeira release (sem tags {projectName}@{version}) usa
-      # --first-release para não exigir um git tag anterior no changelog.
+      # Versiona (bump + changelog + commit + tag) SEM publicar e SEM empurrar. A
+      # publicação no Verdaccio roda no publish-libs.yml, disparado pelo push das
+      # tags geradas abaixo. Na primeira release (sem tags {projectName}@{version})
+      # usa --first-release para não exigir um git tag anterior no changelog.
       # --yes e --skip-publish são mutuamente exclusivos no Nx; usar só skip-publish.
       # Sem continue-on-error: falha real do nx release NÃO deve empurrar tags.
+      #
+      # O nx.json não declara changelog.projectChangelogs.createRelease: o Nx não
+      # tem provider de release para Gitea, e é essa chave que liga o push
+      # automático do comando agregado. Com ela ausente e release.git.push: false
+      # como guardrail, o push acontece num único ponto — o step abaixo.
       - name: Nx Release (skip publish)
         run: |
           FIRST_RELEASE=""
@@ -93,9 +96,6 @@ jobs:
             FIRST_RELEASE="--first-release"
           fi
           pnpm nx release --skip-publish $FIRST_RELEASE
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push version commit and tags
         run: git push --follow-tags origin master

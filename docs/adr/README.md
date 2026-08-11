@@ -31,7 +31,7 @@ Um arquivo por decisão, numeração sequencial e slug em kebab-case:
 ```
 
 O número é o próximo livre na sequência (o último registrado abaixo é o
-`007`). O título dentro do arquivo repete o número: `# ADR-00N: <título>`.
+`008`). O título dentro do arquivo repete o número: `# ADR-00N: <título>`.
 
 ## Template
 
@@ -75,7 +75,7 @@ O que foi decidido e por quê.
 ### `## Status` é opcional
 
 O bloco `## Status` pode ser omitido: ADR-001 e ADR-002 não o trazem, enquanto
-ADR-003 a ADR-007 o incluem. Quando presente, o padrão adotado é
+ADR-003 a ADR-008 o incluem. Quando presente, o padrão adotado é
 `Aceito — AAAA-MM-DD`, seguido, quando aplicável, da referência à spec que a
 decisão implementa (por exemplo, `Implementa SPEC-4NR9KKS8`). Uma decisão pode
 substituir outra: registre isso na própria `## Decisão`, como ADR-005 fez ao
@@ -99,3 +99,4 @@ ADR-001.
 | ADR-005 | A plataforma de hospedagem é Gitea | Toda automação que fala com a plataforma usa a API do Gitea (`/api/v1`); o binário `gh` deixa de ser usado nos workflows. |
 | ADR-006 | Fechamento do port de melhorias do monorepo derivado | Fixa a regra de desempate — a origem prevalece por padrão, o template é preservado onde está mais completo — ao portar melhorias. |
 | ADR-007 | Fronteira entre o template e o plugin mmda-flow | O template versiona (assa) o conteúdo legível sem o plugin; o plugin mmda-flow é consumido quando instalado no ambiente. |
+| ADR-008 | Destravar o release — proteções do repositório e ajuste do Nx Release ao Gitea | Remove as proteções de branch e tag, remove o provider de release incompatível e alinha o `release.yml` ao workflow de referência da organização. |
