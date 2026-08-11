@@ -99,4 +99,4 @@ ADR-001.
 | ADR-005 | A plataforma de hospedagem é Gitea | Toda automação que fala com a plataforma usa a API do Gitea (`/api/v1`); o binário `gh` deixa de ser usado nos workflows. |
 | ADR-006 | Fechamento do port de melhorias do monorepo derivado | Fixa a regra de desempate — a origem prevalece por padrão, o template é preservado onde está mais completo — ao portar melhorias. |
 | ADR-007 | Fronteira entre o template e o plugin mmda-flow | O template versiona (assa) o conteúdo legível sem o plugin; o plugin mmda-flow é consumido quando instalado no ambiente. |
-| ADR-008 | Identidade de automação do release e ajuste do Nx Release ao Gitea | Autoriza `ci-runner-bot` por nome nas whitelists, remove o provider de release incompatível e concentra o push em um único step. |
+| ADR-008 | Destravar o release — proteções do repositório e ajuste do Nx Release ao Gitea | Remove as proteções de branch e tag, remove o provider de release incompatível e alinha o `release.yml` ao workflow de referência da organização. |
