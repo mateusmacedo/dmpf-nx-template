@@ -120,7 +120,7 @@ em PT-BR:
 
 - A descrição é imperativa e o assunto tem no máximo **72 caracteres**.
 - O **escopo** é o nome do projeto Nx afetado, **sem** o prefixo da org: use
-  `shared-utils`, não `@Lidercap-apps/shared-utils`. Use `workspace` para
+  `shared-utils`, não `@lidercap-apps/shared-utils`. Use `workspace` para
   mudanças na raiz do repositório.
 - Projetos distintos vão em **commits separados** — mantenha um commit por
   projeto Nx em vez de misturar libs no mesmo commit, para que o versionamento

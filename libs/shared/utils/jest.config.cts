@@ -5,7 +5,7 @@ const swcJestConfig = JSON.parse(readFileSync(join(__dirname, '../../../.spec.sw
 swcJestConfig.swcrc = false;
 
 module.exports = {
-  displayName: '@Lidercap-apps/shared-utils',
+  displayName: '@lidercap-apps/shared-utils',
   preset: '../../../jest.preset.js',
   testEnvironment: 'node',
   transform: {

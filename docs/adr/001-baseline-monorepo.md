@@ -62,7 +62,7 @@ com realidade.
 | -------- | -------------- |
 | Runtime / package manager | Node `^24` (`engines`); `pnpm@11.14.0` via `packageManager`; Nx `23.1.0` |
 | Apps executáveis | Nenhuma. `apps/{backend,frontend,serverless}` são destinos vazios |
-| Libs | `@Lidercap-apps/shared-types` e `@Lidercap-apps/shared-utils`, ambas em `libs/shared/` |
+| Libs | `@lidercap-apps/shared-types` e `@lidercap-apps/shared-utils`, ambas em `libs/shared/` |
 | Lint / format | **Biome** (`biome ci` / `biome lint`) no CI e no lefthook — **não** ESLint/Prettier |
 | Testes | Jest 30 + SWC, com `passWithNoTests` no preset |
 | Tags 3D | `type:` / `scope:` / `stack:` presentes nas duas libs; `@nx-base-template/source` é exceção conhecida |

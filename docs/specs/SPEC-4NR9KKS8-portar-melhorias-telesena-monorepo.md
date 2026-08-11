@@ -397,6 +397,6 @@ ENTÃO encontra apenas o ponteiro @AGENTS.md e segue para a fonte única
   está à frente.
 - **Adoção do Verdaccio/`overrides: tarn`**: workaround de ambiente específico do
   telesena. Se necessário, vira spec própria.
-- **Correção do prefixo `@Lidercap-apps/` em `tsconfig.base.json`**: débito
-  pré-existente detectado durante a análise, sem relação com o port. Deve virar
-  spec própria.
+- **Correção do prefixo do escopo em `tsconfig.base.json`**: débito
+  pré-existente detectado durante a análise, sem relação com o port. Resolvido
+  depois, fora desta spec.
