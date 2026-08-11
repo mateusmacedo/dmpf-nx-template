@@ -10,9 +10,9 @@ interface SharedLibSchema {
 export default async function sharedLibGenerator(tree: Tree, options: SharedLibSchema) {
   const libNames = names(options.name);
   const stack = options.stack ?? 'node';
-  const projectName = `@Lidercap-apps/shared-${libNames.fileName}`;
+  const projectName = `@lidercap-apps/shared-${libNames.fileName}`;
   const projectRoot = `libs/shared/${libNames.fileName}`;
-  const importPath = `@Lidercap-apps/shared-${libNames.fileName}`;
+  const importPath = `@lidercap-apps/shared-${libNames.fileName}`;
 
   addProjectConfiguration(tree, projectName, {
     root: projectRoot,

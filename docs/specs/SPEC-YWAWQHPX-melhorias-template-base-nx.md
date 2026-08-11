@@ -183,7 +183,7 @@ nx-base-template/
 
 Mudanças são majoritariamente de configuração e documentação, sem código de
 runtime. O modelo de referência é o `jusdocs`, adaptado ao escopo do template
-(multi-stack Node/React/Angular/Go, `defaultBase: master`, escopo `@Lidercap-apps`).
+(multi-stack Node/React/Angular/Go, `defaultBase: master`, escopo `@lidercap-apps`).
 
 ### Fluxo principal (execução por fase)
 

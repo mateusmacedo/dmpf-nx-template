@@ -50,7 +50,7 @@ publiquem libs no Verdaccio sem misturar versionamento e publicação.
 | `release.yml` | version+publish GH Packages + docker no mesmo job; input `release-type`; checkout sem `ref: master` forçado | só version (`--skip-publish`), `--first-release`, checkout `ref: master`, push `--follow-tags`; sem docker | **Portar split + first-release + push**; **manter** docker scheme / `release-type` / bot GitHub |
 | `publish-libs.yml` | ausente | tag `**@*` → reusable Verdaccio | **Criar**, alvo Verdaccio |
 | Runner / Node / pnpm | `gitea-runner` + 24/11 (após alinhamento org) | gitea + 22/9 | **Adotar** `gitea-runner`; **NÃO portar** Node 22 / pnpm 9 |
-| Auth npm no release | `npm.pkg.github.com` + `@Lidercap-apps` | ausente (publish separado) | **Remover** do release; auth fica no publish Verdaccio |
+| Auth npm no release | `npm.pkg.github.com` + `@lidercap-apps` | ausente (publish separado) | **Remover** do release; auth fica no publish Verdaccio |
 
 <constraints>
 - [P0] NUNCA portar Node 22, pnpm 9 ou API Gitea (`curl`/`jq`) para o template
