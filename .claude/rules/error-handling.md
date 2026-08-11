@@ -1,6 +1,7 @@
 ---
 paths:
-  - "src/**/*.ts"
+  - "**/*.ts"
+  - "**/*.go"
 ---
 
 # Tratamento de erros

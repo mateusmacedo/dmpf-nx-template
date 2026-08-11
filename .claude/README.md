@@ -9,8 +9,8 @@ remover arquivos, atualize a tabela correspondente.
 
 | Diretório | Itens | Conteúdo |
 | --- | --- | --- |
-| `rules/` | 9 | Regras de conduta e de qualidade |
-| `skills/` | 25 | Skills de domínio (mais 8 arquivos em `references/`) |
+| `rules/` | 12 | Regras de conduta e de qualidade |
+| `skills/` | 26 | Skills de domínio (mais 11 arquivos em `references/`) |
 | `agents/` | 49 | Agentes especializados |
 | `commands/` | 8 | Comandos de workspace (Nx e utilitários) |
 
@@ -27,9 +27,12 @@ Carregadas como contexto de conduta. Descrevem o que é esperado em cada área.
 | --- | --- | --- |
 | CI e qualidade | `rules/ci-quality.md` | Ferramentas de CI, comandos de validação e pipeline de qualidade. |
 | Padrões de código | `rules/code-patterns.md` | Sintaxe, naming, imports e convenções recomendadas. |
+| Disciplina de comentários | `rules/comment-discipline.md` | Comente o porquê e não o quê; evita comentários redundantes, narração e código comentado. |
+| Referências efêmeras | `rules/ephemeral-refs.md` | Cite apenas artefatos duráveis; evita apontar para planos e estados de pipeline não versionados. |
 | Tratamento de erros | `rules/error-handling.md` | Hierarquia de erros, tratamento centralizado, logging e mensagens. |
 | Organização de arquivos | `rules/file-organization.md` | Colocalização e separação em camadas. |
 | Limites de tamanho | `rules/file-size-limits.md` | Heurísticas de tamanho para arquivos e funções. |
+| Segurança Git | `rules/git-safety.md` | Hooks, force push seguro, revisão pré-commit e proteção das branches compartilhadas. |
 | Performance | `rules/performance.md` | Banco de dados, cache, filas, N+1 e otimizações comuns. |
 | Processo e qualidade | `rules/process-enforcement.md` | Quando exigir especificação e plano antes de implementar. |
 | Segurança | `rules/security.md` | Autenticação, autorização, sanitização e variáveis sensíveis. |
@@ -40,12 +43,17 @@ Carregadas como contexto de conduta. Descrevem o que é esperado em cada área.
 ## Skills
 
 Cada skill vive em `skills/<nome>/SKILL.md`. As skills de `skill-typescript` e
-`skill-go` têm material complementar em `references/` (4 arquivos cada).
+`skill-go` têm material complementar em `references/` (4 arquivos cada), e a
+`c4-architecture` traz mais 3 arquivos em `references/` além de um `README.md`
+próprio — é a única skill do índice com README interno. As skills
+`c4-architecture` e `fill-pr-template-from-diff` não usam o prefixo `skill-` das
+demais; ambas seguem a convenção do repositório de origem.
 
 ### Arquitetura
 
 | Skill | Diretório | Descrição |
 | --- | --- | --- |
+| C4 Architecture | `skills/c4-architecture/` | Documentação de arquitetura com diagramas C4 (contexto, container, componente, deployment) em Mermaid. |
 | Architecture Patterns | `skills/skill-architecture-patterns/` | Estrutura de pastas, separação de responsabilidades e trade-offs. |
 | DDD | `skills/skill-ddd/` | Conceitos de Domain-Driven Design quando couberem. |
 | Evolutionary Architecture | `skills/skill-evolutionary-architecture/` | Refatoração incremental, fitness functions e migração de código. |
@@ -165,7 +173,7 @@ dos arquivos no disco.
 | git-workflow-manager | `agents/git-workflow-manager.md` | Estratégias de branching e gestão de merge. |
 | ci-monitor-subagent | `agents/ci-monitor-subagent.md` | Auxiliar do comando `monitor-ci`: status e detalhes de correção. |
 
-### Testes
+### Testes e automação
 
 | Agente | Arquivo | Foco |
 | --- | --- | --- |
