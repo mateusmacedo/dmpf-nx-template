@@ -1,4 +1,4 @@
-name: Release
+name: NX Release
 
 on:
   pull_request:
@@ -78,7 +78,7 @@ jobs:
           fi
 
       # Versiona (bump + changelog + commit + tag) SEM publicar e SEM empurrar. A
-      # publicação no Verdaccio roda no publish-libs.yml, disparado pelo push das
+      # publicação no Verdaccio roda no nx-publish-libs.yml, disparado pelo push das
       # tags geradas abaixo. Na primeira release (sem tags {projectName}@{version})
       # usa --first-release para não exigir um git tag anterior no changelog.
       # --yes e --skip-publish são mutuamente exclusivos no Nx; usar só skip-publish.
