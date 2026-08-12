@@ -45,11 +45,6 @@
   },
   "license": "MIT",
   "name": "@nx-base-template/source",
-  "nx": {
-    "generators": {
-      "@nx-base-template/tools": "tools/generators.json"
-    }
-  },
   "packageManager": "pnpm@11.14.0",
   "private": true,
   "scripts": {
