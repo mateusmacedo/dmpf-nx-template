@@ -12,7 +12,7 @@ correta de cada lib via conventional commits.
 ## Regra central
 
 > **O scope do commit = nome do projeto NX** (sem o prefixo de organização).
-> Ex.: `@lidercap-apps/shared-types` → scope `shared-types`.
+> Ex.: `@lidercap-apps/minha-lib` → scope `minha-lib`.
 >
 > Commits que tocam arquivos de **projetos distintos** devem ser **commits distintos**.
 > Nunca misture arquivos de libs diferentes no mesmo commit.
@@ -56,7 +56,7 @@ Arquivos sem match pertencem à categoria **infraestrutura**.
 
 | Categoria | Exemplos de path | Scope sugerido |
 |-----------|-----------------|----------------|
-| **Lib/App NX** | `libs/shared/types/src/…`, `apps/api/…` | nome do projeto (`shared-types`, `api`) |
+| **Lib/App NX** | `libs/shared/minha-lib/src/…`, `apps/api/…` | nome do projeto (`minha-lib`, `api`) |
 | **Release / CI** | `nx.json` (seção release), `.github/workflows/` | `release`, `ci` |
 | **Workspace** | `nx.json` (demais seções), `tsconfig.base.json`, `biome.json` | `workspace` |
 | **Generator / Tooling** | `tools/generators/…`, `tools/executors/…` | `generator` ou nome específico |
@@ -105,15 +105,15 @@ git add nx.json
 git commit -m "fix(release): <descrição concisa em PT-BR>"
 
 # Exemplo: fix de lib — SEPARADO por projeto
-git add libs/shared/types/project.json
-git commit -m "fix(shared-types): <descrição concisa em PT-BR>"
+git add libs/shared/minha-lib/project.json
+git commit -m "fix(minha-lib): <descrição concisa em PT-BR>"
 
-git add libs/shared/utils/project.json
-git commit -m "fix(shared-utils): <descrição concisa em PT-BR>"
+git add libs/shared/outra-lib/project.json
+git commit -m "fix(outra-lib): <descrição concisa em PT-BR>"
 
 # Exemplo: feat de lib
-git add libs/shared/types/src/lib/sort.types.ts libs/shared/types/src/index.ts
-git commit -m "feat(shared-types): <descrição concisa em PT-BR>"
+git add libs/shared/minha-lib/src/lib/sort.types.ts libs/shared/minha-lib/src/index.ts
+git commit -m "feat(minha-lib): <descrição concisa em PT-BR>"
 ```
 
 ### Formato da mensagem

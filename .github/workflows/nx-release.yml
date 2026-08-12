@@ -1,4 +1,4 @@
-name: Release
+name: NX Release
 
 on:
   pull_request:
@@ -77,8 +77,25 @@ jobs:
             echo "value=production" >> "$GITHUB_OUTPUT"
           fi
 
+      # Sem projeto com tag:type:lib o nx release sai com exit 1 ("Release group
+      # __default__ matches no projects"), não vazio. Esta detecção é o que mantém
+      # o pipeline ocioso — mesmo padrão dos candidatos Docker abaixo.
+      - name: Detect lib release candidates
+        id: lib-candidates
+        run: |
+          LIBS_JSON=$(pnpm nx show projects --projects="tag:type:lib" --json)
+          LIBS_COUNT=$(node -e "const projects = JSON.parse(process.argv[1] ?? '[]'); console.log(Array.isArray(projects) ? projects.length : 0);" "$LIBS_JSON")
+
+          if [[ "$LIBS_COUNT" -gt 0 ]]; then
+            echo "has_libs=true" >> "$GITHUB_OUTPUT"
+            echo "Versioning enabled for tag:type:lib projects: $LIBS_JSON"
+          else
+            echo "has_libs=false" >> "$GITHUB_OUTPUT"
+            echo "No projects found for tag:type:lib. Skipping version and push steps."
+          fi
+
       # Versiona (bump + changelog + commit + tag) SEM publicar e SEM empurrar. A
-      # publicação no Verdaccio roda no publish-libs.yml, disparado pelo push das
+      # publicação no Verdaccio roda no nx-publish-libs.yml, disparado pelo push das
       # tags geradas abaixo. Na primeira release (sem tags {projectName}@{version})
       # usa --first-release para não exigir um git tag anterior no changelog.
       # --yes e --skip-publish são mutuamente exclusivos no Nx; usar só skip-publish.
@@ -89,6 +106,7 @@ jobs:
       # automático do comando agregado. Com ela ausente e release.git.push: false
       # como guardrail, o push acontece num único ponto — o step abaixo.
       - name: Nx Release (skip publish)
+        if: steps.lib-candidates.outputs.has_libs == 'true'
         run: |
           FIRST_RELEASE=""
           if [ -z "$(git tag -l '*@*')" ]; then
@@ -98,6 +116,7 @@ jobs:
           pnpm nx release --skip-publish $FIRST_RELEASE
 
       - name: Push version commit and tags
+        if: steps.lib-candidates.outputs.has_libs == 'true'
         run: git push --follow-tags origin master
 
       - name: Detect docker release candidates
