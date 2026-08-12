@@ -1,9 +1,9 @@
-name: Publish Libs
+name: NX Publish
 
 # Publica as libs no Verdaccio via `nx release publish` usando o template
 # reusable de actions-templates. O executor pula libs sem versão nova e versões
 # já no registry, então releases parciais publicam só o que mudou.
-# Dispara no push das tags do Nx Release (release.yml).
+# Dispara no push das tags do Nx Release (nx-release.yml).
 on:
   push:
     tags:
