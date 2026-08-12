@@ -2,7 +2,7 @@
 id: SPEC-BG2K2W30
 slug: destravar-release-gitea-actions
 title: Destravar o pipeline de release do template no Gitea Actions
-stage: building
+stage: done
 priority: P1
 depends_on: []
 ticket_url: https://lider-cap.atlassian.net/browse/ARQ-462
@@ -51,21 +51,21 @@ O workflow `Release` versiona as libs compartilhadas corretamente, mas não cons
   - O ator do token efêmero não é o `ci-runner-bot` nem quem dispara o workflow — ambas as hipóteses foram testadas e descartadas. Enquanto houvesse whitelist, o push exigiria a credencial de um usuário autorizado.
   - A ausência de proteção é estado do servidor, não código versionado: um repositório derivado deste template não a herda.
   - Trade-off assumido e registrado no ADR-008: `master` deixa de exigir os dois approvals e qualquer tag pode ser criada ou removida.
-- [ ] **[P0] Manter o workflow em paridade com a referência**: o `release.yml` DEVE usar `secrets.GITHUB_TOKEN` no checkout, o mesmo nome de job, a mesma identidade git e o mesmo comando de push do `lidercap-platform-legacy`.
+- [x] **[P0] Manter o workflow em paridade com a referência**: o `release.yml` DEVE usar `secrets.GITHUB_TOKEN` no checkout, o mesmo nome de job, a mesma identidade git e o mesmo comando de push do `lidercap-platform-legacy`.
   - Divergências permitidas, com causa: versões de Node e pnpm (ADR-003) e steps de release Docker (ADR-004).
-- [ ] **[P0] Separar versionamento de push**: a chave `changelog.projectChangelogs.createRelease` DEVE ser removida do `nx.json` e `"push": false` DEVE ser declarado no bloco `release.git`, na mesma edição. Remover `createRelease` é o que de fato desliga o push do `nx release` — e elimina o provider incompatível; `push: false` entra como guardrail contra a reintrodução do comportamento. O step `Push version commit and tags` volta a ser o único ponto de escrita no remoto, com o mesmo comando usado pelo `lidercap-platform-legacy`.
+- [x] **[P0] Separar versionamento de push**: a chave `changelog.projectChangelogs.createRelease` DEVE ser removida do `nx.json` e `"push": false` DEVE ser declarado no bloco `release.git`, na mesma edição. Remover `createRelease` é o que de fato desliga o push do `nx release` — e elimina o provider incompatível; `push: false` entra como guardrail contra a reintrodução do comportamento. O step `Push version commit and tags` volta a ser o único ponto de escrita no remoto, com o mesmo comando usado pelo `lidercap-platform-legacy`.
   - As duas chaves são inseparáveis: `push: false` mantendo `createRelease` faz o Nx abortar com `GIT_PUSH_FALSE_WITH_CREATE_RELEASE`.
   - Nenhum dos providers suportados pelo Nx (`github`, `github-enterprise-server`, `gitlab`) atende ao Gitea.
   - Os arquivos `CHANGELOG.md` continuam sendo gerados, versionados e commitados — comportamento já observado no run 4803.
-- [ ] **[P0] Restaurar o gatilho da publicação**: o `[skip ci]` DEVE sair de `release.git.commitMessage`, que passa a ser `chore(release): publish`. No Gitea, a skip string é avaliada contra o commit apontado pela tag e impediria o `publish-libs.yml` de disparar.
+- [x] **[P0] Restaurar o gatilho da publicação**: o `[skip ci]` DEVE sair de `release.git.commitMessage`, que passa a ser `chore(release): publish`. No Gitea, a skip string é avaliada contra o commit apontado pela tag e impediria o `publish-libs.yml` de disparar.
   - A remoção não cria recursão: nenhum workflow do repositório dispara em `push` para `master` — `release.yml` dispara em `pull_request`/`workflow_dispatch` e `ci.yml` em `pull_request`.
-- [ ] **[P1] Registrar a decisão**: um ADR em `docs/adr/` DEVE documentar a identidade de automação do release, por que a autorização é por nome e não por time, e a ausência de provider Gitea no Nx Release.
+- [x] **[P1] Registrar a decisão**: um ADR em `docs/adr/` DEVE documentar a identidade de automação do release, por que a autorização é por nome e não por time, e a ausência de provider Gitea no Nx Release.
 
 ### Não-funcionais
 
-- [ ] Segurança: nenhuma permissão administrativa sobre a organização DEVE ser concedida ao CI, e nenhum PAT de usuário DEVE ser persistido no runner. Com o token efêmero das Actions, a credencial é emitida por execução e expira com ela — superfície menor que a de um PAT em secret. Em contrapartida, a remoção das proteções elimina o controle de escrita do lado do servidor: `master` aceita push direto e qualquer tag pode ser criada ou removida. Trade-off assumido, registrado no ADR-008.
-- [ ] Compatibilidade: as mudanças DEVEM funcionar com Nx `23.1.0`, pnpm `11.14.0` e Node `^24`, conforme as versões fixadas no workspace.
-- [ ] Reversibilidade: as três frentes (plataforma, `nx.json`, `release.yml`) DEVEM ser revertíveis de forma independente entre si. Dentro do `nx.json`, porém, `createRelease` e `push` são acopladas e revertem juntas — reverter apenas uma reintroduz o push indevido ou o erro `GIT_PUSH_FALSE_WITH_CREATE_RELEASE`.
+- [x] Segurança: nenhuma permissão administrativa sobre a organização DEVE ser concedida ao CI, e nenhum PAT de usuário DEVE ser persistido no runner. Com o token efêmero das Actions, a credencial é emitida por execução e expira com ela — superfície menor que a de um PAT em secret. Em contrapartida, a remoção das proteções elimina o controle de escrita do lado do servidor: `master` aceita push direto e qualquer tag pode ser criada ou removida. Trade-off assumido, registrado no ADR-008.
+- [x] Compatibilidade: as mudanças DEVEM funcionar com Nx `23.1.0`, pnpm `11.14.0` e Node `^24`, conforme as versões fixadas no workspace.
+- [x] Reversibilidade: as três frentes (plataforma, `nx.json`, `release.yml`) DEVEM ser revertíveis de forma independente entre si. Dentro do `nx.json`, porém, `createRelease` e `push` são acopladas e revertem juntas — reverter apenas uma reintroduz o push indevido ou o erro `GIT_PUSH_FALSE_WITH_CREATE_RELEASE`.
 
 ## Camadas afetadas
 
@@ -157,9 +157,9 @@ A remoção das proteções é pré-requisito: com elas ativas, o workflow conti
 ### Critérios de aceite
 
 - [x] O token efêmero das Actions empurra uma tag descartável para o repositório, e a tag é removida em seguida (run 4831).
-- [ ] O workflow `Release` conclui com `conclusion: success`, com o commit de versão presente em `master` e as tags `{projectName}@{version}` visíveis em `GET /api/v1/repos/lidercap-apps/nx-base-template/tags`.
-- [ ] O push ao remoto ocorre exclusivamente no step `Push version commit and tags`; o step `Nx Release (skip publish)` não emite a linha `NX Pushing to git remote "origin"`.
-- [ ] O `publish-libs.yml` é disparado pelas tags geradas e conclui com sucesso.
+- [x] O workflow `Release` conclui com `conclusion: success`, com o commit de versão presente em `master` e as tags `{projectName}@{version}` visíveis em `GET /api/v1/repos/lidercap-apps/nx-base-template/tags`.
+- [x] O push ao remoto ocorre exclusivamente no step `Push version commit and tags`; o step `Nx Release (skip publish)` não emite a linha `NX Pushing to git remote "origin"`.
+- [x] O `publish-libs.yml` é disparado pelas tags geradas e conclui com sucesso.
 - [x] O `release.yml` diverge do `lidercap-platform-legacy` apenas nos pontos com causa declarada: versões de Node e pnpm (ADR-003) e steps de release Docker (ADR-004).
 - [x] Validação do projeto passando: `pnpm biome ci .` e `pnpm nx affected -t lint,typecheck,test,build --exclude=@nx-base-template/source`.
 
