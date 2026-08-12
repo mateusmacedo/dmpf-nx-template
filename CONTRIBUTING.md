@@ -30,7 +30,7 @@ dia (branches, commits, pull requests e validação); esta seção é o resumo.
 Trabalhe sempre fora de `master` e `develop`.
 
 1. Crie uma branch seguindo o padrão `tipo/descricao-curta`
-   (ex: `feat/notificacoes-webhook`, `fix/lint-shared-utils`).
+   (ex: `feat/notificacoes-webhook`, `fix/lint-minha-lib`).
 2. Faça commits atômicos seguindo Conventional Commits (ver abaixo).
 3. Rode a validação local antes de abrir o PR.
 4. Abra o Pull Request contra `develop` descrevendo o que muda e por quê.
@@ -72,9 +72,9 @@ As mensagens de commit seguem o padrão [Conventional Commits](https://www.conve
 ```
 
 Tipos comuns: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `ci`, `build`.
-O escopo é o projeto Nx afetado (ex: `shared-utils`, `workspace`).
+O escopo é o projeto Nx afetado (ex: `minha-lib`, `workspace`).
 
-Exemplo: `feat(shared-utils): adicionar helper de agrupamento`
+Exemplo: `feat(minha-lib): adicionar helper de agrupamento`
 
 O versionamento e o changelog são derivados desses commits pelo Nx Release.
 

@@ -112,11 +112,9 @@ nx-base-template/
 ├── libs/
 │   ├── backend/                    # placeholder — sem projeto Nx
 │   ├── frontend/                   # placeholder — sem projeto Nx
-│   └── shared/
-│       ├── types/                  # @lidercap-apps/shared-types
-│       └── utils/                  # @lidercap-apps/shared-utils
+│   └── shared/                     # placeholder — sem projeto Nx
 ├── docs/
-│   ├── adr/                        # ADR-00N (baseline, tasks, hardening, release, plataforma, fechamento, fronteira)
+│   ├── adr/                        # ADR-00N (baseline, tasks, hardening, release, plataforma, fechamento, fronteira, identidade de automação, libs)
 │   ├── specs/                      # catálogo e template de specs (SPEC-XXXX)
 │   ├── rules/                      # regras de domínio, com README de índice
 │   │   ├── business/               # regras de negócio (BIZ-)
@@ -144,14 +142,11 @@ Nenhuma. `apps/backend`, `apps/frontend` e `apps/serverless` são diretórios de
 
 ### Libs
 
-| Projeto Nx | Caminho | Papel |
-| --- | --- | --- |
-| `@lidercap-apps/shared-types` | `libs/shared/types` | Tipos compartilhados entre projetos |
-| `@lidercap-apps/shared-utils` | `libs/shared/utils` | Utilitários de string e objeto |
+Nenhuma. `libs/backend`, `libs/frontend` e `libs/shared` são diretórios de destino, sem projeto Nx registrado. Para criar a primeira lib compartilhada, use o generator do Nx (`pnpm nx g @nx/js:lib libs/shared/<name>`), com as três tags 3D e `--linter=none`; o passo a passo com todas as flags está em `docs/nx-reference/tasks.md`. O `go.work` declara `go 1.25`, mas não há módulos nem arquivos `.go` no workspace.
 
-`libs/backend` e `libs/frontend` existem apenas como destino de novas libs — ainda não são projetos Nx. O `go.work` declara `go 1.25`, mas não há módulos nem arquivos `.go` no workspace.
+Sem nenhum projeto com a tag `type:lib`, o `nx release` sai com erro (`Release group "__default__" matches no projects`) em vez de concluir vazio. Por isso o `nx-release.yml` tem o step `Detect lib release candidates`, que pula o versionamento e o push enquanto não houver lib — mesmo padrão do step de candidatos Docker. O pipeline fica armado e ocioso, não vermelho.
 
-O prefixo dos pacotes é `@lidercap-apps/`, tudo em minúsculas — o mesmo escopo usado no Verdaccio, no `publish-libs.yml` e nos demais repositórios da organização. O casing precisa bater exatamente entre o `name` de cada `package.json`, o `tsconfig.base.json` e o `scope` passado ao template de publicação: o Nx resolve o registry pelo escopo do pacote, e qualquer divergência faz o `pnpm publish` cair no registry público e falhar.
+O prefixo dos pacotes é `@lidercap-apps/`, tudo em minúsculas — o mesmo escopo usado no Verdaccio, no `nx-publish-libs.yml` e nos demais repositórios da organização. O casing precisa bater exatamente entre o `name` de cada `package.json`, o `tsconfig.base.json` e o `scope` passado ao template de publicação: o Nx resolve o registry pelo escopo do pacote, e qualquer divergência faz o `pnpm publish` cair no registry público e falhar.
 
 ---
 
@@ -173,11 +168,11 @@ pnpm nx affected -t test
 pnpm nx affected -t build
 
 # Um único projeto
-pnpm nx test @lidercap-apps/shared-utils
-pnpm nx build @lidercap-apps/shared-types
+pnpm nx test @lidercap-apps/minha-lib
+pnpm nx build @lidercap-apps/minha-lib
 
 # Um único arquivo de teste (passthrough p/ Jest)
-pnpm nx test @lidercap-apps/shared-utils --testPathPatterns="string"
+pnpm nx test @lidercap-apps/minha-lib --testPathPatterns="string"
 
 # Formatação (Biome — não Prettier)
 pnpm biome format --write . # aplica
@@ -198,14 +193,14 @@ Scripts raiz (`pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm fo
 - **Nx:** `23.1.0`. NestJS `11.1.28` disponível via catalog.
 - **Lint + format:** **Biome 2.4.16** é a ferramenta principal de format/lint. Estilo: 2 espaços, `lineWidth` 100, aspas simples, trailing commas `all`, semicolons sempre, arrow parens sempre. Regras notáveis: `noUnusedVariables: error`, `noExplicitAny: warn` e `useImportType: error` — neste workspace `import type` é obrigatório, não preferência. O parser tem `unsafeParameterDecoratorsEnabled: true` para suportar decorators de parâmetro do NestJS.
 - **Testes:** Jest 30 transpilado por **SWC** (`@swc/jest`), config em `.spec.swcrc` (decorators + `keepClassNames` para DI do NestJS). O preset em `jest.preset.js` usa `passWithNoTests: true`, então projeto sem teste não quebra o lote.
-- **TypeScript:** `strict: true`, `module`/`moduleResolution: nodenext`, `target: es2022`, Project References (`composite: true`, `emitDeclarationOnly: true`). O `tsconfig.base.json` declara `paths` para as duas libs `shared`.
+- **TypeScript:** `strict: true`, `module`/`moduleResolution: nodenext`, `target: es2022`, Project References (`composite: true`, `emitDeclarationOnly: true`). O `tsconfig.base.json` tem `paths` vazio e o `tsconfig.json` tem `references` vazio: cada lib nova acrescenta a própria entrada nos dois.
 - **Git hooks:** Lefthook (não husky), instalado via `pnpm prepare`. O script é tolerante a falha (`lefthook install || true`), para não quebrar `pnpm install` em ambiente sem o binário. `pre-commit` roda `biome check --write` nos arquivos staged; `pre-push` roda `nx affected` de lint/typecheck/test/build com `--parallel=3`, excluindo `@nx-base-template/source`.
 
 ---
 
 ## Convenções obrigatórias
 
-- **Tags 3D em todo app/lib de produção:** uma de cada dimensão, conforme a taxonomia canônica abaixo. Ex.: `["type:lib", "scope:shared", "stack:node"]`, como nas duas libs existentes. O Nx Release publica apenas projetos com `type:lib` (`release.projects: tag:type:lib`). Exceção conhecida: `@nx-base-template/source` (metadado raiz).
+- **Tags 3D em todo app/lib de produção:** uma de cada dimensão, conforme a taxonomia canônica abaixo. Ex.: `["type:lib", "scope:shared", "stack:node"]`. O Nx Release publica apenas projetos com `type:lib` (`release.projects: tag:type:lib`). Exceção conhecida: `@nx-base-template/source` (metadado raiz).
 
   | Dimensão | Valores válidos |
   | --- | --- |
@@ -215,7 +210,7 @@ Scripts raiz (`pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm fo
 
   Esta tabela é a **fonte canônica** da taxonomia; `docs/nx-reference/tasks.md` a repete e não deve divergir. `stack:universal` é para libs sem dependência de runtime (tipos puros, utilitários); `stack:node` cobre libs que usam APIs de Node ou frameworks de servidor.
 - **Não redeclarar targets** que um plugin ou `targetDefaults` (em `nx.json`) já fornece. Redeclarar quebra o cache silenciosamente (ver `docs/adr/002-nx-task-configuration.md`).
-- **Commits (Conventional Commits, em PT-BR):** formato `<tipo>(<scope>): <descrição imperativa>`, máx. 72 chars no assunto. `scope` = nome do projeto Nx **sem** o prefixo da org (`shared-utils`, não `@lidercap-apps/shared-utils`). Projetos distintos vão em commits separados (nunca misture libs). Tipos: `feat`, `fix`, `refactor`, `chore`, `docs`, `ci`. Body só quando o motivo não é óbvio. Detalhes na skill `.agents/skills/nx-commit/`.
+- **Commits (Conventional Commits, em PT-BR):** formato `<tipo>(<scope>): <descrição imperativa>`, máx. 72 chars no assunto. `scope` = nome do projeto Nx **sem** o prefixo da org (`minha-lib`, não `@lidercap-apps/minha-lib`). Projetos distintos vão em commits separados (nunca misture libs). Tipos: `feat`, `fix`, `refactor`, `chore`, `docs`, `ci`. Body só quando o motivo não é óbvio. Detalhes na skill `.agents/skills/nx-commit/`.
 
 ---
 
