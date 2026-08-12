@@ -18,9 +18,6 @@
     "strict": true,
     "target": "es2022",
     "baseUrl": ".",
-    "paths": {
-      "@lidercap-apps/shared-utils": ["libs/shared/utils/src/index.ts"],
-      "@lidercap-apps/shared-types": ["libs/shared/types/src/index.ts"]
-    }
+    "paths": {}
   }
 }

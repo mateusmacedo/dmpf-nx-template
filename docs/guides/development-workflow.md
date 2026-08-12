@@ -84,7 +84,7 @@ descrição vai em kebab-case minúsculo.
 
 ```text
 feat/notificacoes-webhook        # sem ticket
-fix/lint-shared-utils            # sem ticket
+fix/lint-minha-lib               # sem ticket
 feat/ENG-234-login-social        # com ticket
 ```
 
@@ -120,7 +120,7 @@ em PT-BR:
 
 - A descrição é imperativa e o assunto tem no máximo **72 caracteres**.
 - O **escopo** é o nome do projeto Nx afetado, **sem** o prefixo da org: use
-  `shared-utils`, não `@lidercap-apps/shared-utils`. Use `workspace` para
+  `minha-lib`, não `@lidercap-apps/minha-lib`. Use `workspace` para
   mudanças na raiz do repositório.
 - Projetos distintos vão em **commits separados** — mantenha um commit por
   projeto Nx em vez de misturar libs no mesmo commit, para que o versionamento
@@ -130,8 +130,8 @@ em PT-BR:
 Tipos usados no repositório: `feat`, `fix`, `refactor`, `chore`, `docs`, `ci`.
 
 ```text
-feat(shared-utils): adicionar helper de agrupamento
-fix(shared-types): corrigir tipo do payload de evento
+feat(minha-lib): adicionar helper de agrupamento
+fix(outra-lib): corrigir tipo do payload de evento
 docs(workspace): documentar fluxo de release
 ci(workspace): adicionar passo de cache ao release
 ```
