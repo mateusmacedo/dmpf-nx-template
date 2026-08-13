@@ -11,12 +11,10 @@ clonar, validar o ambiente e então gerar a primeira app ou lib do seu projeto.
 - `pnpm@11.14.0`, conforme `packageManager` em `package.json`.
 - Corepack habilitado, para usar exatamente a versão declarada do pnpm.
 
-Para o dia a dia com o workspace e, opcionalmente, com o plugin `mmda-flow`
-(ver a seção seguinte), tenha também estas ferramentas de linha de comando:
+Para o dia a dia com o workspace, tenha também estas ferramentas de linha de comando:
 
 - `git` — controle de versão do repositório.
 - `node` — runtime dos scripts (já coberto pelo requisito de Node.js `^24`).
-- `python3` — usado por scripts auxiliares do plugin `mmda-flow`.
 - `jq` — processamento de JSON em scripts e automações.
 - `yq` (implementação do mikefarah) — processamento de YAML; confirme a origem
   com `yq --version`, cuja saída menciona `mikefarah/yq`.
@@ -31,7 +29,6 @@ corepack enable
 node --version
 pnpm --version
 git --version
-python3 --version
 jq --version
 yq --version
 ```
@@ -51,43 +48,6 @@ As versões de dependências são centralizadas no `catalog:` do
 `pnpm-workspace.yaml`. Cada `package.json` referencia `"catalog:"` em vez de fixar
 a versão. O mesmo arquivo tem `allowBuilds`, a allowlist de scripts de
 postinstall: pacotes marcados como `false` estão bloqueados de propósito.
-
-## Plugin mmda-flow (opcional)
-
-O plugin `mmda-flow` é opcional. O template funciona por completo sem ele; o
-plugin agrega uma camada de pipeline e de processo por cima do que já existe.
-
-Instale-o pelo marketplace de plugins do Claude Code, a partir do repositório
-`https://github.com/mateusmacedo/plugins-claude`.
-
-### Precedência entre plugin e template
-
-- O plugin fornece **pipeline e processo** (feature pipeline, gates de
-  qualidade e fluxo de entrega).
-- O `.claude/skills/` do template fornece **domínio e stack** (NestJS, Jest,
-  TypeScript, Go, review e demais convenções deste monorepo).
-
-Quando as duas fontes tratarem do mesmo assunto, tome o processo do plugin e o
-conhecimento de domínio e de stack das skills do template.
-
-### Incompatibilidade de fluxo de PR
-
-A rule `rules/git-workflow.md` do plugin declara substituir fluxos em que
-`develop` é branch de integração e impõe "PR sempre para a branch principal",
-sem precedência para `develop` como base. Ela resolve a branch principal via
-`gh repo view --json defaultBranchRef`, comando que não opera contra Gitea.
-
-Este projeto adota o fluxo inverso: a feature vai primeiro para `develop`
-(validação) e só depois a **mesma** árvore é promovida para `release/X.Y.Z` e,
-por fim, para `master` (ver `AGENTS.md` e `CONTRIBUTING.md`).
-
-Essa incompatibilidade significa que, para abrir pull request neste projeto,
-você deve seguir o fluxo descrito em `docs/guides/development-workflow.md`.
-Mantenha desligados os pipelines do plugin que criam PR — a skill de commit/push
-(`mmda-flow:skill-commit-push`) e, por delegar a ela, a
-`mmda-flow:skill-feature-pipeline` —, porque a resolução de base por `gh` falha
-contra Gitea e a regra de base do plugin contraria o fluxo `develop` →
-`release` → `master` deste repositório.
 
 ## O que já existe no workspace
 
@@ -234,10 +194,10 @@ versionado o conhecimento que precisa sobreviver ao plano antes de descartá-lo.
 
 ## Sincronização com tracker
 
-A sincronização com um tracker (Linear, Jira) é responsabilidade do plugin
-`mmda-flow`, quando a organização o adotar. Este template não exige campos de
-tracker: você pode contribuir e abrir PRs sem preencher nenhum identificador de
-issue externo.
+Este template não exige campos de tracker (Linear, Jira ou equivalente): você
+pode contribuir e abrir PRs sem preencher nenhum identificador de issue externo.
+A sincronização com um tracker, se a organização adotar, fica fora do escopo
+deste repositório.
 
 ## Onde continuar lendo
 
