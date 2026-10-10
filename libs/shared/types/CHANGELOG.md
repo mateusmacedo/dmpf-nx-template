@@ -1,3 +1,21 @@
+## 0.0.3 (2026-08-11)
+
+### 🚀 Features
+
+- **shared-types:** add SortInput, SortOrder and PaginatedSortedResponse types
+- **shared-types:** add README.md for shared types library
+- **shared-types:** add publishConfig for GitHub package registry
+- **shared-types:** add shared types library
+
+### 🩹 Fixes
+
+- **workspace:** padronizar escopo npm das libs para @lidercap-apps
+- **shared-types:** restaurar herança de cache e inputs do targetDefault no lint
+
+### ❤️ Thank You
+
+- Mateus Macedo Dos Anjos
+
 ## 0.0.2 (2026-08-11)
 
 ### 🚀 Features
