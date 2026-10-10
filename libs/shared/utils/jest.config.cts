@@ -5,7 +5,7 @@ const swcJestConfig = JSON.parse(readFileSync(join(__dirname, '../../../.spec.sw
 swcJestConfig.swcrc = false;
 
 module.exports = {
-  displayName: '@nx-base-template/shared-utils',
+  displayName: '@lideranca-sites/shared-utils',
   preset: '../../../jest.preset.js',
   testEnvironment: 'node',
   transform: {
