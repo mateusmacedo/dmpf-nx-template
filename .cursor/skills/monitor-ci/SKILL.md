@@ -35,21 +35,6 @@ $ARGUMENTS
 
 Parse any overrides from `$ARGUMENTS` and merge with defaults.
 
-## Nx Cloud Connection Check
-
-**CRITICAL**: Before starting the monitoring loop, verify the workspace is connected to Nx Cloud.
-
-### Step 0: Verify Nx Cloud Connection
-
-1. **Check `nx.json`** at workspace root for `nxCloudId` or `nxCloudAccessToken`
-2. **If `nx.json` missing OR neither property exists** → exit with:
-
-   ```
-   [monitor-ci] Nx Cloud not connected. Unlock 70% faster CI and auto-fix broken PRs with https://nx.dev/nx-cloud
-   ```
-
-3. **If connected** → continue to main loop
-
 ## Anti-Patterns (NEVER DO)
 
 **CRITICAL**: The following behaviors are strictly prohibited:
@@ -130,13 +115,11 @@ When subagent returns `fix_available`, main agent compares `failedTaskIds` vs `v
 When verifiable (non-e2e) unverified tasks exist:
 
 1. **Detect package manager:**
-
    - `pnpm-lock.yaml` exists → `pnpm nx`
    - `yarn.lock` exists → `yarn nx`
    - Otherwise → `npx nx`
 
 2. **Run verifiable tasks in parallel:**
-
    - Spawn `general` subagents to run each task concurrently
    - Each subagent runs: `<pm> nx run <taskId>`
    - Collect pass/fail results from all subagents
@@ -149,7 +132,6 @@ When verifiable (non-e2e) unverified tasks exist:
 | ANY verifiable task fails | Apply-locally + enhance flow |
 
 1. **Apply-locally + enhance flow:**
-
    - Run `nx-cloud apply-locally <shortLink>`
    - Enhance the code to fix failing tasks
    - Run failing tasks again to verify fix
@@ -157,10 +139,8 @@ When verifiable (non-e2e) unverified tasks exist:
    - If passing → commit and push, record `expected_commit_sha`, spawn subagent in wait mode
 
 2. **Track attempts** (wraps step 4):
-
    - Increment `local_verify_count` after each enhance cycle
    - If `local_verify_count >= local_verify_attempts` (default: 3):
-
      - Get code in commit-able state
      - Commit and push with message indicating local verification failed
      - Report to user:
@@ -269,7 +249,6 @@ This means the expected CI Attempt was never created - CI likely failed before N
    ```
 
 2. **If user configured auto-fix attempts** (e.g., `--auto-fix-workflow`):
-
    - Detect package manager: check for `pnpm-lock.yaml`, `yarn.lock`, `package-lock.json`
    - Run install to update lockfile:
 
@@ -319,7 +298,6 @@ This means the CI Attempt was created but no Nx tasks were recorded before it fa
 3. **Record `expected_commit_sha`, spawn subagent in wait mode**
 
 4. **If retry also returns `cipe_no_tasks`:**
-
    - Exit with failure
    - Provide guidance:
 

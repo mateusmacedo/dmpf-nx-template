@@ -14,8 +14,7 @@ export function toKebabCase(value: string): string {
  * Exemplo: "hello-world" → "helloWorld"
  */
 export function toCamelCase(value: string): string {
-  return value
-    .replace(/[-_\s]+(.)?/g, (_, char: string) => (char ? char.toUpperCase() : ''));
+  return value.replace(/[-_\s]+(.)?/g, (_, char: string) => (char ? char.toUpperCase() : ''));
 }
 
 /**
