@@ -126,17 +126,45 @@ jobs:
             echo "Standard mode enabled: existing release tags or existing package detected in registry."
           fi
 
-      - name: Release version — npm libs (bootstrap)
+      - name: Dry-run release plan (bootstrap)
         if: steps.npm-bootstrap.outputs.use_first_release == 'true'
-        run: pnpm nx release version --groups=npm-libs --first-release
+        id: release-plan-bootstrap
+        run: |
+          DRY_RUN_LOG=$(mktemp)
+          pnpm nx release version --groups=npm-libs --first-release --dry-run 2>&1 | tee "$DRY_RUN_LOG"
+          if grep -q "No files changed as a result of running versioning" "$DRY_RUN_LOG"; then
+            echo "would_release=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::No release changes detected in bootstrap dry-run."
+          else
+            echo "would_release=true" >> "$GITHUB_OUTPUT"
+            echo "Release changes detected in bootstrap dry-run."
+          fi
+
+      - name: Dry-run release plan (standard)
+        if: steps.npm-bootstrap.outputs.use_first_release != 'true'
+        id: release-plan-standard
+        run: |
+          DRY_RUN_LOG=$(mktemp)
+          pnpm nx release version --groups=npm-libs --dry-run 2>&1 | tee "$DRY_RUN_LOG"
+          if grep -q "No files changed as a result of running versioning" "$DRY_RUN_LOG"; then
+            echo "would_release=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::No release changes detected in standard dry-run."
+          else
+            echo "would_release=true" >> "$GITHUB_OUTPUT"
+            echo "Release changes detected in standard dry-run."
+          fi
+
+      - name: Execute release (bootstrap)
+        if: steps.npm-bootstrap.outputs.use_first_release == 'true' && steps.release-plan-bootstrap.outputs.would_release == 'true'
+        run: pnpm nx release --groups=npm-libs --first-release --yes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Release version — npm libs (standard)
-        if: steps.npm-bootstrap.outputs.use_first_release != 'true'
-        run: pnpm nx release version --groups=npm-libs
+      - name: Execute release (standard)
+        if: steps.npm-bootstrap.outputs.use_first_release != 'true' && steps.release-plan-standard.outputs.would_release == 'true'
+        run: pnpm nx release --groups=npm-libs --yes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -145,11 +173,20 @@ jobs:
       - name: Collect release tags from current commit
         id: release-tags
         run: |
+          WOULD_RELEASE="${{ steps.release-plan-bootstrap.outputs.would_release || steps.release-plan-standard.outputs.would_release }}"
+          if [[ "$WOULD_RELEASE" != "true" ]]; then
+            echo "has_release_tags=false" >> "$GITHUB_OUTPUT"
+            echo "tags_csv=" >> "$GITHUB_OUTPUT"
+            echo "::notice::Release execution skipped due to no-op dry-run."
+            exit 0
+          fi
+
           TAGS=$(git tag --points-at HEAD | tr '\n' ',' | sed 's/,$//')
           if [[ -z "$TAGS" ]]; then
             echo "has_release_tags=false" >> "$GITHUB_OUTPUT"
             echo "tags_csv=" >> "$GITHUB_OUTPUT"
-            echo "::notice::No release tags created on HEAD. Treating this run as no-op and skipping npm publish."
+            echo "::error::Release was expected, but no tags were created on HEAD."
+            exit 1
           else
             echo "has_release_tags=true" >> "$GITHUB_OUTPUT"
             echo "tags_csv=$TAGS" >> "$GITHUB_OUTPUT"
@@ -166,38 +203,6 @@ jobs:
               exit 1
             fi
           done
-
-      - name: Publish npm libs (bootstrap)
-        if: steps.release-tags.outputs.has_release_tags == 'true' && steps.npm-bootstrap.outputs.use_first_release == 'true'
-        run: pnpm nx release publish --groups=npm-libs --first-release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Publish npm libs (standard)
-        if: steps.release-tags.outputs.has_release_tags == 'true' && steps.npm-bootstrap.outputs.use_first_release != 'true'
-        run: pnpm nx release publish --groups=npm-libs
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Generate changelog and GitHub releases (bootstrap)
-        if: steps.release-tags.outputs.has_release_tags == 'true' && steps.npm-bootstrap.outputs.use_first_release == 'true'
-        run: pnpm nx release changelog --groups=npm-libs --first-release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Generate changelog and GitHub releases (standard)
-        if: steps.release-tags.outputs.has_release_tags == 'true' && steps.npm-bootstrap.outputs.use_first_release != 'true'
-        run: pnpm nx release changelog --groups=npm-libs
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Validate GitHub releases for created tags
         if: steps.release-tags.outputs.has_release_tags == 'true'
@@ -240,6 +245,7 @@ jobs:
         if: always()
         run: |
           echo "first_release=${{ steps.npm-bootstrap.outputs.use_first_release }}"
+          echo "would_release=${{ steps.release-plan-bootstrap.outputs.would_release || steps.release-plan-standard.outputs.would_release }}"
           echo "has_release_tags=${{ steps.release-tags.outputs.has_release_tags }}"
           echo "tags=${{ steps.release-tags.outputs.tags_csv }}"
 
