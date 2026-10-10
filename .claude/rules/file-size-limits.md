@@ -1,6 +1,7 @@
 ---
 paths:
-  - "src/**/*.ts"
+  - "**/*.ts"
+  - "**/*.go"
 ---
 
 # Limites de tamanho

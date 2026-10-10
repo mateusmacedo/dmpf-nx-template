@@ -1,9 +1,11 @@
 ---
 paths:
-  - "src/**/__tests__/**"
-  - "src/**/*.spec.ts"
-  - "tests/**"
-  - "jest.config.*"
+  - "**/*.spec.ts"
+  - "**/*_test.go"
+  - "**/__tests__/**"
+  - "**/tests/**"
+  - "**/jest.config.*"
+  - "jest.preset.js"
 ---
 
 # Convenções de teste

@@ -1,6 +1,7 @@
 ---
 paths:
-  - "src/**/*.ts"
+  - "**/*.ts"
+  - "**/*.go"
 ---
 
 # Organização de arquivos
