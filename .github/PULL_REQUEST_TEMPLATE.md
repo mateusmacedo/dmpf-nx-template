@@ -1,6 +1,6 @@
 ## Contexto
 
-<!-- Descreva o que muda e por quê. Vincule a spec (docs/specs/) ou a issue quando houver. -->
+<!-- Descreva o que muda e por quê. Vincule a spec (docs/specs/) e a issue do Linear (DEVS-<n>) quando houver. -->
 
 ## Tipo de mudança
 

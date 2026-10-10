@@ -29,11 +29,13 @@ dia (branches, commits, pull requests e validação); esta seção é o resumo.
 
 Trabalhe sempre fora de `master` e `develop`.
 
-1. Crie uma branch seguindo o padrão `tipo/descricao-curta`
-   (ex: `feat/notificacoes-webhook`, `fix/lint-minha-lib`).
+1. Crie uma branch seguindo o padrão `tipo/DEVS-<n>-descricao-curta`, com a issue
+   do Linear (ex: `feat/DEVS-42-notificacoes-webhook`); sem issue, use
+   `tipo/descricao-curta`.
 2. Faça commits atômicos seguindo Conventional Commits (ver abaixo).
 3. Rode a validação local antes de abrir o PR.
-4. Abra o Pull Request contra `develop` descrevendo o que muda e por quê.
+4. Abra o Pull Request contra `develop` com o título
+   `tipo(scope): [DEVS-<n>] descrição`, descrevendo o que muda e por quê.
    `master` recebe o trabalho pela branch `release/X.Y.Z`, não diretamente.
 
 PRs que tocam apenas arquivos Markdown não disparam o pipeline, por causa do
@@ -60,8 +62,10 @@ foi validado em `develop`, sem reeditar os mesmos arquivos "de outro jeito".
 
 O `create-release.yml` automatiza a criação da branch `release/X.Y.Z`: ele calcula
 o próximo número a partir das releases já mergeadas em `master`, deriva o
-incremento dos commits em `origin/master..origin/develop` e abre o PR de release
-pela API do Gitea.
+incremento dos commits em `origin/master..origin/develop` (ou usa o input
+`bump-type`), cria `release/X.Y.Z` a partir de `master` e a empurra. O PR de
+`release/X.Y.Z` para `master` é aberto por você, com a sua conta: um PR aberto
+pelo `GITHUB_TOKEN` não dispara o CI.
 
 ## Conventional Commits
 

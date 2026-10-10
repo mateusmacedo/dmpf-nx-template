@@ -19,10 +19,9 @@ Para o dia a dia com o workspace, tenha também estas ferramentas de linha de co
 - `yq` (implementação do mikefarah) — processamento de YAML; confirme a origem
   com `yq --version`, cuja saída menciona `mikefarah/yq`.
 
-O binário `gh` (GitHub CLI) só é necessário quando o fluxo do desenvolvedor
-envolve GitHub. A plataforma deste projeto é **Gitea** (`gitea.lidercap.com.br`)
-e não depende do `gh` — a automação que fala com a plataforma usa a API do
-Gitea (`/api/v1/...`).
+O binário `gh` (GitHub CLI) é o caminho padrão para operar a plataforma: o
+repositório vive no GitHub (`github.com/mateusmacedo/dmpf-nx-template`), e PRs,
+runs e releases se operam por ele.
 
 ```bash
 corepack enable
@@ -72,7 +71,7 @@ cria, está em `docs/nx-reference/tasks.md`.
 ```bash
 # lib compartilhada
 pnpm nx g @nx/js:lib libs/shared/<name> \
-  --importPath=@lidercap-apps/shared-<name> \
+  --importPath=@mateusmacedo/shared-<name> \
   --bundler=tsc --unitTestRunner=jest --linter=none \
   --tags=type:lib,scope:shared,stack:node
 
@@ -102,15 +101,15 @@ pnpm nx run-many -t lint
 pnpm nx run-many -t typecheck
 pnpm nx run-many -t test
 pnpm nx run-many -t build
-pnpm nx test @lidercap-apps/minha-lib
-pnpm nx build @lidercap-apps/minha-lib
+pnpm nx test @mateusmacedo/minha-lib
+pnpm nx build @mateusmacedo/minha-lib
 ```
 
 Para rodar um único arquivo de teste, o passthrough vai direto ao Jest 30 — a flag
 é `--testPathPatterns`, no plural:
 
 ```bash
-pnpm nx test @lidercap-apps/minha-lib --testPathPatterns="string"
+pnpm nx test @mateusmacedo/minha-lib --testPathPatterns="string"
 ```
 
 ## Projetos afetados
@@ -141,7 +140,7 @@ commit.
 ## CI
 
 O workflow `.github/workflows/ci.yml` roda em PRs para `master`, `develop` e
-`release/**`, no runner `gitea-runner`. A pipeline executa `pnpm biome ci .` e
+`release/**`, no runner `ubuntu-26.04`. A pipeline executa `pnpm biome ci .` e
 depois `nx affected` de lint, typecheck, test (com `--ci --coverage`), build e
 e2e.
 
@@ -151,12 +150,13 @@ o pipeline e precisam de revisão humana.
 
 ## Release e plataforma
 
-- A plataforma é **Gitea** (`gitea.lidercap.com.br`). O binário `gh` não opera
-  contra este servidor — ver `docs/adr/005-plataforma-gitea.md`.
-- O versionamento (`release.yml`) é separado da publicação de libs
-  (`publish-libs.yml`) — ver `docs/adr/004-workflows-verdaccio-release.md`.
-- O `create-release.yml` cria a branch `release/X.Y.Z` e abre o PR de release pela
-  API do Gitea.
+- A plataforma é o **GitHub** (`github.com/mateusmacedo/dmpf-nx-template`) — ver
+  `docs/adr/010-migracao-github-linear.md`.
+- O versionamento (`nx-release.yml`) é separado da publicação de libs no GitHub
+  Packages, que roda no job `publish` encadeado ao mesmo run. O
+  `nx-publish-libs.yml` só republica, por disparo manual.
+- O `create-release.yml` cria a branch `release/X.Y.Z` e avisa para abrir o PR
+  para `master` com a sua conta: PR aberto pelo `GITHUB_TOKEN` não dispara o CI.
 
 ## CD (deploy)
 
@@ -192,12 +192,23 @@ Por isso, mantenha o racional durável de uma decisão na spec (`docs/specs/`) o
 em um ADR (`docs/adr/`), nunca apenas no plano. Migre para um artefato
 versionado o conhecimento que precisa sobreviver ao plano antes de descartá-lo.
 
-## Sincronização com tracker
+## Sincronização com o tracker
 
-Este template não exige campos de tracker (Linear, Jira ou equivalente): você
-pode contribuir e abrir PRs sem preencher nenhum identificador de issue externo.
-A sincronização com um tracker, se a organização adotar, fica fora do escopo
-deste repositório.
+O trabalho deste repositório é rastreado no Linear, no projeto
+[nx-base-template](https://linear.app/mmda/project/nx-base-template-db3f16eab767)
+(time DevTeam, chave `DEVS`). Projetos derivados escolhem o próprio tracker.
+
+- **Uma spec, uma issue**, com o título `[SPEC-<id>] <título da spec>`. A spec
+  continua sendo a fonte da verdade do escopo.
+- **Vínculo:** o `ticket_url` do frontmatter guarda a URL da issue
+  (`https://linear.app/mmda/issue/DEVS-<n>/...`); specs guarda-chuva listam as
+  sub-issues em `subtask_urls`.
+- **Status ↔ stage:** `backlog` e `deferred` → Backlog, `planning` → Todo,
+  `building` → In Progress, `done` → Done, `cancelled` → Canceled.
+- **Prioridade:** P0 → Urgent, P1 → High, P2 → Medium, P3 → Low.
+- **Dependências:** o `depends_on` de cada spec vira relação *blocked by*.
+- **Branch e PR:** `tipo/DEVS-<n>-descricao-curta` e título
+  `tipo(scope): [DEVS-<n>] descrição`.
 
 ## Onde continuar lendo
 
