@@ -54,7 +54,11 @@
       "!**/.github/prompts",
       "!**/.opencode",
       "!**/.tokensave",
-      "!**/.remember"
+      "!**/.remember",
+      "!dmpf.json",
+      "!dmpf.rendered.json",
+      "!infra",
+      "!tools/dmpf-baseline"
     ]
   }
 }

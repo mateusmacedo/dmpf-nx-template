@@ -31,7 +31,7 @@ Um arquivo por decisão, numeração sequencial e slug em kebab-case:
 ```
 
 O número é o próximo livre na sequência (o último registrado abaixo é o
-`009`). O título dentro do arquivo repete o número: `# ADR-00N: <título>`.
+`011`). O título dentro do arquivo repete o número: `# ADR-00N: <título>`.
 
 ## Template
 
@@ -102,3 +102,4 @@ ADR-001.
 | ADR-008 | Destravar o release — proteções do repositório e ajuste do Nx Release ao Gitea | **Parcialmente supersedido** pela ADR-010 (2026-10-09): identidade do bot e push. Remove as proteções de branch e tag, remove o provider de release incompatível e alinha o `release.yml` ao workflow de referência da organização. |
 | ADR-009 | O template não carrega libs nem generator de exemplo | Remove `shared-types`, `shared-utils` e o generator `shared-lib` obsoleto, deixando `libs/shared/` e `tools/generators/` como destinos vazios; a infraestrutura de release fica armada com um guard para conjunto vazio. |
 | ADR-010 | Migrar a manutenção para o GitHub e o Linear | Muda a plataforma para o GitHub (`gh`, runner `ubuntu-26.04`, reutilizáveis locais), publica as libs no GitHub Packages com escopo `@mateusmacedo` num job encadeado ao release e adota o Linear como tracker; supersede a ADR-005 e partes das ADRs 004 e 008. |
+| ADR-011 | O template consome o DMPF por versão | Versiona a saída do `init` do `@mateusmacedo/dmpf-plugin` fixado no `catalog:`, autentica o GitHub Packages por npmrc de usuário, prova o template com o `template-smoke`, deixa o release sem grupos até o primeiro membro e mantém o `dmpf-ci.yml` fora dos checks obrigatórios. |

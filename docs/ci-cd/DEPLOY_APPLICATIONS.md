@@ -31,8 +31,12 @@ Convenções do modelo de referência:
 ## Checklist — app pronta para CD
 
 1. [ ] `apps/<app>/Dockerfile` com contexto na **raiz** do monorepo
-       (`docker build -f apps/<app>/Dockerfile .`). Use
-       `infra/docker/Dockerfile.node.example` como ponto de partida.
+       (`docker build -f apps/<app>/Dockerfile --secret id=npmrc,src=$HOME/.npmrc
+       --secret id=NODE_AUTH_TOKEN,env=NODE_AUTH_TOKEN .`). Use
+       `infra/docker/Dockerfile.node.example` como ponto de partida; os dois secrets
+       autenticam o `pnpm install` no GitHub Packages, de onde vem o
+       `@mateusmacedo/dmpf-plugin`. O job de build do CD, quando for criado, precisa
+       passar os mesmos secrets.
 2. [ ] `pnpm nx prune <app>` funciona no Dockerfile (target `prune` declarado no
        projeto — ver o exemplo em `infra/docker/`).
 3. [ ] Repositório de imagem criado (ou criação idempotente pelo template).
