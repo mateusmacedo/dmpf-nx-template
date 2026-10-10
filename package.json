@@ -2,6 +2,7 @@
   "dependencies": {},
   "devDependencies": {
     "@biomejs/biome": "catalog:",
+    "@mateusmacedo/dmpf-plugin": "catalog:",
     "@nestjs/common": "catalog:",
     "@nestjs/core": "catalog:",
     "@nestjs/platform-express": "catalog:",
