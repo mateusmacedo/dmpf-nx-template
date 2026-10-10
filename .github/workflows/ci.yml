@@ -38,8 +38,8 @@ jobs:
       - name: Set Nx SHAs (base/head para affected)
         uses: nrwl/nx-set-shas@v4
 
-      - name: Check formatting
-        run: pnpm nx format:check
+      - name: Check formatting and linting
+        run: pnpm biome ci .
 
       - name: Lint (affected)
         run: pnpm nx affected -t lint --parallel=3

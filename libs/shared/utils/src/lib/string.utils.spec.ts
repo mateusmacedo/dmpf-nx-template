@@ -1,4 +1,4 @@
-import { toCamelCase, toKebabCase, isBlank } from './string.utils.js';
+import { isBlank, toCamelCase, toKebabCase } from './string.utils.js';
 
 describe('toKebabCase', () => {
   it('converte PascalCase para kebab-case', () => {

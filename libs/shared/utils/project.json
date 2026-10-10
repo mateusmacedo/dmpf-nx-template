@@ -11,8 +11,9 @@
       }
     },
     "lint": {
+      "executor": "nx:run-commands",
       "options": {
-        "lintFilePatterns": ["libs/shared/utils/**/*.ts"]
+        "command": "biome lint {projectRoot}"
       }
     }
   }

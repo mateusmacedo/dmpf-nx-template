@@ -1,4 +1,4 @@
-import { omitNullish, isPlainObject } from './object.utils.js';
+import { isPlainObject, omitNullish } from './object.utils.js';
 
 describe('omitNullish', () => {
   it('remove propriedades null e undefined', () => {

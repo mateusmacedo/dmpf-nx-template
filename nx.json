@@ -10,12 +10,14 @@
       "!{projectRoot}/tsconfig.spec.json",
       "!{projectRoot}/jest.config.[jt]s",
       "!{projectRoot}/jest.config.cts",
-      "!{projectRoot}/.eslintrc.json",
-      "!{projectRoot}/eslint.config.*",
       "!{projectRoot}/src/test-setup.[jt]s",
       "!{projectRoot}/test-setup.[jt]s"
     ],
-    "sharedGlobals": ["{workspaceRoot}/tsconfig.base.json", "{workspaceRoot}/nx.json"]
+    "sharedGlobals": [
+      "{workspaceRoot}/tsconfig.base.json",
+      "{workspaceRoot}/nx.json",
+      "{workspaceRoot}/biome.json"
+    ]
   },
   "plugins": [
     {
@@ -46,10 +48,6 @@
       "options": { "targetName": "test" }
     },
     {
-      "plugin": "@nx/eslint/plugin",
-      "options": { "targetName": "lint" }
-    },
-    {
       "plugin": "@nx/docker",
       "options": {
         "buildTarget": { "name": "docker:build" },
@@ -67,7 +65,12 @@
       "cache": true
     },
     "lint": {
-      "cache": true
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "biome lint {projectRoot}"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/biome.json"]
     },
     "typecheck": {
       "dependsOn": ["^typecheck"],
