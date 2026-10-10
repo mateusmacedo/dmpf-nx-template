@@ -38,13 +38,6 @@ jobs:
       - name: Fetch all branches
         run: git fetch --all
 
-      - name: Validate GitHub CLI availability
-        run: |
-          if ! command -v gh >/dev/null 2>&1; then
-            echo "::error::GitHub CLI (gh) is required on the runner."
-            exit 1
-          fi
-
       - name: Resolve bump type
         id: bump
         run: |

@@ -23,6 +23,8 @@ jobs:
     name: Nx Affected Pipeline
     runs-on: k8s-actions-runner
     timeout-minutes: 30
+    env:
+      NX_EXCLUDE: "@nx-base-template/source"
 
     steps:
       - name: Checkout
@@ -37,22 +39,22 @@ jobs:
           pnpm-version: '9'
 
       - name: Set Nx SHAs for affected (base/head)
-        uses: nrwl/nx-set-shas@v4
+        uses: nrwl/nx-set-shas@v5
 
       - name: Check formatting and linting
         run: pnpm biome ci .
 
       - name: Lint (affected)
-        run: pnpm nx affected -t lint --base=$NX_BASE --head=$NX_HEAD --parallel=3 --exclude=@nx-base-template/source
+        run: pnpm nx affected -t lint --base=$NX_BASE --head=$NX_HEAD --parallel=3 --exclude=$NX_EXCLUDE
 
       - name: Typecheck (affected)
-        run: pnpm nx affected -t typecheck --base=$NX_BASE --head=$NX_HEAD --parallel=3 --exclude=@nx-base-template/source
+        run: pnpm nx affected -t typecheck --base=$NX_BASE --head=$NX_HEAD --parallel=3 --exclude=$NX_EXCLUDE
 
       - name: Test (affected)
-        run: pnpm nx affected -t test --base=$NX_BASE --head=$NX_HEAD --parallel=3 --ci --coverage --exclude=@nx-base-template/source
+        run: pnpm nx affected -t test --base=$NX_BASE --head=$NX_HEAD --parallel=3 --ci --coverage --exclude=$NX_EXCLUDE
 
       - name: Build (affected)
-        run: pnpm nx affected -t build --base=$NX_BASE --head=$NX_HEAD --parallel=3 --exclude=@nx-base-template/source
+        run: pnpm nx affected -t build --base=$NX_BASE --head=$NX_HEAD --parallel=3 --exclude=$NX_EXCLUDE
 
       - name: E2E (affected)
-        run: pnpm nx affected -t e2e --base=$NX_BASE --head=$NX_HEAD --parallel=1 --exclude=@nx-base-template/source
+        run: pnpm nx affected -t e2e --base=$NX_BASE --head=$NX_HEAD --parallel=1 --exclude=$NX_EXCLUDE
