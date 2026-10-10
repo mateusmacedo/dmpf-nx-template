@@ -138,7 +138,7 @@ jobs:
       - name: Detect docker release candidates
         id: docker-candidates
         run: |
-          APPS_JSON=$(pnpm nx show projects --projects="tag:type:app" --json)
+          APPS_JSON=$(pnpm nx show projects --projects="tag:type:app,!tag:stack:go" --json)
           APPS_COUNT=$(node -e "const projects = JSON.parse(process.argv[1] ?? '[]'); console.log(Array.isArray(projects) ? projects.length : 0);" "$APPS_JSON")
           APPS_CSV=$(node -e "const projects = JSON.parse(process.argv[1] ?? '[]'); console.log(Array.isArray(projects) ? projects.join(',') : '');" "$APPS_JSON")
 
@@ -182,5 +182,5 @@ jobs:
       nx_exclude: "@nx-base-template/source"
       scope: "@mateusmacedo"
       tag: latest
-      build_projects_filter: "tag:type:lib"
+      build_projects_filter: "tag:type:lib,!tag:stack:go"
       ref: ${{ needs.version.outputs.version_sha }}

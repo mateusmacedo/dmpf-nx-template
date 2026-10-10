@@ -128,7 +128,9 @@ pnpm nx g @nx/nest:lib libs/backend/<name> \
 Cria `libs/<scope>/<name>/` com `tsconfig`, `package.json`, `src/index.ts`,
 `.spec.swcrc` próprio e as tags 3D já preenchidas. A variante Nest adiciona
 `jest.config.cts` e o módulo inicial. Depois rode `pnpm nx sync` para atualizar as
-TypeScript Project References da raiz.
+TypeScript Project References da raiz. Se for a primeira lib publicável do
+workspace, declare também o grupo `libs` no `nx.json` (ver
+[Release por grupos](#release-por-grupos)).
 
 `--linter=none` é deliberado: o lint deste workspace é o Biome, configurado em
 `targetDefaults` (ver `nx.json`), não um linter por projeto.
@@ -145,6 +147,63 @@ do workspace, quando houver. Registre a coleção em `nx.generators` do
 4. Crie `tsconfig.json`, `tsconfig.lib.json` e (se tiver testes) `tsconfig.spec.json`
 5. Adicione o path alias em `tsconfig.base.json`
 6. Adicione a reference em `tsconfig.json` raiz
+7. Se for a primeira lib publicável, declare o grupo `libs` (ver
+   [Release por grupos](#release-por-grupos))
+
+---
+
+## Release por grupos
+
+O `nx.json` do template não declara `release.projects` nem grupos de release. O
+topo de `release` só guarda o que vale para todos os grupos: versionamento
+independente, tag `{projectName}@{version}`, Conventional Commits, changelog e git.
+Cada grupo nasce junto com o primeiro projeto que ele libera, por três regras do
+Nx 23:
+
+- grupo sem projeto é erro (`RELEASE_GROUP_MATCHES_NO_PROJECTS`), inclusive em
+  `nx release --dry-run`;
+- `release.projects` não convive com `release.groups`
+  (`PROJECTS_AND_GROUPS_DEFINED`);
+- o bloco `docker` no topo de `release` é herdado por todos os grupos.
+
+| Grupo | Quem cria | Quando |
+|-------|-----------|--------|
+| `libs` | você, com o trecho abaixo | ao criar a primeira lib TS publicável |
+| `apps` | você, com o trecho abaixo | ao criar a primeira app com imagem Docker |
+| `go-contract-<contexto>` | o generator `bounded-context` do `@mateusmacedo/dmpf-plugin` | a cada bounded context gerado |
+
+Trecho do grupo `libs`, dentro de `release` no `nx.json`:
+
+```json
+"groups": {
+  "libs": {
+    "projects": ["tag:type:lib", "!tag:stack:go"]
+  }
+}
+```
+
+Trecho do grupo `apps`, com o esquema de versão das imagens:
+
+```json
+"apps": {
+  "projects": ["tag:type:app", "!tag:stack:go"],
+  "docker": {
+    "registryUrl": "ghcr.io",
+    "versionSchemes": {
+      "production": "{currentDate|YYMM.DD}.{shortCommitSha}",
+      "hotfix": "{currentDate|YYMM.DD}.{shortCommitSha}-hotfix"
+    }
+  }
+}
+```
+
+A exclusão `!tag:stack:go` existe porque o contrato de um bounded context tem as
+tags `type:lib` e `stack:go` e já está no grupo `go-contract-<contexto>`; sem ela,
+o projeto cairia em dois grupos (`PROJECT_MATCHES_MULTIPLE_GROUPS`). Pelo mesmo
+motivo, o publish npm (`nx-release.yml`, `publish-libs.yaml` e
+`nx-publish-libs.yml`) e o release Docker do `nx-release.yml` filtram
+`!tag:stack:go`: contratos e apps Go não vão para o npm nem para o release Docker
+das stacks JS.
 
 ---
 

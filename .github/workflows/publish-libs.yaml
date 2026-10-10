@@ -47,7 +47,7 @@ on:
         description: "Filtro de projetos para build (ex: tag:type:lib)"
         required: false
         type: string
-        default: "tag:type:lib"
+        default: "tag:type:lib,!tag:stack:go"
       timeout_minutes:
         description: "Timeout em minutos"
         required: false

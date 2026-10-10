@@ -68,7 +68,6 @@
   ],
   "release": {
     "projectsRelationship": "independent",
-    "projects": ["tag:type:lib"],
     "releaseTag": {
       "pattern": "{projectName}@{version}"
     },
@@ -87,13 +86,6 @@
       "automaticFromRef": true,
       "projectChangelogs": {
         "entryWhenNoChanges": "Initial release"
-      }
-    },
-    "docker": {
-      "registryUrl": "ghcr.io",
-      "versionSchemes": {
-        "production": "{currentDate|YYMM.DD}.{shortCommitSha}",
-        "hotfix": "{currentDate|YYMM.DD}.{shortCommitSha}-hotfix"
       }
     }
   },
