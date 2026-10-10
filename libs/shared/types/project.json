@@ -5,11 +5,6 @@
   "projectType": "library",
   "tags": ["type:lib", "scope:shared", "stack:node"],
   "targets": {
-    "lint": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "biome lint {projectRoot}"
-      }
-    }
+    "lint": {}
   }
 }
