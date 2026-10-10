@@ -7,6 +7,8 @@ on:
       - develop
       - 'release/**'
   pull_request:
+    branches:
+      - develop
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
