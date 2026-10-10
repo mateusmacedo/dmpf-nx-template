@@ -72,8 +72,6 @@ jobs:
     name: Publish libs (nx release publish)
     runs-on: ${{ inputs.runner }}
     timeout-minutes: ${{ inputs.timeout_minutes }}
-    env:
-      NODE_AUTH_TOKEN: ${{ github.token }}
 
     steps:
       - name: Checkout (commit versionado da tag)
@@ -100,6 +98,8 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
         run: pnpm install --frozen-lockfile
 
       - name: Build libs
