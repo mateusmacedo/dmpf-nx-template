@@ -66,26 +66,25 @@
   ],
   "release": {
     "projectsRelationship": "independent",
+    "projects": ["tag:type:lib"],
+    "releaseTag": {
+      "pattern": "{projectName}@{version}"
+    },
     "git": {
       "commit": true,
       "tag": true,
       "commitMessage": "chore(release): publish [skip ci]"
     },
     "version": {
-      "conventionalCommits": true
+      "conventionalCommits": true,
+      "updateDependents": "auto",
+      "fallbackCurrentVersionResolver": "disk"
     },
     "changelog": {
+      "automaticFromRef": true,
       "projectChangelogs": {
         "createRelease": "github",
         "entryWhenNoChanges": "Initial release"
-      }
-    },
-    "groups": {
-      "npm-libs": {
-        "projects": ["tag:type:lib"],
-        "releaseTag": {
-          "pattern": "{projectName}@{version}"
-        }
       }
     },
     "docker": {
