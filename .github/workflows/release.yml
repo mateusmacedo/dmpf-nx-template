@@ -39,16 +39,13 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      # O token do ci-runner-bot substitui o token efêmero das Actions: só ele
-      # consta nas whitelists da branch protection de master e da tag protection,
-      # e o actions/checkout o persiste para o push do step final.
       - name: Checkout master
         uses: actions/checkout@v4
         with:
           ref: master
           fetch-depth: 0
           fetch-tags: true
-          token: ${{ secrets.RELEASE_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Validate manual dispatch branch
         if: github.event_name == 'workflow_dispatch'
