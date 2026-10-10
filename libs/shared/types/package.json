@@ -1,8 +1,5 @@
 {
   "name": "@lideranca-sites/shared-types",
   "version": "0.0.1",
-  "type": "module",
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
-  }
+  "type": "module"
 }
