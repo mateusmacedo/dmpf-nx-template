@@ -1,0 +1,34 @@
+name: Publish Libs
+
+# Publica as libs no Verdaccio via `nx release publish` usando o template
+# reusable de actions-templates. O executor pula libs sem versão nova e versões
+# já no registry, então releases parciais publicam só o que mudou.
+# Dispara no push das tags do Nx Release (release.yml).
+on:
+  push:
+    tags:
+      - "**@*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Dist-tag de publicação (latest, beta, next)"
+        type: string
+        default: latest
+
+# cancel-in-progress consolida o push de múltiplas tags (versionamento
+# independente) em um único run, que publica todas as libs pendentes do commit
+# já versionado — o nx release publish ignora as que já estão no registry.
+concurrency:
+  group: publish-libs
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    uses: lidercap-apps/actions-templates/.github/workflows/publish-libs.yaml@main
+    with:
+      node_version: "24"
+      pnpm_version: "11"
+      nx_exclude: "@nx-base-template/source"
+      scope: "@lidercap-apps"
+      tag: ${{ inputs.tag || 'latest' }}
+      build_projects_filter: "tag:type:lib"
