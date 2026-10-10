@@ -80,7 +80,8 @@ por isso essa divergência é proibida.
 
 Sem issue tracker, use `tipo/descricao-curta`. Com issue tracker, inclua o
 identificador do ticket logo após a barra: `tipo/TICKET-ID-descricao-curta`. A
-descrição vai em kebab-case minúsculo.
+descrição vai em kebab-case minúsculo. Neste repositório o ticket é a issue do
+Linear (`DEVS-<n>`).
 
 ```text
 feat/notificacoes-webhook        # sem ticket
@@ -120,7 +121,7 @@ em PT-BR:
 
 - A descrição é imperativa e o assunto tem no máximo **72 caracteres**.
 - O **escopo** é o nome do projeto Nx afetado, **sem** o prefixo da org: use
-  `minha-lib`, não `@lidercap-apps/minha-lib`. Use `workspace` para
+  `minha-lib`, não `@mateusmacedo/minha-lib`. Use `workspace` para
   mudanças na raiz do repositório.
 - Projetos distintos vão em **commits separados** — mantenha um commit por
   projeto Nx em vez de misturar libs no mesmo commit, para que o versionamento
@@ -143,10 +144,9 @@ versionamento independente por projeto marcado com `type:lib`.
 
 - **Base padrão: `develop`.** As bases `release/**` e `master` são exceções
   declaradas explicitamente por quem abre o PR.
-- **Plataforma: Gitea** (`gitea.lidercap.com.br`, organização `lidercap-apps`).
-  Automação que fala com a plataforma usa a API do Gitea em `/api/v1/...`. O
-  binário `gh` **não** opera contra este servidor — para operar a plataforma,
-  chame a API do Gitea diretamente.
+- **Plataforma: GitHub** (`github.com/mateusmacedo/dmpf-nx-template`). O `gh` é
+  o caminho padrão para operar PRs, runs e releases.
+- **Título do PR:** `tipo(scope): [DEVS-<n>] descrição`, com a issue do Linear.
 - Prefira PRs pequenos e focados: uma feature ou um fix por PR.
 - Descreva o que muda e por quê, com contexto suficiente para o revisor.
 - PRs que tocam apenas arquivos Markdown não disparam o pipeline, por causa do
@@ -176,7 +176,8 @@ criada pelo workflow `create-release.yml`.
 
 O `create-release.yml` calcula o próximo número a partir das releases já
 mergeadas em `master`, deriva o incremento de versão dos commits em
-`origin/master..origin/develop` e abre o PR de release pela API do Gitea.
+`origin/master..origin/develop` e empurra a branch. O PR para `master` é aberto
+com a sua conta, porque PR aberto pelo `GITHUB_TOKEN` não dispara o CI.
 Como esse cálculo lê `origin/develop`, o workflow depende de `develop` existir
 no remoto — provisione-a primeiro para que a automação de release funcione.
 
@@ -194,13 +195,13 @@ Evite os padrões abaixo; a alternativa correta está indicada em cada um:
   PR; ambas são protegidas.
 - **Misturar múltiplos projetos Nx no mesmo commit** → um commit por projeto,
   para manter o versionamento por projeto correto.
-- **Contar com `gh` para operar a plataforma** → use a API do Gitea
-  (`/api/v1/...`); o `gh` não fala com este servidor.
+- **Abrir o PR de release com o token do workflow** → abra com a sua conta; PR
+  aberto pelo `GITHUB_TOKEN` não dispara o CI.
 - **PRs grandes misturando várias features** → prefira PRs pequenos e focados.
 
 ## Referências
 
 - `AGENTS.md` — seções `Convenções obrigatórias` e `Git e release`.
 - `CONTRIBUTING.md` — entrada curta com o modelo anti-drift.
-- `docs/adr/005-plataforma-gitea.md` — decisão sobre a plataforma Gitea.
+- `docs/adr/010-migracao-github-linear.md` — plataforma GitHub e tracker Linear.
 - `docs/ci-cd/` — guia de adoção de CI/CD e deploy.

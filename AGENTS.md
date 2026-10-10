@@ -29,15 +29,11 @@ As recomendações abaixo são defaults pensados para este projeto e podem ser a
 - Em caso de conflito entre instruções, considere este arquivo junto com os arquivos de configuração efetivos do projeto (por exemplo: `package.json` / `pnpm-workspace.yaml`, `lefthook.yml`, `biome.json`, `nx.json`, `tsconfig.base.json`).
 - Este repositório é um **template**. Projetos derivados herdam estas convenções e devem atualizar o inventário desta seção conforme criam apps e libs reais.
 
-### Fronteira: consumir mmda-flow vs artefatos bakeados
+### Autonomia do template
 
-Este template **assa (bake)** no próprio repositório o scaffold de engenharia, para que o conteúdo seja legível mesmo sem o plugin instalado: o catálogo e o template de specs (`docs/specs/`), as regras de domínio (`docs/rules/**`, nos escopos `BIZ-`/`APP-`/`PRD-`), o guia detalhado de fluxo (`docs/guides/development-workflow.md`), o índice de ADRs (`docs/adr/README.md`), as rules documentais em `.claude/rules/` e as skills de domínio em `.claude/skills/`. Esses artefatos ficam versionados e valem por si.
+Este template é **autônomo**: o scaffold de engenharia fica versionado no próprio repositório e vale por si, sem plugin externo. Isso inclui o catálogo e o template de specs (`docs/specs/`), as regras de domínio (`docs/rules/**`, nos escopos `BIZ-`/`APP-`/`PRD-`), o guia detalhado de fluxo (`docs/guides/development-workflow.md`), o índice de ADRs (`docs/adr/README.md`), as rules documentais em `.claude/rules/` e as skills de domínio em `.claude/skills/`.
 
-O template **consome** do plugin `mmda-flow` (canônico em `https://github.com/mateusmacedo/plugins-claude`) o que faz sentido evoluir num único lugar: os agentes e skills de pipeline, os hooks de higiene, as skills de bootstrap (`skill-init`, `skill-sync`, `skill-config`) e a sincronização de tracker. Esses recursos existem apenas quando o plugin está instalado no ambiente do desenvolvedor. Nenhum runtime do plugin é forkado para dentro do template, o que evita drift de manutenção.
-
-Quando uma skill existe dos dois lados (por exemplo `bug-fix`, `code-review` e `quality-checklist`), a precedência é: a skill bakeada no template vale para o código da organização; a homônima do plugin vale quando o fluxo mmda-flow é invocado explicitamente. Skills só do plugin (como `feature-pipeline` e `spec-management`) vêm sempre do plugin; skills só do template (Nest, Go, TypeORM, TypeScript) vêm sempre do template.
-
-O fluxo git deste repositório é o git-flow da organização (ver [Git e release](#git-e-release)); a rule de fluxo do plugin prescreve o inverso e deve ser tratada como anti-referência quanto a fluxo. Os detalhes desta fronteira, a precedência completa e as consequências assumidas estão em `docs/adr/007-fronteira-plugin-template.md`.
+O fluxo git deste repositório é o git-flow do template (ver [Git e release](#git-e-release)). A decisão histórica de fronteira bake/consume (já supersedida) está em `docs/adr/007-fronteira-plugin-template.md`.
 
 ### Idioma
 
@@ -97,7 +93,7 @@ Ao mover arquivos ou pastas, verifique todos os imports afetados — inclusive o
 
 ## Visão geral e estrutura
 
-`nx-base-template` (workspace npm `@nx-base-template/source`) é o baseline de monorepo **Nx + pnpm** multistack da organização. O workspace já vem preparado para Express, Fastify, NestJS, Next.js, Angular e Go (`go.work` / `@nx-go/nx-go`), mas **não contém apps** — quem parte deste template cria as suas.
+`nx-base-template` (workspace npm `@nx-base-template/source`) é o baseline de monorepo **Nx + pnpm** multistack mantido por `mateusmacedo`. O workspace já vem preparado para Express, Fastify, NestJS, Next.js, Angular e Go (`go.work` / `@nx-go/nx-go`), mas **não contém apps** — quem parte deste template cria as suas.
 
 Fonte de verdade dos projetos: `pnpm nx show projects`.
 
@@ -114,7 +110,7 @@ nx-base-template/
 │   ├── frontend/                   # placeholder — sem projeto Nx
 │   └── shared/                     # placeholder — sem projeto Nx
 ├── docs/
-│   ├── adr/                        # ADR-00N (baseline, tasks, hardening, release, plataforma, fechamento, fronteira, identidade de automação, libs)
+│   ├── adr/                        # ADR-0NN (baseline, tasks, hardening, release, plataforma, fechamento, fronteira, identidade de automação, libs, migração GitHub/Linear)
 │   ├── specs/                      # catálogo e template de specs (SPEC-XXXX)
 │   ├── rules/                      # regras de domínio, com README de índice
 │   │   ├── business/               # regras de negócio (BIZ-)
@@ -146,7 +142,7 @@ Nenhuma. `libs/backend`, `libs/frontend` e `libs/shared` são diretórios de des
 
 Sem nenhum projeto com a tag `type:lib`, o `nx release` sai com erro (`Release group "__default__" matches no projects`) em vez de concluir vazio. Por isso o `nx-release.yml` tem o step `Detect lib release candidates`, que pula o versionamento e o push enquanto não houver lib — mesmo padrão do step de candidatos Docker. O pipeline fica armado e ocioso, não vermelho.
 
-O prefixo dos pacotes é `@lidercap-apps/`, tudo em minúsculas — o mesmo escopo usado no Verdaccio, no `nx-publish-libs.yml` e nos demais repositórios da organização. O casing precisa bater exatamente entre o `name` de cada `package.json`, o `tsconfig.base.json` e o `scope` passado ao template de publicação: o Nx resolve o registry pelo escopo do pacote, e qualquer divergência faz o `pnpm publish` cair no registry público e falhar.
+O prefixo dos pacotes é `@mateusmacedo/`, tudo em minúsculas. No GitHub Packages o escopo do pacote precisa ser o owner do repositório; projetos derivados trocam pelo owner deles. O casing precisa bater exatamente entre o `name` de cada `package.json`, os `paths` do `tsconfig.base.json` e o input `scope` da publicação (job `publish` do `nx-release.yml` e `nx-publish-libs.yml`): o Nx resolve o registry pelo escopo do pacote, e qualquer divergência faz o `pnpm publish` cair no registry público e falhar.
 
 ---
 
@@ -168,11 +164,11 @@ pnpm nx affected -t test
 pnpm nx affected -t build
 
 # Um único projeto
-pnpm nx test @lidercap-apps/minha-lib
-pnpm nx build @lidercap-apps/minha-lib
+pnpm nx test @mateusmacedo/minha-lib
+pnpm nx build @mateusmacedo/minha-lib
 
 # Um único arquivo de teste (passthrough p/ Jest)
-pnpm nx test @lidercap-apps/minha-lib --testPathPatterns="string"
+pnpm nx test @mateusmacedo/minha-lib --testPathPatterns="string"
 
 # Formatação (Biome — não Prettier)
 pnpm biome format --write . # aplica
@@ -210,18 +206,25 @@ Scripts raiz (`pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm fo
 
   Esta tabela é a **fonte canônica** da taxonomia; `docs/nx-reference/tasks.md` a repete e não deve divergir. `stack:universal` é para libs sem dependência de runtime (tipos puros, utilitários); `stack:node` cobre libs que usam APIs de Node ou frameworks de servidor.
 - **Não redeclarar targets** que um plugin ou `targetDefaults` (em `nx.json`) já fornece. Redeclarar quebra o cache silenciosamente (ver `docs/adr/002-nx-task-configuration.md`).
-- **Commits (Conventional Commits, em PT-BR):** formato `<tipo>(<scope>): <descrição imperativa>`, máx. 72 chars no assunto. `scope` = nome do projeto Nx **sem** o prefixo da org (`minha-lib`, não `@lidercap-apps/minha-lib`). Projetos distintos vão em commits separados (nunca misture libs). Tipos: `feat`, `fix`, `refactor`, `chore`, `docs`, `ci`. Body só quando o motivo não é óbvio. Detalhes na skill `.agents/skills/nx-commit/`.
+- **Commits (Conventional Commits, em PT-BR):** formato `<tipo>(<scope>): <descrição imperativa>`, máx. 72 chars no assunto. `scope` = nome do projeto Nx **sem** o prefixo do escopo npm (`minha-lib`, não `@mateusmacedo/minha-lib`). Projetos distintos vão em commits separados (nunca misture libs). Tipos: `feat`, `fix`, `refactor`, `chore`, `docs`, `ci`. Body só quando o motivo não é óbvio. Detalhes na skill `.agents/skills/nx-commit/`.
 
 ---
 
 ## Git e release
 
-- **Plataforma:** **Gitea** (`gitea.lidercap.com.br`, organização `lidercap-apps`). O binário `gh` **não** opera contra este servidor — automação que fale com a plataforma usa a API do Gitea (`/api/v1/...`). Ver `docs/adr/005-plataforma-gitea.md`.
-- **Branches protegidas:** `master` e `develop`. `defaultBase` do Nx é `master`.
+- **Plataforma:** **GitHub** (`github.com/mateusmacedo/dmpf-nx-template`, repositório marcado como template). O `gh` CLI opera normalmente contra ele. Decisão e contexto da migração em `docs/adr/010-migracao-github-linear.md` (ADR-010, que supersede a ADR-005).
+- **Tracker:** projeto [nx-base-template](https://linear.app/mmda/project/nx-base-template-db3f16eab767) no Linear (time DevTeam, chave `DEVS`). Cada spec tem uma issue, ligada pelo `ticket_url` do frontmatter; branch e título de PR levam a chave `DEVS-<n>`. Regras de sincronização: `docs/onboarding.md`.
+- **Branches protegidas:** `master` e `develop`, por rulesets do GitHub. `develop` exige PR e o check do CI verde, sem deleção e sem force push. `master` fica sem deleção e sem force push; o bot de release empurra nela o commit de versão e as tags. `defaultBase` do Nx é `master`.
 - **Fluxo (git-flow):** trabalho → `develop` (validação) → `release/X.Y.Z` (após validar) → `master`. Antes do PR para `develop`, a branch de trabalho mergeia `release/X.Y.Z` (updates já aprovados). PRs de feature comparam contra `origin/develop` por padrão.
 - **Anti-drift (duro):** ao promover para `release`, usar a **mesma árvore** já mergeada em `develop` (mesmo tip da feature). Não abrir promoção paralela com resolução/conteúdo diferente — isso faz o merge `release` → branch de trabalho reabrir os mesmos conflitos. Detalhe em `CONTRIBUTING.md`.
-- **Release:** Nx Release com versionamento **independente** por projeto (`type:lib`), baseado em Conventional Commits; tag pattern `{projectName}@{version}`. O versionamento (`release.yml`) é separado da publicação no Verdaccio (`publish-libs.yml`) — ver `docs/adr/004-workflows-verdaccio-release.md`.
-- **CI:** `.github/workflows/ci.yml` roda em PRs para `master`, `develop` e `release/**` (ignora mudanças só em `**/*.md` e em `.github/ISSUE_TEMPLATE/**`), no runner `gitea-runner`: `biome ci`, depois `nx affected` de lint, typecheck, test (com `--ci --coverage`), build e e2e. Os demais workflows são `release.yml`, `publish-libs.yml`, `create-release.yml` e `cd-dev-hmg.yml` — este último é um **template de CD desligado**, com apenas `workflow_dispatch` e o job de deploy comentado (ver `docs/ci-cd/`).
+- **Release:** Nx Release com versionamento **independente** por projeto (`type:lib`), baseado em Conventional Commits; tag pattern `{projectName}@{version}`. A release é encadeada:
+  - `create-release.yml` (dispatch, input `bump-type`) cria e empurra `release/X.Y.Z` a partir de `master` e avisa para abrir o PR para `master` **com a sua conta** — PR aberto pelo `GITHUB_TOKEN` não dispara o CI.
+  - `nx-release.yml` roda no merge de `release/*` ou `hotfix/*` em `master` (ou por dispatch em `master`): `nx release --skip-publish`, push atômico do commit e só das tags criadas no run, release Docker no `ghcr.io` quando houver `type:app` e o job `publish`, encadeado por `needs`, que chama o reutilizável `publish-libs.yaml`. O encadeamento é necessário porque tag empurrada com `GITHUB_TOKEN` não dispara outro workflow.
+  - `nx-publish-libs.yml` é a republicação **manual** (dispatch com os inputs `tag` e `ref`), pelo mesmo `publish-libs.yaml`, para quando a publicação encadeada falhar.
+  - A publicação das libs vai para o GitHub Packages (`https://npm.pkg.github.com`, escopo `@mateusmacedo`), autenticada no CI só com `secrets.GITHUB_TOKEN` (`packages: write`). Quem consome libs publicadas usa um token com `read:packages` no `~/.npmrc` (`//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}`) e `@mateusmacedo:registry=https://npm.pkg.github.com` no `.npmrc` do projeto.
+  - A separação entre versionamento e publicação vem da ADR-004; o alvo de publicação e o runner atuais seguem a ADR-010, que a supersede em parte.
+- **CI:** `.github/workflows/ci.yml` roda em PRs para `master`, `develop` e `release/**` (ignora mudanças só em `**/*.md` e em `.github/ISSUE_TEMPLATE/**`), no runner `ubuntu-26.04`: `biome ci`, depois `nx affected` de lint, typecheck, test (com `--ci --coverage`), build e e2e.
+- **Demais workflows:** `publish-libs.yaml` e `detect-apps.yaml` são reutilizáveis **locais** (`on: workflow_call`), chamados por `uses: ./.github/workflows/...`. O `cd-dev-hmg.yml` é um **template de CD desligado**, com apenas `workflow_dispatch` e o job de deploy comentado (ver `docs/ci-cd/`); seu job `detect` usa o `detect-apps.yaml` local, e o deploy comentado aponta para `./.github/workflows/deploy-eks.yaml`, reutilizável que **não existe** neste repositório. Ele deve ser criado quando o CD for ligado, com roles AWS, registry e repositório de infraestrutura do próprio projeto; o mesmo vale para os modelos ECS, on-premises e Lambda.
 
 ---
 
@@ -322,9 +325,10 @@ Antes de criar algo novo, considere:
 
 - `CONTRIBUTING.md` — entrada curta para contribuir, com o modelo anti-drift.
 - `docs/onboarding.md` — setup local e primeiro PR.
-- `docs/adr/` — decisões arquiteturais (baseline, tasks Nx, hardening, release, plataforma, fechamento, fronteira).
+- `docs/adr/` — decisões arquiteturais (baseline, tasks Nx, hardening, release, plataforma, fechamento, autonomia do template, migração para GitHub e Linear).
 - `docs/adr/README.md` — índice e template de ADRs.
-- `docs/adr/007-fronteira-plugin-template.md` — fronteira entre o template e o plugin `mmda-flow` (o que é bakeado, o que é consumido, precedência de skills).
+- `docs/adr/007-fronteira-plugin-template.md` — ADR supersedido; o template é autônomo (sem consumo de plugin externo).
+- `docs/adr/010-migracao-github-linear.md` — plataforma GitHub, publicação no GitHub Packages e tracker Linear; supersede a ADR-005 e, em parte, as ADR-004 e ADR-008.
 - `docs/nx-reference/tasks.md` — guia prático de configuração de tasks.
 - `docs/specs/` — specs de produto/técnicas.
 - `docs/specs/README.md` — catálogo e template de specs.

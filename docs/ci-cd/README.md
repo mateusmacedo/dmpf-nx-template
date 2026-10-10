@@ -13,7 +13,7 @@ namespace, nome de secret) é versionado aqui — e não deve passar a ser.
 | Item | Estado no template |
 | --- | --- |
 | CI em PR (`ci.yml`) | **Ativo** — Nx affected de lint/typecheck/test/build/e2e |
-| Versionamento e publish de libs | **Ativo** — `release.yml`, `publish-libs.yml`, `create-release.yml` |
+| Versionamento e publish de libs | **Ativo** — `create-release.yml`, `nx-release.yml` (publica no GitHub Packages pelo `publish-libs.yaml`) e `nx-publish-libs.yml` (republicação manual) |
 | CD (`cd-dev-hmg.yml`) | **Template** — só `workflow_dispatch`, parametrizado por placeholder |
 | Manifestos GitOps | **Ausentes** — vivem no repositório de infraestrutura, não aqui |
 | Variáveis e secrets de deploy | **Ausentes** — configurados no repositório do projeto |
@@ -28,7 +28,7 @@ Separação rígida: **CI não faz deploy**; **CD não substitui o CI**.
 | Plataforma | EKS, com GitOps reconciliado por ArgoCD |
 | Ambientes iniciais | `dev` e `hmg` |
 | Nomenclatura de app | Sufixo terminal canônico `-bff` ou `-api` (nunca `-bff-api`) |
-| Templates reutilizáveis | [actions-templates](https://gitea.lidercap.com.br/lidercap-apps/actions-templates) (`deploy-eks`, `detect-apps`, …) |
+| Workflows reutilizáveis | Locais, em `.github/workflows/`: `detect-apps.yaml` vem pronto; `deploy-eks.yaml` é criado ao ligar o CD, com a infraestrutura do projeto |
 
 Modelos B/C, CD de produção e outras plataformas estão em
 [EXPANSION_MODELS.md](./EXPANSION_MODELS.md) — consulte antes de proliferar
@@ -54,10 +54,9 @@ push develop / workflow_dispatch
 
 ## Fontes externas
 
-| Repo | URL |
-| --- | --- |
-| actions-templates | https://gitea.lidercap.com.br/lidercap-apps/actions-templates |
-| lidercap-infra | https://gitea.lidercap.com.br/lidercap-apps/lidercap-infra |
+O template não depende de repositório externo de workflows: os reutilizáveis
+ficam em `.github/workflows/`. O que fica fora é o repositório de
+infraestrutura do seu projeto (manifestos GitOps, roles, secrets).
 
 Paths GitOps típicos, no repositório de infraestrutura:
 
@@ -94,9 +93,11 @@ ConfigMap e de secrets externos definidos no repositório de infraestrutura — 
 | Workflow | Papel |
 | --- | --- |
 | `.github/workflows/ci.yml` | CI em PR |
-| `.github/workflows/publish-libs.yml` | Publish de libs (Nx Release → Verdaccio) |
-| `.github/workflows/release.yml` / `create-release.yml` | Versionamento e criação da branch de release |
+| `.github/workflows/create-release.yml` | Cria a branch `release/X.Y.Z`; o PR para `master` é aberto com a sua conta |
+| `.github/workflows/nx-release.yml` | Versionamento (Nx Release) e publicação encadeada das libs no GitHub Packages |
+| `.github/workflows/nx-publish-libs.yml` | Republicação manual das libs |
+| `.github/workflows/publish-libs.yaml` / `detect-apps.yaml` | Reutilizáveis locais (`workflow_call`) |
 
 Decisões relacionadas: [ADR-004](../adr/004-workflows-verdaccio-release.md) (split
-version/publish) e [ADR-005](../adr/005-plataforma-gitea.md) (a plataforma é
-Gitea).
+version/publish) e [ADR-010](../adr/010-migracao-github-linear.md) (plataforma
+GitHub, publicação no GitHub Packages e tracker Linear).

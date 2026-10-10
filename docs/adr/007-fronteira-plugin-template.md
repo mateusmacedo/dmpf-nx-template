@@ -2,11 +2,13 @@
 
 ## Status
 
-Aceito — 2026-07-31. Registra o fechamento das Fases 1 e 2 da SPEC-EPG1YDDC.
+**Supersedido** — 2026-08-13.
 
-Este ADR existe por exigência da própria spec (RF12), que pede o registro da
-fronteira "assar (bake) vs consumir" e da decisão sobre `plans/` ao concluir o
-scaffold de engenharia e as convenções de IA.
+Originalmente aceito em 2026-07-31.
+A decisão de "assar (bake) vs consumir" um plugin externo deixou de valer: o
+template é **autônomo** e não documenta nem depende de consumo de plugin para
+operar. O corpo abaixo permanece como registro histórico da fronteira que
+vigia naquela data.
 
 ## Contexto
 
@@ -24,8 +26,8 @@ mas faltavam duas coisas:
 Sem essa fronteira registrada, cada projeto derivado tende a reinventar a
 estrutura ou a copiar o plugin de forma destrutiva — duplicando skills homônimas
 e, pior, importando o fluxo git do plugin, que é incompatível com o git-flow da
-organização. A SPEC-EPG1YDDC definiu a divisão; este ADR a fixa para que o
-próximo mantenedor não a refaça.
+organização. Este ADR fixava essa divisão para que o próximo mantenedor não a
+refizesse.
 
 ## Decisão
 
@@ -147,7 +149,6 @@ precisam ser provisionadas no remoto para o ciclo de release funcionar.
 
 ## Referências
 
-- Spec: `SPEC-EPG1YDDC` (em `docs/specs/`)
 - [ADR-001](./001-baseline-monorepo.md) — baseline do monorepo
 - [ADR-003](./003-template-hardening.md) — hardening de tooling, docs e CI/CD
 - [ADR-004](./004-workflows-verdaccio-release.md) — split version/publish

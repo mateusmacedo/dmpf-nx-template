@@ -7,10 +7,9 @@ O catálogo de specs não é um arquivo central mantido à mão: ele é constru�
 **on demand** lendo o frontmatter YAML de cada `SPEC-*.md` deste diretório.
 Cada spec carrega seus próprios metadados (`id`, `stage`, `priority`,
 `depends_on`), então varrer os frontmatters basta para produzir a visão
-consolidada (tabela markdown ou JSON). Quando o plugin **mmda-flow** está
-instalado, ele oferece a automação que monta esse catálogo e gera os IDs;
-sem o plugin, leia os frontmatters diretamente — por exemplo, `rg` sobre os
-campos que interessam.
+consolidada (tabela markdown ou JSON). Para montar o catálogo ou inspecionar
+IDs, leia os frontmatters diretamente — por exemplo, `rg` sobre os campos que
+interessam.
 
 ## Ciclo de vida
 
@@ -36,16 +35,15 @@ title: Nome descritivo
 stage: backlog                  # backlog | planning | building | done | deferred | cancelled
 priority: P1                    # P0 | P1 | P2 | P3
 depends_on: []                  # lista inline de IDs, ex: [SPEC-W4RWD02M]
-ticket_url: null                # URL completa do ticket externo (Gitea/Linear/Jira) ou null
+ticket_url: null                # URL da issue no Linear (https://linear.app/mmda/issue/DEVS-<n>/...) ou null
 subtask_urls: []                # URLs completas das sub-issues; [] quando não há sub-issues
 created: 2026-07-19             # data ISO YYYY-MM-DD
 ---
 ```
 
 Os quatro campos de rastreamento (`id`, `slug`, `title`, `created`) são fixos
-por spec; `stage`, `priority` e `depends_on` evoluem ao longo do ciclo. O
-plugin **mmda-flow** documenta o schema completo e a geração de ID no próprio
-repositório: <https://github.com/mateusmacedo/plugins-claude>.
+por spec; `stage`, `priority` e `depends_on` evoluem ao longo do ciclo. O schema
+e a geração de ID seguem as convenções deste diretório (ver Nomenclatura).
 
 ### Transições
 
@@ -73,17 +71,15 @@ repositório: <https://github.com/mateusmacedo/plugins-claude>.
 ### Nomenclatura
 
 Formato: `SPEC-<id>-<slug>.md`, onde `<id>` é um identificador de 8 caracteres
-em Crockford base32 e `<slug>` é o título em kebab-case. Com o plugin
-**mmda-flow** instalado, o gerador de ID do plugin produz o `<id>`; sem o
-plugin, gere um identificador manualmente seguindo o mesmo alfabeto (Crockford
-base32, 8 chars). Specs legadas no formato `SPEC-NNN-...` continuam válidas —
-mantenha o nome como está.
+em Crockford base32 e `<slug>` é o título em kebab-case. Gere o `<id>`
+manualmente seguindo o alfabeto Crockford base32 (8 chars). Specs legadas no
+formato `SPEC-NNN-...` continuam válidas — mantenha o nome como está.
 
 Exemplos deste repositório:
 
 - `SPEC-YWAWQHPX-melhorias-template-base-nx.md`
-- `SPEC-W4RWD02M-evoluir-workflows-com-lidercap.md`
-- `SPEC-4NR9KKS8-portar-melhorias-telesena-monorepo.md`
+- `SPEC-W4RWD02M-evoluir-workflows-com-monorepo-referencia.md`
+- `SPEC-4NR9KKS8-portar-melhorias-monorepo-origem.md`
 
 ### Formato de requisitos (checklist com prioridade)
 
