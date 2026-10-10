@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       bump-type:
-        description: 'Semantic version increment type'
+        description: "Semantic version increment type"
         type: choice
         options:
           - auto
@@ -24,7 +24,7 @@ permissions:
 jobs:
   create-release:
     name: Create Release Branch
-    runs-on: k8s-actions-runner
+    runs-on: gitea-runner
     timeout-minutes: 10
 
     steps:

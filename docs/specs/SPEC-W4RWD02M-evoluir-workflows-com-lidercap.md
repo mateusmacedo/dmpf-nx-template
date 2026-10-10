@@ -45,7 +45,7 @@ publiquem libs no Verdaccio sem misturar versionamento e publicação.
 
 | Arquivo | Template hoje | Lidercap | Decisão |
 |---------|---------------|----------|---------|
-| `ci.yml` | `k8s-actions-runner`, Node 24 / pnpm 11, `NX_EXCLUDE=@nx-base-template/source` | `gitea-runner`, Node 22 / pnpm 9, exclude lidercap | **Manter template** (parity estrutural já existe) |
+| `ci.yml` | `gitea-runner`, Node 24 / pnpm 11, `NX_EXCLUDE=@nx-base-template/source` | `gitea-runner`, Node 22 / pnpm 9, exclude lidercap | **Manter template** (parity estrutural já existe) |
 | `create-release.yml` | `gh pr create` | Gitea API (`curl` + `jq`) | **Manter `gh`** (template é GitHub) |
 | `release.yml` | version+publish GH Packages + docker no mesmo job; input `release-type`; checkout sem `ref: master` forçado | só version (`--skip-publish`), `--first-release`, checkout `ref: master`, push `--follow-tags`; sem docker | **Portar split + first-release + push**; **manter** docker scheme / `release-type` / bot GitHub |
 | `publish-libs.yml` | ausente | tag `**@*` → reusable Verdaccio | **Criar**, alvo Verdaccio |
@@ -57,7 +57,7 @@ publiquem libs no Verdaccio sem misturar versionamento e publicação.
 - [P0] NUNCA publicar no GitHub Packages neste fluxo — alvo de publish de libs É o Verdaccio
 - [P0] NUNCA misturar `--yes` e `--skip-publish` no mesmo `nx release` (mutuamente exclusivos no Nx)
 - [P0] NUNCA hardcodar segredos; auth Verdaccio via o mesmo padrão do `actions-templates` (SSM / secrets), não em texto plano
-- [P1] Preservar Node 24, pnpm 11, `k8s-actions-runner` e steps Docker do template
+- [P1] Preservar Node 24, pnpm 11, `gitea-runner` e steps Docker do template
 - [P1] Documentar no ADR/spec o que ficou de fora (matriz acima) para evitar re-litígio
 </constraints>
 
@@ -120,7 +120,7 @@ publiquem libs no Verdaccio sem misturar versionamento e publicação.
 - [x] Segurança: nenhum token Verdaccio/AWS em YAML; mascarar auth nos logs
   (`::add-mask::`).
   *(Auth fica no reusable; caller sem secrets em plaintext.)*
-- [x] Compatibilidade: Node 24 + pnpm 11 + runner `k8s-actions-runner`.
+- [x] Compatibilidade: Node 24 + pnpm 11 + runner `gitea-runner`.
 - [x] Determinismo: workflows passam `actionlint` (se disponível no repo)
   ou revisão manual equivalente sem referências a secrets inventados.
   *(actionlint ausente; YAML parse + review manual OK.)*
@@ -152,6 +152,7 @@ nx-base-template/
 ```
 
 **Arquivos a modificar**:
+
 - `.github/workflows/release.yml` — split version/publish; first-release; push tags
 - `.github/workflows/publish-libs.yml` — criar
 - `libs/shared/types/package.json` / `libs/shared/utils/package.json` — registry Verdaccio
@@ -159,6 +160,7 @@ nx-base-template/
 - `docs/adr/00N-*.md` — documentar decisões e não-portabilidade
 
 **Referência (somente leitura)**:
+
 - `lidercap-platform/.github/workflows/*`
 - `actions-templates/.github/workflows/publish-lib.yaml`
 
@@ -235,7 +237,7 @@ pnpm nx release publish --tag=$DIST_TAG
 - [x] Existe `publish-libs.yml` disparado por tags `**@*` e `workflow_dispatch`
 - [x] Auth Verdaccio não aparece em plaintext nos YAML
 - [x] Steps Docker (detecção + GHCR + dockerVersionScheme) permanecem no release
-- [x] `ci.yml` mantém Node 24 / pnpm 11 / `k8s-actions-runner`
+- [x] `ci.yml` mantém Node 24 / pnpm 11 / `gitea-runner`
 - [x] `create-release.yml` continua usando `gh pr create`
 - [x] ADR/docs registram a matriz do que NÃO foi portado
 - [x] Validação do projeto passando (`pnpm biome ci .` nos arquivos tocados;
@@ -263,18 +265,19 @@ ENTÃO abre PR via gh contra master (não via API Gitea)
 ```
 
 <critical_constraints>
+
 - [P0] NUNCA portar runner `gitea-runner`, Node 22, pnpm 9 ou API Gitea para o template
 - [P0] NUNCA publicar no GitHub Packages neste fluxo — alvo de publish de libs É o Verdaccio
 - [P0] NUNCA misturar `--yes` e `--skip-publish` no mesmo `nx release`
 - [P0] NUNCA hardcodar segredos; auth Verdaccio via padrão actions-templates (SSM / secrets)
-- [P1] Preservar Node 24, pnpm 11, `k8s-actions-runner` e steps Docker do template
+- [P1] Preservar Node 24, pnpm 11, `gitea-runner` e steps Docker do template
 - [P1] Documentar o que ficou de fora (matriz de diff)
 </critical_constraints>
 
 ## Escopo fora
 
 - **Migrar CI para Gitea / mudar runner**: identidade do template é GitHub +
-  `k8s-actions-runner`; pertence a outra iniciativa de portabilidade.
+  `gitea-runner`; pertence a outra iniciativa de portabilidade.
 - **Downgrade Node/pnpm para 22/9**: template já pinado em 24/11 (ADR-003).
 - **Publicar no GitHub Packages**: substituído por Verdaccio nesta spec.
 - **Criar/alterar o reusable `publish-libs.yaml` no actions-templates**: pode

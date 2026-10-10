@@ -35,7 +35,7 @@ jobs:
           startsWith(github.event.pull_request.head.ref, 'hotfix/')
         )
       )
-    runs-on: k8s-actions-runner
+    runs-on: gitea-runner
     timeout-minutes: 30
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
