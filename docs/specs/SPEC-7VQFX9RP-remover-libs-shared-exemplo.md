@@ -5,7 +5,7 @@ title: Remover as libs compartilhadas e o generator shared-lib do template
 stage: done
 priority: P2
 depends_on: []
-ticket_url: https://lider-cap.atlassian.net/browse/ARQ-470
+ticket_url: https://linear.app/mmda/issue/DEVS-11/spec-7vqfx9rp-remover-as-libs-compartilhadas-e-o-generator-shared-lib
 subtask_urls: []
 created: 2026-08-12
 ---
@@ -14,7 +14,7 @@ created: 2026-08-12
 
 ## Resumo
 
-Remover `@lidercap-apps/shared-types` e `@lidercap-apps/shared-utils` do
+Remover `@<org-contratante>/shared-types` e `@<org-contratante>/shared-utils` do
 workspace, deixando `libs/shared/` como diretório de destino vazio, no mesmo
 padrão de `libs/backend/` e `libs/frontend/`. Como mantenedor do template, quero
 que quem parte deste repositório não herde bibliotecas que não pediu, para que o
@@ -126,7 +126,7 @@ resolve e duplica o que `@nx/js:lib` já faz.
 - [x] Reversibilidade: a remoção DEVE ser revertível por um único `git revert`
   do commit, sem passos manuais fora do repositório.
 - [x] Rastreabilidade: as tags git já publicadas
-  (`@lidercap-apps/shared-types@0.0.3`, `@lidercap-apps/shared-utils@0.0.3` e
+  (`@<org-contratante>/shared-types@0.0.3`, `@<org-contratante>/shared-utils@0.0.3` e
   anteriores) e os pacotes no Verdaccio permanecem intocados. Esta spec não
   despublica nada.
 
@@ -163,14 +163,14 @@ nx-base-template/
 - `libs/shared/types/` — remover o diretório inteiro (via `trash`)
 - `libs/shared/utils/` — remover o diretório inteiro (via `trash`)
 - `libs/shared/.gitkeep` — criar, para manter o diretório versionado
-- `tsconfig.base.json` — remover as chaves `@lidercap-apps/shared-utils` e
-  `@lidercap-apps/shared-types` de `compilerOptions.paths`
+- `tsconfig.base.json` — remover as chaves `@<org-contratante>/shared-utils` e
+  `@<org-contratante>/shared-types` de `compilerOptions.paths`
 - `tsconfig.json` — esvaziar o array `references` (as duas entradas apontam para
   as libs removidas)
 - `pnpm-lock.yaml` — regenerado por `pnpm install`
 - `AGENTS.md` — a árvore de diretórios, a tabela de libs, os exemplos de comando
   e o exemplo de escopo de commit
-- `README.md` — os dois exemplos `pnpm nx test @lidercap-apps/shared-utils`
+- `README.md` — os dois exemplos `pnpm nx test @<org-contratante>/shared-utils`
 - `CONTRIBUTING.md` — o exemplo de escopo de commit e o exemplo de nome de
   branch que cita `shared-utils`
 - `docs/onboarding.md` — a tabela de libs e os exemplos de comando
@@ -275,7 +275,7 @@ projeto com `tag:type:app`.
 - [x] `pnpm nx show projects` retorna exatamente `["@nx-base-template/source"]`
 - [x] `libs/shared/` existe, contém apenas `.gitkeep` e está versionado
 - [x] `tsconfig.base.json` não contém nenhuma ocorrência de
-  `@lidercap-apps/shared-`
+  `@<org-contratante>/shared-`
 - [x] `tsconfig.json` não referencia `libs/shared/utils` nem `libs/shared/types`
 - [x] `.github/workflows/nx-publish-libs.yml` e `nx.json` estão byte a byte
   idênticos aos do commit anterior
@@ -351,7 +351,7 @@ ENTÃO a mudança DEVE ser bloqueada pela constraint P0, porque o versionamento
 ## Escopo fora
 
 - **Despublicar os pacotes do Verdaccio**: as versões
-  `@lidercap-apps/shared-types@0.0.3` e `@lidercap-apps/shared-utils@0.0.3` (e
+  `@<org-contratante>/shared-types@0.0.3` e `@<org-contratante>/shared-utils@0.0.3` (e
   anteriores) permanecem no registry. Despublicar é operação de plataforma, fora
   do repositório, e quebraria qualquer consumidor que já as tenha instalado.
 - **Remover as tags git de versão**: as tags `{projectName}@{version}` já

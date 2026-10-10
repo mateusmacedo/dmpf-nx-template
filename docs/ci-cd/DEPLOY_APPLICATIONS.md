@@ -61,10 +61,10 @@ Convenções do modelo de referência:
       dockerfile: apps/<app>/Dockerfile
 ```
 
-Não há job `resolve` nem `strategy.matrix`, e isso é deliberado: o `act_runner` do
-Gitea não injeta matriz vinda de expressão em job reutilizável (`uses:`). Cada app
-nova entra como um job novo — o custo é um bloco por app, e o ganho é um workflow
-que roda na plataforma real. O `cd-dev-hmg.yml` traz esse bloco comentado, pronto
+Não há job `resolve` nem `strategy.matrix`, e isso é deliberado: a restrição à
+matriz em job reutilizável (`uses:`) era do runner anterior, e o modelo foi mantido
+por ser mais legível. Cada app nova entra como um job novo — o custo é um bloco por
+app, e o ganho é um workflow que se lê de cima a baixo. O `cd-dev-hmg.yml` traz esse bloco comentado, pronto
 para copiar.
 
 Inputs típicos do `deploy-eks`:
@@ -167,7 +167,9 @@ não são duplicadas no recurso da app.
 
 ## Referências
 
-- Templates reutilizáveis: https://gitea.lidercap.com.br/lidercap-apps/actions-templates
-- Repositório de infraestrutura: https://gitea.lidercap.com.br/lidercap-apps/lidercap-infra
+- Reutilizáveis: `.github/workflows/detect-apps.yaml`; o `deploy-eks.yaml` é criado
+  em `.github/workflows/` ao ligar o CD, com as roles AWS, o registry e o
+  repositório de infraestrutura do projeto
+- Repositório de infraestrutura: o do seu projeto (manifestos GitOps e secrets)
 - Expansões: [EXPANSION_MODELS.md](./EXPANSION_MODELS.md)
 - Dockerfile de referência: `infra/docker/Dockerfile.node.example`

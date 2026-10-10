@@ -85,7 +85,7 @@ Cada projeto deve declarar uma tag de cada dimensão:
 
 ```bash
 # Rodar testes de uma lib
-pnpm nx test @lidercap-apps/minha-lib
+pnpm nx test @mateusmacedo/minha-lib
 
 # Rodar lint apenas nos projetos afetados pelo último commit
 pnpm nx affected -t lint
@@ -101,7 +101,7 @@ pnpm nx graph
 
 # Gerar nova shared lib
 pnpm nx g @nx/js:lib libs/shared/minha-lib \
-  --importPath=@lidercap-apps/minha-lib \
+  --importPath=@mateusmacedo/minha-lib \
   --bundler=tsc --unitTestRunner=jest --linter=none \
   --tags=type:lib,scope:shared,stack:node
 ```
@@ -142,7 +142,7 @@ Os testes usam Jest com transform via SWC (`.spec.swcrc`).
 
 ```bash
 # Testar uma lib específica
-pnpm nx test @lidercap-apps/minha-lib
+pnpm nx test @mateusmacedo/minha-lib
 
 # Testar apenas os projetos afetados
 pnpm nx affected -t test
