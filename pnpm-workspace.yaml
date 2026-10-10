@@ -4,12 +4,17 @@ packages:
   - "tools/*"
 allowBuilds:
   "@biomejs/biome": true
+  "@datadog/pprof": false
   "@nestjs/core": true
+  "@newrelic/fn-inspect": false
+  "@newrelic/native-metrics": false
   "@parcel/watcher": true
+  "@scarf/scarf": false
   "@swc/core": true
   lefthook: true
   less: true
   nx: true
+  protobufjs: false
   sharp: true
   unrs-resolver: true
 

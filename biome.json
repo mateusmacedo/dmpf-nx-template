@@ -8,6 +8,9 @@
     "lineWidth": 100
   },
   "javascript": {
+    "parser": {
+      "unsafeParameterDecoratorsEnabled": true
+    },
     "formatter": {
       "quoteStyle": "single",
       "trailingCommas": "all",
@@ -34,8 +37,12 @@
     "includes": [
       "**",
       "!**/dist",
+      "!**/out-tsc",
+      "!**/test-output",
       "!**/coverage",
       "!**/.nx",
+      "!**/plans",
+      "!**/tmp",
       "!**/node_modules",
       "!**/pnpm-lock.yaml",
       "!**/*.swcrc",
@@ -45,7 +52,9 @@
       "!**/.gemini",
       "!**/.github/skills",
       "!**/.github/prompts",
-      "!**/.opencode"
+      "!**/.opencode",
+      "!**/.tokensave",
+      "!**/.remember"
     ]
   }
 }
