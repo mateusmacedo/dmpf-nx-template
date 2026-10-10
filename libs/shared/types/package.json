@@ -2,5 +2,7 @@
   "name": "@nx-base-template/shared-types",
   "version": "0.0.1",
   "type": "module",
-  "private": true
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  }
 }
