@@ -174,26 +174,25 @@ Nx 23:
 | `apps` | você, com o trecho abaixo | ao criar a primeira app com imagem Docker |
 | `go-contract-<contexto>` | o generator `bounded-context` do `@mateusmacedo/dmpf-plugin` | a cada bounded context gerado |
 
-Trecho do grupo `libs`, dentro de `release` no `nx.json`:
+Os dois grupos ficam em `release.groups` no `nx.json`, ao lado dos grupos
+`go-contract-*` que já existirem; declare só o que já tiver membro. O grupo `apps`
+traz o esquema de versão das imagens:
 
 ```json
-"groups": {
-  "libs": {
-    "projects": ["tag:type:lib", "!tag:stack:go"]
-  }
-}
-```
-
-Trecho do grupo `apps`, com o esquema de versão das imagens:
-
-```json
-"apps": {
-  "projects": ["tag:type:app", "!tag:stack:go"],
-  "docker": {
-    "registryUrl": "ghcr.io",
-    "versionSchemes": {
-      "production": "{currentDate|YYMM.DD}.{shortCommitSha}",
-      "hotfix": "{currentDate|YYMM.DD}.{shortCommitSha}-hotfix"
+"release": {
+  "groups": {
+    "libs": {
+      "projects": ["tag:type:lib", "!tag:stack:go"]
+    },
+    "apps": {
+      "projects": ["tag:type:app", "!tag:stack:go"],
+      "docker": {
+        "registryUrl": "ghcr.io",
+        "versionSchemes": {
+          "production": "{currentDate|YYMM.DD}.{shortCommitSha}",
+          "hotfix": "{currentDate|YYMM.DD}.{shortCommitSha}-hotfix"
+        }
+      }
     }
   }
 }

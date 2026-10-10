@@ -60,8 +60,9 @@ message PingResponse {}
 A mesma sequência do `tools/template-smoke.sh`:
 
 ```bash
-mapfile -t pacotes < <(go list -m -f '{{.Path}}/...')
-go build "${pacotes[@]}" && go vet "${pacotes[@]}" && go test "${pacotes[@]}"
+go list -m -f '{{.Path}}/...' | xargs go build
+go list -m -f '{{.Path}}/...' | xargs go vet
+go list -m -f '{{.Path}}/...' | xargs go test
 
 KIT="github.com/mateusmacedo/dmpf/tools/dmpf-conformance/cmd"
 go run "$KIT/conformance@$CONFORMANCE" --root .

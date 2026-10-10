@@ -12,7 +12,8 @@ namespace, nome de secret) é versionado aqui — e não deve passar a ser.
 
 | Item | Estado no template |
 | --- | --- |
-| CI em PR (`ci.yml`) | **Ativo** — Nx affected de lint/typecheck/test/build/e2e |
+| CI em PR (`ci.yml`) | **Ativo** — Nx affected de lint/typecheck/test/build/e2e (sem `tag:stack:go`) e job `template-smoke` |
+| CI Go do DMPF (`dmpf-ci.yml`) | **Ativo** — saída do `init` do `@mateusmacedo/dmpf-plugin`; vermelho no template sem módulo Go e fora dos checks obrigatórios (ADR-011) |
 | Versionamento e publish de libs | **Ativo** — `create-release.yml`, `nx-release.yml` (publica no GitHub Packages pelo `publish-libs.yaml`) e `nx-publish-libs.yml` (republicação manual) |
 | CD (`cd-dev-hmg.yml`) | **Template** — só `workflow_dispatch`, parametrizado por placeholder |
 | Manifestos GitOps | **Ausentes** — vivem no repositório de infraestrutura, não aqui |
@@ -37,7 +38,8 @@ workflows.
 ## Fluxo resumido
 
 ```text
-PR  →  .github/workflows/ci.yml          (Nx affected: lint/typecheck/test/build/e2e)
+PR  →  .github/workflows/ci.yml          (Nx affected: lint/typecheck/test/build/e2e + template-smoke)
+    →  .github/workflows/dmpf-ci.yml     (projetos Go: workflow reutilizável do platform)
 push develop / workflow_dispatch
     →  .github/workflows/cd-dev-hmg.yml  (Modelo A: detect → deploy-eks, um job por app)
         →  build/push da imagem no registry
@@ -92,7 +94,8 @@ ConfigMap e de secrets externos definidos no repositório de infraestrutura — 
 
 | Workflow | Papel |
 | --- | --- |
-| `.github/workflows/ci.yml` | CI em PR |
+| `.github/workflows/ci.yml` | CI em PR, com o job `template-smoke` |
+| `.github/workflows/dmpf-ci.yml` | CI Go do DMPF, gerado pelo `init`; não editar à mão |
 | `.github/workflows/create-release.yml` | Cria a branch `release/X.Y.Z`; o PR para `master` é aberto com a sua conta |
 | `.github/workflows/nx-release.yml` | Versionamento (Nx Release) e publicação encadeada das libs no GitHub Packages |
 | `.github/workflows/nx-publish-libs.yml` | Republicação manual das libs |
