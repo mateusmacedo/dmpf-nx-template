@@ -1,3 +1,17 @@
+## 0.0.1 (2026-04-19)
+
+### 🚀 Features
+
+- **shared-utils:** add toSnakeCase and toPascalCase utilities ([34df7d2](https://github.com/lideranca-sites/nx-base-template/commit/34df7d2))
+
+### 🩹 Fixes
+
+- **shared-utils:** restaurar herança de cache e inputs do targetDefault no lint ([aeb252e](https://github.com/lideranca-sites/nx-base-template/commit/aeb252e))
+
+### ❤️ Thank You
+
+- Mateus Macedo Dos Anjos @mmanjos-mazzatech
+
 # 0.0.0 (2026-04-19)
 
 ### 🚀 Features
