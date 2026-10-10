@@ -44,7 +44,17 @@ jobs:
           BUMP="${{ inputs.bump-type }}"
 
           if [[ "$BUMP" == "auto" ]]; then
-            COMMITS=$(git log origin/master..origin/develop --pretty=format:"%s" 2>/dev/null || echo "")
+            if ! git rev-parse --verify --quiet refs/remotes/origin/develop >/dev/null; then
+              echo "::error::O ciclo de release deriva o incremento de origin/master..origin/develop, mas a branch 'develop' não foi encontrada. Provisione a branch 'develop' antes de disparar a release automática."
+              exit 1
+            fi
+
+            COMMITS=$(git log origin/master..origin/develop --pretty=format:"%s")
+
+            if [[ -z "$COMMITS" ]]; then
+              echo "::error::Não há commits entre origin/master e origin/develop. A release automática precisa de ao menos um commit para derivar o incremento."
+              exit 1
+            fi
 
             if echo "$COMMITS" | grep -qE "(BREAKING[[:space:]]CHANGE|^[a-z]+(\(.+\))?!:)"; then
               BUMP="major"
