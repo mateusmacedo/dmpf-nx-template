@@ -5,7 +5,7 @@ title: Melhorias no template base NX (tooling, docs, CI/CD, infra)
 stage: done
 priority: P1
 depends_on: []
-ticket_url: null
+ticket_url: https://linear.app/mmda/issue/DEVS-9/spec-ywawqhpx-melhorias-no-template-base-nx-tooling-docs-cicd-infra
 subtask_urls: []
 created: 2026-07-19
 ---
@@ -30,7 +30,7 @@ consistente e completa.
   versão de Node/pnpm.
 - **Impacto**: projetos criados a partir do template começam com governança,
   automação e docs prontas — reduz setup manual e drift entre repositórios.
-- **Inspiração**: monorepo `jusdocs` (`/home/mateus/work/jusdocs/repositories/jusdocs`),
+- **Inspiração**: monorepo `jusdocs`,
   fonte de dados declarada no doc de origem.
 - **Links relevantes**:
   - `plans/references/nx-base-template-improves.md` — doc de origem (11 melhorias)
@@ -183,7 +183,7 @@ nx-base-template/
 
 Mudanças são majoritariamente de configuração e documentação, sem código de
 runtime. O modelo de referência é o `jusdocs`, adaptado ao escopo do template
-(multi-stack Node/React/Angular/Go, `defaultBase: master`, escopo `@lidercap-apps`).
+(multi-stack Node/React/Angular/Go, `defaultBase: master`, escopo `@<org-contratante>`).
 
 ### Fluxo principal (execução por fase)
 
