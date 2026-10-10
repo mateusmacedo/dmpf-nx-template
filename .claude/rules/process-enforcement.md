@@ -1,6 +1,6 @@
 ---
 paths:
-  - "src/**"
+  - "**/*"
 ---
 
 # Processo e qualidade
@@ -9,19 +9,36 @@ Orientações de processo para apoiar qualidade e rastreabilidade. Adapte ao wor
 
 ## Features novas
 
-Ao criar um novo módulo, serviço ou feature, considere:
+Toda feature, módulo ou serviço novo exige uma spec correspondente em `docs/specs/` antes de a implementação começar:
 
-- Verificar se existe uma especificação ou documento de design associado.
-- Se não existir, avaliar se faz sentido escrever um antes de implementar.
+- Confirme que a spec (ou documento de design) já existe antes de escrever código.
+- Escreva a spec antes de implementar quando ela ainda não existir; peça a criação ao usuário sempre que o escopo depender de decisões dele.
 
-O formato do artefato (spec, PRD, RFC, ADR) depende do processo do projeto.
+O formato do artefato (spec, PRD, RFC, ADR) depende do processo do projeto. Bugs simples e manutenção rotineira ficam isentos de spec.
+
+## Plano antes de implementar
+
+Mudanças que tocam 2 ou mais arquivos exigem um plano breve aprovado antes da execução:
+
+- Apresente o plano com o que será feito, os arquivos afetados e os riscos ou tradeoffs.
+- Aguarde aprovação explícita do usuário antes de prosseguir.
 
 ## Refatorações amplas
 
-Ao modificar vários arquivos em uma refatoração:
+Toda refatoração exige um plano documentado antes da execução:
 
-- Verifique se existe um plano escrito.
-- Caso não exista, sugira escrever um antes de implementar, especialmente quando o impacto cruza camadas.
+- Documente o plano com motivação, escopo, arquivos impactados e estratégia de validação.
+- Confirme o plano com o usuário antes de aplicar mudanças, sobretudo quando o impacto cruza camadas.
+
+## Exceções
+
+Estas situações dispensam spec ou plano prévio e podem ser executadas direto:
+
+- Correção de 1 linha (typo ou bug óbvio).
+- Tarefa em arquivo único com instrução clara e específica.
+- Pedido explícito do usuário ("pode fazer direto", "sem plano").
+
+Bug simples e manutenção rotineira seguem isentos de spec.
 
 ## Reutilização
 
@@ -44,7 +61,7 @@ Verifique quais passos rodam em hooks automáticos (pré-commit, pré-push) e qu
 
 ## 🔹 Go: processo e cadeia de validação
 
-A cadeia tipica em Go é mais ampla que o trio "lint, typecheck, testes" do TS — tipagem é validada pelo build, mas adicionam-se etapas próprias (race, vet, vuln).
+A cadeia típica em Go é mais ampla que o trio "lint, typecheck, testes" do TS — tipagem é validada pelo build, mas adicionam-se etapas próprias (race, vet, vuln).
 
 ### Cadeia comum
 
