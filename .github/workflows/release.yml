@@ -61,13 +61,13 @@ jobs:
       - name: Setup Node and pnpm
         uses: ./.github/actions/setup-node-pnpm
         with:
-          node-version: '22'
-          pnpm-version: '9'
+          node-version: '24'
+          pnpm-version: '11'
 
       - name: Setup npm registry auth
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           registry-url: https://npm.pkg.github.com
           scope: '@lideranca-sites'
 
@@ -78,13 +78,14 @@ jobs:
 
       - name: Resolve docker version scheme
         id: docker-scheme
+        env:
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          MANUAL_TYPE: ${{ inputs.release-type }}
         run: |
-          HEAD_REF="${{ github.event.pull_request.head.ref }}"
-          MANUAL_TYPE="${{ inputs.release-type }}"
           if [[ "$HEAD_REF" == hotfix/* ]] || [[ "$MANUAL_TYPE" == "hotfix" ]]; then
-            echo "value=hotfix" >> $GITHUB_OUTPUT
+            echo "value=hotfix" >> "$GITHUB_OUTPUT"
           else
-            echo "value=production" >> $GITHUB_OUTPUT
+            echo "value=production" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Release
