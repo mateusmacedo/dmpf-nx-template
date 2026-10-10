@@ -152,7 +152,7 @@ jobs:
 
       - name: Publish npm libs (first release)
         if: steps.release-tags.outputs.has_release_tags == 'true' && steps.npm-first-release.outputs.is_first_npm_release == 'true'
-        run: pnpm nx release publish --groups=npm-libs --first-release --yes
+        run: pnpm nx release publish --groups=npm-libs --first-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -160,7 +160,7 @@ jobs:
 
       - name: Publish npm libs (standard)
         if: steps.release-tags.outputs.has_release_tags == 'true' && steps.npm-first-release.outputs.is_first_npm_release != 'true'
-        run: pnpm nx release publish --groups=npm-libs --yes
+        run: pnpm nx release publish --groups=npm-libs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
