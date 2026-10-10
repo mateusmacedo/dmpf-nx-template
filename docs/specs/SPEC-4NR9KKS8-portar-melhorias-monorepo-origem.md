@@ -1,33 +1,33 @@
 ---
 id: SPEC-4NR9KKS8
-slug: portar-melhorias-telesena-monorepo
-title: Portar melhorias do telesena-monorepo para o template base
+slug: portar-melhorias-monorepo-origem
+title: Portar melhorias do monorepo de origem para o template base
 stage: done
 priority: P1
 depends_on: [SPEC-W4RWD02M]
-ticket_url: null
+ticket_url: https://linear.app/mmda/issue/DEVS-73/spec-4nr9kks8-portar-melhorias-do-monorepo-de-origem-para-o-template
 subtask_urls: []
 created: 2026-07-30
 ---
 
-# SPEC-4NR9KKS8: Portar melhorias do telesena-monorepo para o template base
+# SPEC-4NR9KKS8: Portar melhorias do monorepo de origem para o template base
 
 ## Resumo
 
-O `telesena-monorepo` foi materializado a partir deste template em 2026-07-16 e,
+O monorepo de origem foi materializado a partir deste template em 2026-07-16 e,
 desde então, acumulou correções de tooling, endurecimentos de segurança, ajustes
 de CI para o runner Gitea e um corpo maduro de convenções de IA que este
 repositório não possui. Esta spec porta esse ganho de volta ao template.
 
 Como mantenedor do template, quero incorporar as melhorias validadas em produção
-no `telesena-monorepo` para que todo projeto novo derivado deste repositório
+no monorepo de origem para que todo projeto novo derivado deste repositório
 nasça com o tooling corrigido, os segredos protegidos e as convenções de IA já
 estabelecidas.
 
 ## Contexto
 
 - **Problema**: os dois repositórios divergiram em paralelo a partir do commit
-  raiz comum `7a42ab6`. O `telesena-monorepo` (211 commits) resolveu problemas
+  raiz comum `7a42ab6`. O monorepo de origem (211 commits) resolveu problemas
   concretos que continuam abertos aqui — entre eles um bug latente: o
   `create-release.yml` deste repositório já roda em `runs-on: gitea-runner`
   (commit `b7b513a`) mas ainda abre PR via `gh pr create`, comando indisponível
@@ -37,35 +37,35 @@ estabelecidas.
   pagas, repetindo os mesmos erros — lint quebrado em código NestJS, `nx affected
   -t test` falhando em projeto sem spec, `.env` copiado para dentro da imagem
   Docker e release branch que não abre PR.
-- **Inspiração**: `telesena-monorepo` é a única fonte considerada. A relação é de
+- **Inspiração**: o monorepo de origem é a única fonte considerada. A relação é de
   ancestral/descendente com evolução paralela comprovada por histórico git, não
   de superset.
 - **Links relevantes**:
   - `SPEC-W4RWD02M` — evoluiu os workflows deste template a partir do
-    `lidercap-platform`; esta spec continua o mesmo trilho de CI/CD
+    `dmpf`; esta spec continua o mesmo trilho de CI/CD
   - `SPEC-YWAWQHPX` — melhorias de tooling, docs, CI/CD e infra do template
   - `docs/adr/001-baseline-monorepo.md` — baseline que recebe o addendum
   - `docs/adr/004-*` — decisão de uso do `gitea-runner`
 - **Referências externas**:
-  - Repositório de origem: `/home/mmanjos/work/repositories/modernização/telesena-monorepo`
+  - Repositório de origem: monorepo de origem
     (branch `develop`, HEAD `309ab4e`)
   - Commit de bifurcação: `chore: rename project references from nx-base-template
-    to telesena-monorepo` (2026-07-16)
+    to monorepo-origem` (2026-07-16)
   - Commit de correção do setup pnpm: `ci: infere a versão do pnpm pelo
     packageManager no setup` (2026-07-16)
-  - Templates de CD consumidos pelo telesena:
-    `lidercap-apps/actions-templates` (`deploy-eks`, `detect-apps`)
+  - Templates de CD consumidos pelo monorepo de origem:
+    `<org-contratante>/actions-templates` (`deploy-eks`, `detect-apps`)
 
 <constraints>
-- [P0] O `telesena-monorepo` prevalece em qualquer discrepância, EXCETO nos 12
+- [P0] O monorepo de origem prevalece em qualquer discrepância, EXCETO nos 12
   itens listados em "Exceções preservadas", onde este template está
   comprovadamente mais novo.
 - [P0] NUNCA regredir versão de dependência: `nx` permanece em 23.1.0 e o
   `catalog:` do pnpm permanece completo.
-- [P0] NUNCA importar código de produto do telesena (`apps/telesena-*`,
+- [P0] NUNCA importar código de produto do monorepo de origem (`apps/monorepo-origem-*`,
   `libs/backend/*`, `libs/shared/money`) — este repositório é um template.
 - [P0] Todo conteúdo portado DEVE ser generalizado: nenhuma string
-  `telesena`, `@telesena-monorepo`, `TSM-` ou path `apps/telesena-*` pode
+  `monorepo-origem`, `@monorepo-origem`, `MO-` ou path `apps/monorepo-origem-*` pode
   permanecer nos arquivos aplicados.
 - [P1] Cada exceção preservada DEVE ter justificativa objetiva registrada nesta
   spec e no ADR de fechamento.
@@ -80,7 +80,7 @@ estabelecidas.
   - `biome.json`: adicionar às exclusões `!**/out-tsc`, `!**/test-output`,
     `!**/plans`, `!**/tmp`, `!**/.tokensave`, `!**/.remember`
   - `jest.preset.js`: adicionar `passWithNoTests: true`
-  - Edge case: manter `style.useImportType: "error"` do template — o telesena
+  - Edge case: manter `style.useImportType: "error"` do template — o monorepo de origem
     desligou (`"off"`) por conveniência de port, não por decisão técnica
 
 - [x] **[P0] RF2 — Higiene de artefatos e segredos**: impedir vazamento de `.env`.
@@ -89,7 +89,7 @@ estabelecidas.
   - `.dockerignore`: reescrever usando globs `**/` (a forma atual, sem `**/`,
     não alcança subdiretórios de `apps/`), com `**/.env` e `!**/.env.example`
   - Edge case: preservar as entradas exclusivas do template (Next.js, Go,
-    Terraform, `.pnpm-store`) que o telesena não possui
+    Terraform, `.pnpm-store`) que o monorepo de origem não possui
 
 - [x] **[P0] RF3 — Robustez de instalação e supply chain**.
   - `package.json`: alterar `"prepare"` de `lefthook install` para
@@ -98,7 +98,7 @@ estabelecidas.
     `false` — `@datadog/pprof`, `@newrelic/fn-inspect`, `@newrelic/native-metrics`,
     `@scarf/scarf`, `protobufjs`
   - Edge case: NÃO importar o bloco `overrides: tarn` — é workaround de
-    resolução específico do Verdaccio do telesena
+    resolução específico do Verdaccio do monorepo de origem
 
 - [x] **[P0] RF4 — Correção do CI para o runner Gitea**.
   - `.github/actions/setup-node-pnpm/action.yml`: remover o input
@@ -117,16 +117,16 @@ estabelecidas.
   `nx prune` para `pnpm install --prod --frozen-lockfile` reconstruindo as deps
   do importer raiz e removendo o bloco `overrides:` do lockfile.
   - Edge case: o script é agnóstico de projeto; validar que roda sem referência
-    a nomes do telesena
+    a nomes do monorepo de origem
 
 - [x] **[P1] RF6 — DX no editor**: criar `.vscode/` com `extensions.json`
   (recomendações Nx Console) e `settings.json`.
   - Edge case: NÃO portar `launch.json` — as configurações de debug apontam para
-    as apps do telesena
+    as apps do monorepo de origem
 
 - [x] **[P1] RF7 — Convenções de IA**: estabelecer o corpo de convenções.
   - `AGENTS.md`: substituir as 24 linhas atuais pela estrutura de 347 linhas do
-    telesena (meta, regras duras, estrutura, comandos, tooling, convenções,
+    monorepo de origem (meta, regras duras, estrutura, comandos, tooling, convenções,
     git/release, padrões de código, workflows, glossário), generalizada
   - `CLAUDE.md`: reduzir para `@AGENTS.md`, adotando fonte única
   - `.claude/rules/`: portar as 9 regras (`ci-quality`, `code-patterns`,
@@ -139,13 +139,13 @@ estabelecidas.
     documenta 7 agentes com nomes que não existem no diretório (cita
     `agents/architecture.md`; o arquivo real é `agents/architect-reviewer.md`)
   - Edge case: preservar `.claude/settings.json`, que existe neste template e
-    não existe no telesena
+    não existe no monorepo de origem
 
 - [x] **[P1] RF8 — Documentação de processo**.
   - `CONTRIBUTING.md`: incorporar a seção "Modelo develop → release (anti-drift)"
     sem descartar as seções exclusivas do template (Conventional Commits,
     validação local, padrões de código, reportar problemas)
-  - `docs/onboarding.md`: criar a partir do telesena, generalizado
+  - `docs/onboarding.md`: criar a partir do monorepo de origem, generalizado
   - `docs/adr/001-baseline-monorepo.md`: incorporar o addendum (67 linhas) com
     estado atual, drift em relação ao texto histórico e débitos derivados
   - `docs/ci-cd/`: criar `README.md`, `DEPLOY_APPLICATIONS.md` e
@@ -154,11 +154,11 @@ estabelecidas.
     backend NestJS via generator
 
 - [x] **[P2] RF9 — Template de CD**: criar `.github/workflows/cd-dev-hmg.yml`
-  como modelo comentado e desabilitado por padrão, derivado do telesena.
+  como modelo comentado e desabilitado por padrão, derivado do monorepo de origem.
   - Manter o comentário que documenta por que os jobs de deploy são explícitos:
     o `act_runner` do Gitea não injeta matriz vinda de expressão em job
     reutilizável (`uses:`)
-  - Substituir `telesena-soft-bff` e `telesena-auth-api` por placeholders
+  - Substituir `monorepo-origem-soft-bff` e `monorepo-origem-auth-api` por placeholders
   - Edge case: o workflow NÃO pode disparar em `push` para `develop` no
     template; usar apenas `workflow_dispatch`
 
@@ -167,18 +167,18 @@ estabelecidas.
 
 | # | Item | Estado a preservar | Justificativa |
 |---|------|--------------------|---------------|
-| 1 | `nx` e plugins `@nx/*` | 23.1.0 | Telesena está em 22.7.5 |
-| 2 | `catalog:` do pnpm | 30 entradas | Telesena reduziu a 7 e pinou o resto no `package.json` |
-| 3 | `tools/generators.json` | generator `shared-lib` | Telesena esvaziou (`generators: {}`) |
-| 4 | `nx.json` → `nxCloudId` | presente | Telesena removeu |
-| 5 | `nx.json` → `sharedGlobals` | inclui `biome.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml` | Telesena encolheu para só `biome.json`, degradando a invalidação de cache |
-| 6 | `nx.json` → plugin `@nx/jest` | sem `exclude` | O `exclude` do telesena aponta para e2e de apps que não existem aqui |
-| 7 | `release.yml` | release Docker (GHCR, `dockerVersionScheme`, hotfix) | Telesena removeu porque usa CD próprio |
-| 8 | `publish-libs.yml` → `pnpm_version` | `"11"` | Telesena está em `"9"`, incoerente com `packageManager: pnpm@11.9.0` |
-| 9 | `libs/shared/` | `types` e `utils` | `money` é domínio do telesena |
-| 10 | `README.md` | orientado a template | O do telesena é orientado ao produto |
-| 11 | `infra/`, `renovate.json`, `migrations.json`, `LICENSE`, `SECURITY.md`, `CODE_OF_CONDUCT.md` | presentes | Não existem no telesena |
-| 12 | Aspas em YAML | `"` | O uso de `'` no telesena é cosmético, não é melhoria |
+| 1 | `nx` e plugins `@nx/*` | 23.1.0 | O monorepo de origem está em 22.7.5 |
+| 2 | `catalog:` do pnpm | 30 entradas | O monorepo de origem reduziu a 7 e pinou o resto no `package.json` |
+| 3 | `tools/generators.json` | generator `shared-lib` | O monorepo de origem esvaziou (`generators: {}`) |
+| 4 | `nx.json` → `nxCloudId` | presente | O monorepo de origem removeu |
+| 5 | `nx.json` → `sharedGlobals` | inclui `biome.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml` | O monorepo de origem encolheu para só `biome.json`, degradando a invalidação de cache |
+| 6 | `nx.json` → plugin `@nx/jest` | sem `exclude` | O `exclude` do monorepo de origem aponta para e2e de apps que não existem aqui |
+| 7 | `release.yml` | release Docker (GHCR, `dockerVersionScheme`, hotfix) | O monorepo de origem removeu porque usa CD próprio |
+| 8 | `publish-libs.yml` → `pnpm_version` | `"11"` | O monorepo de origem está em `"9"`, incoerente com `packageManager: pnpm@11.9.0` |
+| 9 | `libs/shared/` | `types` e `utils` | `money` é domínio do monorepo de origem |
+| 10 | `README.md` | orientado a template | O do monorepo de origem é orientado ao produto |
+| 11 | `infra/`, `renovate.json`, `migrations.json`, `LICENSE`, `SECURITY.md`, `CODE_OF_CONDUCT.md` | presentes | Não existem no monorepo de origem |
+| 12 | Aspas em YAML | `"` | O uso de `'` no monorepo de origem é cosmético, não é melhoria |
 
 ### Não-funcionais
 
@@ -189,7 +189,7 @@ estabelecidas.
 - [x] Regressão zero: `pnpm nx run-many -t lint typecheck test build` deve
       terminar com o mesmo conjunto de projetos com sucesso que hoje
 - [x] Rastreabilidade: cada arquivo portado deve ter origem identificável no
-      `telesena-monorepo` (path + commit)
+      monorepo de origem (path + commit)
 
 ## Camadas afetadas
 
@@ -265,15 +265,15 @@ hook de pre-commit.
 1. Aplicar o trilho 1 e rodar `pnpm nx run-many -t lint typecheck test build`
 2. Aplicar o trilho 2, validando cada workflow por análise estática do YAML
 3. Aplicar o trilho 3, generalizando cada arquivo antes de gravar
-4. Rodar a varredura de generalização (busca por `telesena`, `@telesena-monorepo`,
-   `TSM-`, `apps/telesena-`) — resultado deve ser zero ocorrências
+4. Rodar a varredura de generalização (busca por `monorepo-origem`, `@monorepo-origem`,
+   `MO-`, `apps/monorepo-origem-`) — resultado deve ser zero ocorrências
 5. Revalidar o conjunto completo e registrar o ADR de fechamento
 
 ### Pseudocódigo
 
 ```text
 // Varredura de generalização — gate obrigatório antes do commit
-padroes = ["telesena", "@telesena-monorepo", "TSM-", "apps/telesena-"]
+padroes = ["monorepo-origem", "@monorepo-origem", "MO-", "apps/monorepo-origem-"]
 ocorrencias = buscar(padroes, em=arquivos_alterados_ou_criados)
 
 se ocorrencias.total > 0:
@@ -284,10 +284,10 @@ senao:
 
 ## Decisões técnicas
 
-- **Regra de desempate assimétrica**: o telesena prevalece por padrão, mas cede
+- **Regra de desempate assimétrica**: o monorepo de origem prevalece por padrão, mas cede
   nos 12 itens da tabela RF10, porque a análise de histórico git provou evolução
   paralela — e não linear — a partir do commit raiz comum `7a42ab6`.
-  Alternativa descartada: prevalência literal e irrestrita do telesena, porque
+  Alternativa descartada: prevalência literal e irrestrita do monorepo de origem, porque
   causaria downgrade de `nx` 23.1.0 → 22.7.5, desmonte do `catalog:` do pnpm e
   perda do generator `shared-lib`.
 - **`create-release.yml` via API do Gitea**: usar `curl` contra
@@ -299,7 +299,7 @@ senao:
 - **`CLAUDE.md` como ponteiro `@AGENTS.md`**: fonte única evita divergência entre
   os dois arquivos.
   Alternativa descartada: manter conteúdo duplicado nos dois, porque o próprio
-  telesena chegou ao ponteiro depois de sofrer com a divergência.
+  monorepo de origem chegou ao ponteiro depois de sofrer com a divergência.
 - **`cd-dev-hmg.yml` apenas com `workflow_dispatch`**: um template não deve
   disparar deploy ao receber push em `develop`.
   Alternativa descartada: não portar o workflow, porque o valor está no padrão
@@ -322,7 +322,7 @@ senao:
 - [x] Os 13 itens do balde A estão aplicados (RF1 a RF6, RF8)
 - [x] Os 6 itens do balde B estão aplicados e generalizados (RF7, RF9)
 - [x] Os 12 itens da tabela RF10 permanecem no estado atual do template
-- [x] A busca por `telesena`, `@telesena-monorepo`, `TSM-` e `apps/telesena-`
+- [x] A busca por `monorepo-origem`, `@monorepo-origem`, `MO-` e `apps/monorepo-origem-`
       nos arquivos alterados ou criados retorna 0 ocorrências
 - [x] `pnpm nx run-many -t lint typecheck test build` termina com sucesso
 - [x] `pnpm biome ci .` termina com sucesso
@@ -370,14 +370,14 @@ ENTÃO encontra apenas o ponteiro @AGENTS.md e segue para a fonte única
 ```
 
 <critical_constraints>
-- [P0] O `telesena-monorepo` prevalece em qualquer discrepância, EXCETO nos 12
+- [P0] O monorepo de origem prevalece em qualquer discrepância, EXCETO nos 12
   itens da tabela RF10, onde este template está comprovadamente mais novo.
 - [P0] NUNCA regredir versão de dependência: `nx` permanece em 23.1.0 e o
   `catalog:` do pnpm permanece completo.
-- [P0] NUNCA importar código de produto do telesena (`apps/telesena-*`,
+- [P0] NUNCA importar código de produto do monorepo de origem (`apps/monorepo-origem-*`,
   `libs/backend/*`, `libs/shared/money`) — este repositório é um template.
 - [P0] Todo conteúdo portado DEVE ser generalizado: nenhuma string
-  `telesena`, `@telesena-monorepo`, `TSM-` ou path `apps/telesena-*` pode
+  `monorepo-origem`, `@monorepo-origem`, `MO-` ou path `apps/monorepo-origem-*` pode
   permanecer nos arquivos aplicados.
 - [P1] Cada exceção preservada DEVE ter justificativa objetiva registrada nesta
   spec e no ADR de fechamento.
@@ -385,10 +385,10 @@ ENTÃO encontra apenas o ponteiro @AGENTS.md e segue para a fonte única
 
 ## Escopo fora
 
-- **Código de aplicação do telesena** (`apps/telesena-soft-bff`,
-  `apps/telesena-auth-api` e respectivos e2e — 163 arquivos): é produto, não
-  template. Pertence ao próprio `telesena-monorepo`.
-- **Libs de backend do telesena** (`libs/backend/{http-client,auth,contracts,observability,health}`
+- **Código de aplicação do monorepo de origem** (`apps/monorepo-origem-soft-bff`,
+  `apps/monorepo-origem-auth-api` e respectivos e2e — 163 arquivos): é produto, não
+  template. Pertence ao próprio monorepo de origem.
+- **Libs de backend do monorepo de origem** (`libs/backend/{http-client,auth,contracts,observability,health}`
   — 97 arquivos): os padrões podem virar skills em `.claude/skills/`, mas o
   código pertence ao produto ou a um pacote publicado separadamente.
 - **`libs/shared/money`**: lógica de domínio financeiro, não utilitário genérico.
@@ -396,7 +396,7 @@ ENTÃO encontra apenas o ponteiro @AGENTS.md e segue para a fonte única
 - **Migração deste repositório para Nx 22**: não há motivo técnico; o template
   está à frente.
 - **Adoção do Verdaccio/`overrides: tarn`**: workaround de ambiente específico do
-  telesena. Se necessário, vira spec própria.
+  monorepo de origem. Se necessário, vira spec própria.
 - **Correção do prefixo do escopo em `tsconfig.base.json`**: débito
   pré-existente detectado durante a análise, sem relação com o port. Resolvido
   depois, fora desta spec.

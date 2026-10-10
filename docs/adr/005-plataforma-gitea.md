@@ -9,6 +9,9 @@ os itens sobre host de hospedagem e uso do binário `gh`. As demais decisões do
 ADR-004 (split version/publish, alvo Verdaccio, runner `gitea-runner`) seguem
 válidas.
 
+Superseded pela [ADR-010](./010-migracao-github-linear.md) — 2026-10-09: a
+plataforma passa a ser o GitHub.
+
 ## Contexto
 
 O ADR-004 afirma, na matriz do que não foi portado, que a API do Gitea não seria
@@ -21,8 +24,8 @@ O remoto do repositório contradiz essa premissa:
 
 ```text
 $ git remote -v
-origin	git@gitea.lidercap.com.br:lidercap-apps/nx-base-template.git (fetch)
-origin	git@gitea.lidercap.com.br:lidercap-apps/nx-base-template.git (push)
+origin	git@gitea.<contratante>:<org-contratante>/nx-base-template.git (fetch)
+origin	git@gitea.<contratante>:<org-contratante>/nx-base-template.git (push)
 ```
 
 O template está hospedado em Gitea desde antes do ADR-004, que registrou uma
@@ -34,8 +37,8 @@ execução real — um defeito latente, porque o workflow só roda por
 
 ## Decisão
 
-- **A plataforma é Gitea** (`gitea.lidercap.com.br`, organização
-  `lidercap-apps`). Toda automação que precise falar com a plataforma usa a API
+- **A plataforma é Gitea** (`gitea.<contratante>`, organização
+  `<org-contratante>`). Toda automação que precise falar com a plataforma usa a API
   do Gitea, não a do GitHub.
 - **`create-release.yml` abre PR via API do Gitea**: `jq` monta o corpo JSON e
   `curl -fsS -X POST` chama
