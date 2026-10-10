@@ -37,17 +37,18 @@ jobs:
       )
     runs-on: gitea-runner
     timeout-minutes: 30
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
+      # O token do ci-runner-bot substitui o token efêmero das Actions: só ele
+      # consta nas whitelists da branch protection de master e da tag protection,
+      # e o actions/checkout o persiste para o push do step final.
       - name: Checkout master
         uses: actions/checkout@v4
         with:
           ref: master
           fetch-depth: 0
           fetch-tags: true
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.RELEASE_TOKEN }}
 
       - name: Validate manual dispatch branch
         if: github.event_name == 'workflow_dispatch'
@@ -79,12 +80,17 @@ jobs:
             echo "value=production" >> "$GITHUB_OUTPUT"
           fi
 
-      # Versiona (bump + changelog + commit + tag) SEM publicar. A publicação no
-      # Verdaccio roda no publish-libs.yml, disparado pelo push das tags geradas
-      # abaixo. Na primeira release (sem tags {projectName}@{version}) usa
-      # --first-release para não exigir um git tag anterior no changelog.
+      # Versiona (bump + changelog + commit + tag) SEM publicar e SEM empurrar. A
+      # publicação no Verdaccio roda no publish-libs.yml, disparado pelo push das
+      # tags geradas abaixo. Na primeira release (sem tags {projectName}@{version})
+      # usa --first-release para não exigir um git tag anterior no changelog.
       # --yes e --skip-publish são mutuamente exclusivos no Nx; usar só skip-publish.
       # Sem continue-on-error: falha real do nx release NÃO deve empurrar tags.
+      #
+      # O nx.json não declara changelog.projectChangelogs.createRelease: o Nx não
+      # tem provider de release para Gitea, e é essa chave que liga o push
+      # automático do comando agregado. Com ela ausente e release.git.push: false
+      # como guardrail, o push acontece num único ponto — o step abaixo.
       - name: Nx Release (skip publish)
         run: |
           FIRST_RELEASE=""
@@ -93,12 +99,18 @@ jobs:
             FIRST_RELEASE="--first-release"
           fi
           pnpm nx release --skip-publish $FIRST_RELEASE
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # --atomic preserva a semântica all-or-nothing que o Nx aplicava ao empurrar
+      # as três refs (master e as duas tags). LEFTHOOK=0 neutraliza o pre-push que
+      # o pnpm install registra no runner: ele roda `nx affected` de 4 targets
+      # contra o tip de master, já validado pelo ci.yml no PR que o produziu, e
+      # falharia o release por um motivo alheio a ele. No caminho manual
+      # (workflow_dispatch) não há PR correspondente: a precondição é que o tip de
+      # master tenha sido validado antes do disparo.
       - name: Push version commit and tags
-        run: git push --follow-tags origin master
+        env:
+          LEFTHOOK: "0"
+        run: git push --follow-tags --atomic origin master
 
       - name: Detect docker release candidates
         id: docker-candidates
