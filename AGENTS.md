@@ -29,6 +29,16 @@ As recomendações abaixo são defaults pensados para este projeto e podem ser a
 - Em caso de conflito entre instruções, considere este arquivo junto com os arquivos de configuração efetivos do projeto (por exemplo: `package.json` / `pnpm-workspace.yaml`, `lefthook.yml`, `biome.json`, `nx.json`, `tsconfig.base.json`).
 - Este repositório é um **template**. Projetos derivados herdam estas convenções e devem atualizar o inventário desta seção conforme criam apps e libs reais.
 
+### Fronteira: consumir mmda-flow vs artefatos bakeados
+
+Este template **assa (bake)** no próprio repositório o scaffold de engenharia, para que o conteúdo seja legível mesmo sem o plugin instalado: o catálogo e o template de specs (`docs/specs/`), as regras de domínio (`docs/rules/**`, nos escopos `BIZ-`/`APP-`/`PRD-`), o guia detalhado de fluxo (`docs/guides/development-workflow.md`), o índice de ADRs (`docs/adr/README.md`), as rules documentais em `.claude/rules/` e as skills de domínio em `.claude/skills/`. Esses artefatos ficam versionados e valem por si.
+
+O template **consome** do plugin `mmda-flow` (canônico em `https://github.com/mateusmacedo/plugins-claude`) o que faz sentido evoluir num único lugar: os agentes e skills de pipeline, os hooks de higiene, as skills de bootstrap (`skill-init`, `skill-sync`, `skill-config`) e a sincronização de tracker. Esses recursos existem apenas quando o plugin está instalado no ambiente do desenvolvedor. Nenhum runtime do plugin é forkado para dentro do template, o que evita drift de manutenção.
+
+Quando uma skill existe dos dois lados (por exemplo `bug-fix`, `code-review` e `quality-checklist`), a precedência é: a skill bakeada no template vale para o código da organização; a homônima do plugin vale quando o fluxo mmda-flow é invocado explicitamente. Skills só do plugin (como `feature-pipeline` e `spec-management`) vêm sempre do plugin; skills só do template (Nest, Go, TypeORM, TypeScript) vêm sempre do template.
+
+O fluxo git deste repositório é o git-flow da organização (ver [Git e release](#git-e-release)); a rule de fluxo do plugin prescreve o inverso e deve ser tratada como anti-referência quanto a fluxo. Os detalhes desta fronteira, a precedência completa e as consequências assumidas estão em `docs/adr/007-fronteira-plugin-template.md`.
+
 ### Idioma
 
 Por default, respostas são em português (PT-BR) e código permanece em inglês. O idioma da interação é parâmetro do projeto e pode ser ajustado.
@@ -105,7 +115,17 @@ nx-base-template/
 │   └── shared/
 │       ├── types/                  # @Lidercap-apps/shared-types
 │       └── utils/                  # @Lidercap-apps/shared-utils
-├── docs/                           # adr, specs, nx-reference, ci-cd, onboarding
+├── docs/
+│   ├── adr/                        # ADR-00N (baseline, tasks, hardening, release, plataforma, fechamento, fronteira)
+│   ├── specs/                      # catálogo e template de specs (SPEC-XXXX)
+│   ├── rules/                      # regras de domínio, com README de índice
+│   │   ├── business/               # regras de negócio (BIZ-)
+│   │   ├── application/            # regras de aplicação (APP-)
+│   │   └── product/                # regras de produto (PRD-)
+│   ├── guides/                     # development-workflow.md (guia detalhado do fluxo)
+│   ├── nx-reference/               # guia prático de tasks Nx
+│   ├── ci-cd/                      # adoção de CI/CD e deploy
+│   └── onboarding.md               # setup local e primeiro PR
 ├── infra/docker/                   # Dockerfile de referência
 ├── tools/                          # generators, executors e scripts do workspace
 ├── .agents/skills/                 # skills de workspace (Nx)
@@ -307,9 +327,14 @@ Antes de criar algo novo, considere:
 
 - `CONTRIBUTING.md` — entrada curta para contribuir, com o modelo anti-drift.
 - `docs/onboarding.md` — setup local e primeiro PR.
-- `docs/adr/` — decisões arquiteturais (baseline, tasks Nx, hardening, release, plataforma).
+- `docs/adr/` — decisões arquiteturais (baseline, tasks Nx, hardening, release, plataforma, fechamento, fronteira).
+- `docs/adr/README.md` — índice e template de ADRs.
+- `docs/adr/007-fronteira-plugin-template.md` — fronteira entre o template e o plugin `mmda-flow` (o que é bakeado, o que é consumido, precedência de skills).
 - `docs/nx-reference/tasks.md` — guia prático de configuração de tasks.
 - `docs/specs/` — specs de produto/técnicas.
+- `docs/specs/README.md` — catálogo e template de specs.
+- `docs/rules/README.md` — índice das regras de domínio (negócio, aplicação, produto).
+- `docs/guides/development-workflow.md` — guia detalhado do fluxo de trabalho.
 - `docs/ci-cd/` — guia de adoção de CI/CD e deploy.
 - `infra/docker/Dockerfile.node.example` — Dockerfile de referência para apps Node.
 - `.agents/skills/` — skills de workspace (`nx-workspace`, `nx-generate`, `nx-commit`, `monitor-ci`, entre outras).
