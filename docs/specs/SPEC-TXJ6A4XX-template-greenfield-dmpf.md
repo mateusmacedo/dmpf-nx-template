@@ -87,7 +87,7 @@ publicada em 2026-10-09 com o dist-tag `next` (o `latest` aponta para a
 
 **A. Bootstrap DMPF**
 
-- [ ] **[P0] A1 — Workspace inicializado pelo plugin**: o template contém a
+- [x] **[P0] A1 — Workspace inicializado pelo plugin**: o template contém a
   saída de
   `pnpm nx g @mateusmacedo/dmpf-plugin:init --modulePrefix=example.com/change-me --npmScope=@mateusmacedo --composeProject=nx-base-template`,
   com o plugin na versão `1.0.0-rc.3`: `dmpf.json`, `dmpf.rendered.json`,
@@ -117,7 +117,7 @@ publicada em 2026-10-09 com o dist-tag `next` (o `latest` aponta para a
     `tools/dmpf-baseline`: o pre-commit roda `biome check --write` e, sem a
     exclusão, poderia reescrever arquivo gerado, quebrando o registro de
     hashes do `init` ou o `infrasync --check`.
-- [ ] **[P0] A2 — Registry**: `.npmrc` versionado só com
+- [x] **[P0] A2 — Registry**: `.npmrc` versionado só com
   `@mateusmacedo:registry=https://npm.pkg.github.com`. A credencial
   (`//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}`) vai no `~/.npmrc`
   do usuário: desde a 11.5.3, o pnpm ignora `${...}` em credencial do
@@ -134,7 +134,7 @@ publicada em 2026-10-09 com o dist-tag `next` (o `latest` aponta para a
     `npm.pkg.github.com`, mesmo com o pacote público; o README explica como
     criar o token (`read:packages`) e onde gravá-lo, logo na seção de
     pré-requisitos.
-- [ ] **[P0] A3 — Configuração do projeto novo**: o primeiro passo depois de
+- [x] **[P0] A3 — Configuração do projeto novo**: o primeiro passo depois de
   criar o repositório é
   `pnpm nx g @mateusmacedo/dmpf-plugin:init --modulePrefix=<module path do projeto>`,
   que reescreve sem `--force` os arquivos gerenciados não editados. Enquanto
@@ -145,14 +145,14 @@ publicada em 2026-10-09 com o dist-tag `next` (o `latest` aponta para a
   - Edge: o `init` não reescreve a semente `infra/local/docker-compose.yml`;
     o nome do projeto Compose (`nx-base-template-local`) é ajustado à mão no
     projeto derivado, e o README diz isso.
-- [ ] **[P1] A4 — Renovate em lockstep**: o `renovate.json` ganha uma
+- [x] **[P1] A4 — Renovate em lockstep**: o `renovate.json` ganha uma
   `packageRules` com `enabled: false` para `@mateusmacedo/dmpf-plugin`,
   `@nx-go/nx-go`, os módulos `github.com/mateusmacedo/dmpf/**` e o `uses:`
   de `mateusmacedo/dmpf` nos workflows; a atualização desses itens acontece
   só por `nx migrate`. `ignoreDeps` não serve porque só casa nome exato, e o
   `helpers:pinGitHubActionDigests` atual mexeria no SHA do workflow
   reutilizável.
-- [ ] **[P0] A5 — Release sem grupos no template**: o `nx.json` perde
+- [x] **[P0] A5 — Release sem grupos no template**: o `nx.json` perde
   `release.projects` e `release.docker`; o topo do `release` fica só com as
   opções globais (versionamento independente, tag `{projectName}@{version}`,
   conventional commits, changelog, git), como no `nx.json` do platform. Cada
@@ -176,7 +176,7 @@ publicada em 2026-10-09 com o dist-tag `next` (o `latest` aponta para a
 
 **B. CI/CD no GitHub**
 
-- [ ] **[P0] B1 — CI Go**: o `.github/workflows/dmpf-ci.yml`, gerado pelo
+- [x] **[P0] B1 — CI Go**: o `.github/workflows/dmpf-ci.yml`, gerado pelo
   `init`, chama
   `mateusmacedo/dmpf/.github/workflows/dmpf-go-ci.yml@5def4d2d749bf8d5b2ef683f3cdc97eadf354c26`
   (o `workflowRef` do `versions.json` da rc.3), com `permissions` de
@@ -192,7 +192,7 @@ publicada em 2026-10-09 com o dist-tag `next` (o `latest` aponta para a
     `dmpf-ci.yml` fica vermelho nos PRs do template e **não** entra nos
     checks obrigatórios dos rulesets de `develop` e `master`. No projeto
     derivado, ele passa a valer a partir do primeiro contexto.
-- [ ] **[P0] B2 — Smoke do template**: o job `template-smoke` roda em todo PR
+- [x] **[P0] B2 — Smoke do template**: o job `template-smoke` roda em todo PR
   o script `tools/template-smoke.sh`, que copia o working tree (arquivos
   versionados e não ignorados) para um repositório novo em `mktemp`, instala
   as dependências e repete ali a sequência do `tools/external-consumer.sh` do
@@ -230,7 +230,7 @@ publicada em 2026-10-09 com o dist-tag `next` (o `latest` aponta para a
 
 **C. Documentação**
 
-- [ ] **[P0] C1 — README**: quickstart greenfield com:
+- [x] **[P0] C1 — README**: quickstart greenfield com:
   - criação via template e token no `~/.npmrc`;
   - `pnpm install` e `init --modulePrefix` (com `--composeProject`);
   - primeiro `bounded-context`, `tidy`, `conformance --write-baseline` e o
@@ -239,7 +239,7 @@ publicada em 2026-10-09 com o dist-tag `next` (o `latest` aponta para a
 
   A "Stack suportada" inclui Go/DMPF, e a "Convenção de tags" inclui
   `stack:go` e `layer:*`.
-- [ ] **[P0] C2 — ADR-011 "O template consome o DMPF por versão"**: plugin como
+- [x] **[P0] C2 — ADR-011 "O template consome o DMPF por versão"**: plugin como
   âncora única, GitHub Packages, ativos de IA pelo plugin, smoke em vez de app
   de exemplo, release sem grupos no template e `dmpf-ci.yml` fora dos checks
   obrigatórios do template.
@@ -250,7 +250,7 @@ publicada em 2026-10-09 com o dist-tag `next` (o `latest` aponta para a
 - [x] **[P1] C4 — Docs de processo sem Gitea** (movido para a SPEC-317RXZ73): `AGENTS.md`, `CONTRIBUTING.md`,
   `docs/onboarding.md`, `docs/ci-cd/*` e `docs/guides/development-workflow.md`
   descrevem GitHub e GitHub Packages.
-- [ ] **[P1] C5 — Guia do primeiro contexto**:
+- [x] **[P1] C5 — Guia do primeiro contexto**:
   `docs/guides/primeiro-bounded-context.md`, curto. Ele remete ao guia de
   consumo do platform (`docs/guides/dmpf-consumo-externo.md` no commit
   `5def4d2d749bf8d5b2ef683f3cdc97eadf354c26`) e cobre só o que é próprio do
@@ -258,12 +258,12 @@ publicada em 2026-10-09 com o dist-tag `next` (o `latest` aponta para a
 
 ### Não-funcionais
 
-- [ ] Compatibilidade: Nx 23.x (peer `@nx/devkit ^23.0.0` do plugin), Node 24,
+- [x] Compatibilidade: Nx 23.x (peer `@nx/devkit ^23.0.0` do plugin), Node 24,
   pnpm 11.14.0 e a diretiva Go do `versions.json` do plugin (1.26.9 na rc.3).
 - [ ] Desempenho: `template-smoke` termina em até 25 min no runner hospedado
   pelo GitHub, com cache de Go e pnpm (o mesmo teto do job
   `external-consumer` do platform).
-- [ ] Segurança: workflows com `permissions` mínimas (`contents: read`,
+- [x] Segurança: workflows com `permissions` mínimas (`contents: read`,
   `packages: read` e, no `dmpf-ci.yml`, `actions: read`); nenhum token em
   log ou arquivo versionado.
 
@@ -410,15 +410,21 @@ github.com/mateusmacedo/dmpf (platform)          dmpf-nx-template (este repo)
 
 ### Critérios de aceite
 
-- [ ] `pnpm nx g @mateusmacedo/dmpf-plugin:init --modulePrefix=example.com/change-me --npmScope=@mateusmacedo --composeProject=nx-base-template` sobre o template produz `git diff` vazio.
-- [ ] `go.work` com a diretiva Go de `versions.json` (1.26.9 na rc.3).
-- [ ] `nx.json` sem `release.projects` e sem `release.docker`; `pnpm nx release --dry-run` passa no smoke, com o grupo Go gerado. (No template sem projetos o comando continua falhando por grupo vazio, como antes desta spec.)
-- [ ] Nenhuma credencial em arquivo versionado; o `pnpm install` dos workflows e do `Dockerfile.node.example` autentica pelo npmrc de usuário.
+- [x] `pnpm nx g @mateusmacedo/dmpf-plugin:init --modulePrefix=example.com/change-me --npmScope=@mateusmacedo --composeProject=nx-base-template` sobre o template produz `git diff` vazio.
+- [x] `go.work` com a diretiva Go de `versions.json` (1.26.9 na rc.3).
+- [x] `nx.json` sem `release.projects` e sem `release.docker`; `pnpm nx release --dry-run` passa no smoke, com o grupo Go gerado. (No template sem projetos o comando continua falhando por grupo vazio, como antes desta spec.)
+- [x] Nenhuma credencial em arquivo versionado; o `pnpm install` dos workflows e do `Dockerfile.node.example` autentica pelo npmrc de usuário.
 - [ ] `template-smoke` verde em PR, em até 25 min, sem arquivos novos versionados ao final.
-- [ ] `dmpf-ci.yml` fora dos checks obrigatórios dos rulesets de `develop` e `master`.
-- [ ] ADR-011 publicada.
+- [x] `dmpf-ci.yml` fora dos checks obrigatórios dos rulesets de `develop` e `master`.
+- [x] ADR-011 publicada.
 - [ ] README com quickstart executado do zero em repositório criado pelo template, até o primeiro contexto verde.
-- [ ] Validação do projeto passando: `pnpm biome ci .` e `pnpm nx run-many -t lint,typecheck,test,build`.
+- [x] Validação do projeto passando: `pnpm biome ci .` e `pnpm nx run-many -t lint,typecheck,test,build`.
+
+**Pendências da entrega (2026-10-10):** o `template-smoke` passou localmente duas vezes
+(80 s e 53 s, com caches quentes); o tempo e o verde no runner do GitHub dependem do primeiro CI da PR. O
+quickstart do zero depende do merge na `master`, porque o `gh repo create --template` usa
+a branch padrão do template. O repositório não tem rulesets hoje, então o `dmpf-ci.yml`
+não é obrigatório em nenhuma branch.
 
 ### Cenários de teste
 
