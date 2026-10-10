@@ -245,7 +245,7 @@ Gitea da contratante                          github.com/mateusmacedo/dmpf-nx-te
 - [x] Projeto Linear `nx-base-template` com as 7 issues das specs do template, e cada `ticket_url` resolvendo para a issue de mesmo `SPEC-<id>`.
 - [x] `gh repo view mateusmacedo/dmpf-nx-template --json isTemplate,defaultBranchRef` retorna `true` e `master`.
 - [x] Rulesets ativos em `develop` e `master` (`gh api repos/mateusmacedo/dmpf-nx-template/rulesets`).
-- [ ] CI do PR desta spec verde em `ubuntu-26.04`.
+- [x] CI do PR desta spec verde em `ubuntu-26.04`.
 - [x] `pnpm biome ci .` e `pnpm nx run-many -t lint,typecheck,test,build --exclude=@nx-base-template/source` verdes.
 
 ### Cenários de teste
