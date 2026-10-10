@@ -47,3 +47,28 @@ Thumbs.db
 .cursor/plans
 plans
 .serena
+
+# build info
+*.tsbuildinfo
+
+# logs
+*.log
+
+# local environment (keep example)
+.env
+.env.*
+!.env.example
+
+# Next.js
+.next
+
+# Go build artifacts
+**/bin/
+**/__debug_bin*
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+*.tfplan
