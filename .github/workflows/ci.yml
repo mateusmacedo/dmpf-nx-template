@@ -21,7 +21,7 @@ permissions:
 jobs:
   main:
     name: Nx Affected Pipeline
-    runs-on: gitea-runner
+    runs-on: ubuntu-26.04
     timeout-minutes: 30
     env:
       NX_EXCLUDE: "@nx-base-template/source"
