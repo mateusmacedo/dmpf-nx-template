@@ -1,7 +1,8 @@
 # Referência: Configuração de Tasks no NX
 
 Guia de referência para configurar tasks, cache e pipelines neste workspace.
-Baseado na documentação oficial do NX v22.
+Baseado na documentação oficial do NX v23 — a versão fixada no `catalog:` deste
+workspace.
 
 ---
 
@@ -80,37 +81,65 @@ isso sobrescreve as propriedades herdadas do default, incluindo `cache: true`.
 
 Todo projeto deve ter **exatamente três tags**, uma de cada dimensão:
 
+A fonte canônica desta taxonomia é o `AGENTS.md`; a tabela abaixo a repete e não
+deve divergir dele.
+
 | Dimensão | Valores válidos | Exemplo |
 |----------|----------------|---------|
-| `type:` | `lib`, `app` | `type:lib` |
-| `scope:` | `shared`, `<domínio>` | `scope:shared`, `scope:auth` |
-| `stack:` | `node`, `react`, `angular`, `universal` | `stack:node` |
+| `type:` | `lib`, `app`, `e2e` | `type:lib` |
+| `scope:` | `shared`, `backend`, `frontend` | `scope:shared` |
+| `stack:` | `node`, `express`, `fastify`, `nest`, `next`, `react`, `angular`, `go`, `universal` | `stack:node` |
 
 ### Significado de `stack:`
 
 | Valor | Quando usar |
 |-------|-------------|
-| `node` | Lib que usa APIs de Node.js (fs, http, process) ou frameworks como NestJS/Express |
+| `node` | Usa APIs de Node.js (fs, http, process) sem se prender a um framework |
+| `express` / `fastify` / `nest` | Projeto acoplado ao respectivo framework de servidor |
+| `next` | App ou lib Next.js |
 | `react` | Lib com componentes React ou hooks |
 | `angular` | Lib com módulos/componentes Angular |
-| `universal` | Lib sem dependência de runtime (tipos puros, utilitários de string/data) |
+| `go` | Projeto Go, gerenciado via `go.work` / `@nx-go/nx-go` |
+| `universal` | Sem dependência de runtime (tipos puros, utilitários de string/data) |
+
+As duas libs existentes usam `stack:node`. `scope:` acompanha a pasta de primeiro
+nível sob `libs/` ou `apps/` (`shared`, `backend`, `frontend`).
 
 ---
 
 ## Como criar uma nova lib
 
-### Via generator (recomendado)
+### Via generator Nx (recomendado)
 
 ```bash
-pnpm nx g @Lidercap-apps/source:shared-lib minha-lib
+# lib compartilhada (TypeScript puro, buildable via tsc)
+pnpm nx g @nx/js:lib libs/shared/<name> \
+  --importPath=@Lidercap-apps/shared-<name> \
+  --bundler=tsc --unitTestRunner=jest --linter=none \
+  --tags=type:lib,scope:shared,stack:node
+
+# lib backend (NestJS)
+pnpm nx g @nx/nest:lib libs/backend/<name> \
+  --importPath=@Lidercap-apps/backend-<name> \
+  --unitTestRunner=jest --linter=none \
+  --tags=type:lib,scope:backend,stack:node
 ```
 
-O generator pergunta o nome e a stack, e cria:
+Cria `libs/<scope>/<name>/` com `tsconfig`, `package.json`, `src/index.ts`,
+`.spec.swcrc` próprio e as tags 3D já preenchidas. A variante Nest adiciona
+`jest.config.cts` e o módulo inicial. Depois rode `pnpm nx sync` para atualizar as
+TypeScript Project References da raiz.
 
-- `libs/shared/<name>/` com tsconfig, package.json e src/index.ts
-- Tags corretas no `project.json`
-- Path alias em `tsconfig.base.json`
-- Reference em `tsconfig.json` raiz
+`--linter=none` é deliberado: o lint deste workspace é o Biome, configurado em
+`targetDefaults` (ver `nx.json`), não um linter por projeto.
+
+> **Débito conhecido:** existe um generator interno em
+> `tools/generators/shared-lib`, declarado em `generators.json` e registrado no
+> `package.json` como `@nx-base-template/tools`. Ele **não está resolvível** pelo
+> Nx hoje — `pnpm nx list` não o exibe e a invocação falha com
+> `Cannot find module '@nx-base-template/tools/package.json'`, porque o Nx tenta
+> resolver o nome como um pacote instalado. Use os generators do Nx acima até que
+> o registro seja corrigido.
 
 ### Manualmente
 
@@ -134,7 +163,7 @@ com uma execução anterior, o resultado é restaurado sem rodar o comando.
 |-------------|----------|
 | `default` | Todos os arquivos do projeto + `sharedGlobals` |
 | `production` | `default` sem arquivos de teste/spec |
-| `sharedGlobals` | `tsconfig.base.json`, `nx.json`, `biome.json` |
+| `sharedGlobals` | `tsconfig.base.json`, `nx.json`, `biome.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml` |
 
 O prefixo `^` significa "inclui os inputs dos projetos dependentes também".
 Ex: `"^production"` → mudanças nos arquivos de produção de qualquer dependência
@@ -192,8 +221,14 @@ TypeScript Project References sincronizadas automaticamente.
 **Em máquinas de desenvolvedor:** as mudanças são aplicadas automaticamente
 (`sync.applyChanges: true` em `nx.json`).
 
-**Em CI:** o `nx sync:check` é executado antes de qualquer task. Se há
-divergências, o CI falha com diff claro do que precisa ser sincronizado.
+**Em CI:** o `ci.yml` **não** executa `nx sync:check` hoje. Quem quiser que o
+pipeline falhe em caso de referências dessincronizadas precisa adicionar o passo
+explicitamente — ele reporta um diff claro do que falta sincronizar:
+
+```yaml
+      - name: Sync check
+        run: pnpm nx sync:check
+```
 
 ```bash
 # Verificar sincronização manualmente
