@@ -77,7 +77,7 @@ This is the standard "npm Script Rewriting" issue from SKILL.md, but triggered b
 For single-project `create-next-app` repos, use whole-repo import into a subdirectory:
 
 ```bash
-nx import /path/to/source apps/web --ref=main --source=. --no-interactive
+nx import /path/to/source apps/web --ref=master --source=. --no-interactive
 ```
 
 ### `next-env.d.ts`
