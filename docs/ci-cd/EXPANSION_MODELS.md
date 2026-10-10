@@ -55,11 +55,10 @@ cd-dev-hmg.yml  →  detect-apps → um job por app → uses: ./.github/workflow
 .github/workflows/deploy-<app-b>.yml
 ```
 
-> Atenção ao adotar o Modelo C no Gitea: o `act_runner` não injeta
-> `strategy.matrix` vinda de expressão em job reutilizável (`uses:`) — a mesma
-> limitação que fez o Modelo A usar um job explícito por app. O orquestrador do
-> Modelo C precisa chamar cada `deploy-<app>.yml` em um job próprio, não por
-> matriz.
+> Ao adotar o Modelo C: no GitHub Actions, um job que chama workflow reutilizável
+> (`uses:`) aceita `strategy.matrix`. O Modelo A usa um job explícito por app,
+> padrão herdado de uma restrição do runner anterior e mantido por legibilidade.
+> Escolha matriz ou jobs explícitos no orquestrador e registre a escolha.
 
 ### 1.4 Critérios de decisão (resumo)
 
@@ -78,9 +77,9 @@ fonte da verdade.
 
 O baseline cobre apenas `dev` e `hmg`. Produção é expansão explícita.
 
-| Item | Padrão sugerido (`actions-templates`) |
+| Item | Padrão sugerido |
 | --- | --- |
-| Exemplo | `examples/eks-prod-monorepo.yaml` |
+| Workflow | `cd-prod.yml`, chamando o mesmo `deploy-eks.yaml` local do Modelo A |
 | Gatilho | `push` de tags `v*`, ou o fluxo de release do monorepo |
 | `version` | `github.ref_name` |
 | `environment` | `prod` |
@@ -115,11 +114,13 @@ Para cada app nova no monorepo:
 
 | Necessidade | Template / exemplo | Notas |
 | --- | --- | --- |
-| Alterar parâmetros de ConfigMap/GitOps | `actions-templates` → `change-parameters.yaml` | `workflow_dispatch` + JSON; path no repositório de infraestrutura |
+| Alterar parâmetros de ConfigMap/GitOps | `change-parameters.yaml` | `workflow_dispatch` + JSON; path no repositório de infraestrutura |
 | Migrations de banco | `run-migrations.yaml` | Secrets de banco explícitos; só quando houver comando de migration |
 | Lint SQL em PR | `sql-ci.yaml` / `sql-lint.yaml` | Paths de migrations SQL |
 
-Esses fluxos **complementam** o CD; não substituem o Modelo A.
+Esses fluxos **complementam** o CD; não substituem o Modelo A. Nenhum desses
+reutilizáveis vem no template: crie-os em `.github/workflows/` quando adotar o
+fluxo.
 
 ---
 
@@ -127,10 +128,10 @@ Esses fluxos **complementam** o CD; não substituem o Modelo A.
 
 Regra: **uma plataforma por manifesto**.
 
-| Plataforma | Exemplos em `actions-templates` | Quando |
+| Plataforma | Reutilizável a criar em `.github/workflows/` | Quando |
 | --- | --- | --- |
-| ECS | `ecs-dev-hmg*.yaml`, `ecs-prod*.yaml` | O serviço já nasce ou migra para ECS |
-| On-premises (Portainer) | `on-premises-*.yaml` | Deploy via stack Portainer |
+| ECS | `deploy-ecs.yaml` | O serviço já nasce ou migra para ECS |
+| On-premises (Portainer) | `deploy-on-premises.yaml` | Deploy via stack Portainer |
 | Lambda | `deploy-lambda.yaml` | Functions |
 | S3 + CloudFront | `deploy-s3-cloudfront.yaml` | Front estático |
 
@@ -140,8 +141,9 @@ Não adicione jobs de ECS ou on-premises no mesmo YAML do CD EKS do Modelo A.
 
 ## 6. Expansão de libs / registry
 
-Já existe: `.github/workflows/publish-libs.yml`. É independente do CD, disparado
-por tags do Nx Release (`**@*`). Mantenha separado do `cd-dev-hmg.yml`.
+Já existe: a publicação no GitHub Packages, no job `publish` do `nx-release.yml`
+(reutilizável `publish-libs.yaml`), com republicação manual pelo
+`nx-publish-libs.yml`. É independente do CD; mantenha separado do `cd-dev-hmg.yml`.
 
 ---
 
@@ -162,6 +164,5 @@ por tags do Nx Release (`**@*`). Mantenha separado do `cd-dev-hmg.yml`.
 
 | Fonte | URL / uso |
 | --- | --- |
-| actions-templates (examples) | https://gitea.lidercap.com.br/lidercap-apps/actions-templates/src/branch/main/examples |
-| lidercap-infra | https://gitea.lidercap.com.br/lidercap-apps/lidercap-infra |
-| Exemplo de CD monorepo | https://gitea.lidercap.com.br/lidercap-apps/actions-templates/src/branch/main/examples/eks-dev-hmg-monorepo.yaml |
+| Workflows locais | `.github/workflows/cd-dev-hmg.yml`, `detect-apps.yaml`, `publish-libs.yaml` |
+| Repositório de infraestrutura | O do seu projeto (manifestos GitOps, roles, secrets) |

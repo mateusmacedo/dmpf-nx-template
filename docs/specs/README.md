@@ -35,7 +35,7 @@ title: Nome descritivo
 stage: backlog                  # backlog | planning | building | done | deferred | cancelled
 priority: P1                    # P0 | P1 | P2 | P3
 depends_on: []                  # lista inline de IDs, ex: [SPEC-W4RWD02M]
-ticket_url: null                # URL completa do ticket externo (Gitea/Linear/Jira) ou null
+ticket_url: null                # URL da issue no Linear (https://linear.app/mmda/issue/DEVS-<n>/...) ou null
 subtask_urls: []                # URLs completas das sub-issues; [] quando não há sub-issues
 created: 2026-07-19             # data ISO YYYY-MM-DD
 ---
@@ -78,8 +78,8 @@ formato `SPEC-NNN-...` continuam válidas — mantenha o nome como está.
 Exemplos deste repositório:
 
 - `SPEC-YWAWQHPX-melhorias-template-base-nx.md`
-- `SPEC-W4RWD02M-evoluir-workflows-com-lidercap.md`
-- `SPEC-4NR9KKS8-portar-melhorias-telesena-monorepo.md`
+- `SPEC-W4RWD02M-evoluir-workflows-com-monorepo-referencia.md`
+- `SPEC-4NR9KKS8-portar-melhorias-monorepo-origem.md`
 
 ### Formato de requisitos (checklist com prioridade)
 

@@ -57,7 +57,7 @@ não cria novos):
 
 ```json
 {
-  "name": "@lidercap-apps/minha-lib",
+  "name": "@mateusmacedo/minha-lib",
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/minha-lib/src",
   "projectType": "library",
@@ -114,13 +114,13 @@ nível sob `libs/` ou `apps/` (`shared`, `backend`, `frontend`).
 ```bash
 # lib compartilhada (TypeScript puro, buildable via tsc)
 pnpm nx g @nx/js:lib libs/shared/<name> \
-  --importPath=@lidercap-apps/shared-<name> \
+  --importPath=@mateusmacedo/shared-<name> \
   --bundler=tsc --unitTestRunner=jest --linter=none \
   --tags=type:lib,scope:shared,stack:node
 
 # lib backend (NestJS)
 pnpm nx g @nx/nest:lib libs/backend/<name> \
-  --importPath=@lidercap-apps/backend-<name> \
+  --importPath=@mateusmacedo/backend-<name> \
   --unitTestRunner=jest --linter=none \
   --tags=type:lib,scope:backend,stack:node
 ```
@@ -169,10 +169,10 @@ invalidam o cache desta task.
 
 ```bash
 # Ver a configuração completa resolvida de um projeto
-pnpm nx show project @lidercap-apps/minha-lib
+pnpm nx show project @mateusmacedo/minha-lib
 
 # Versão visual no browser
-pnpm nx show project @lidercap-apps/minha-lib --web
+pnpm nx show project @mateusmacedo/minha-lib --web
 
 # Limpar o cache local
 pnpm nx reset
