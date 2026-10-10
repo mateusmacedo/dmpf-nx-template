@@ -2,5 +2,12 @@ packages:
   - 'apps/*'
   - 'libs/**'
   - 'tools/*'
+allowBuilds:
+  '@biomejs/biome': true
+  '@nestjs/core': true
+  '@parcel/watcher': true
+  less: true
+  sharp: true
+  unrs-resolver: true
 
 autoInstallPeers: true
