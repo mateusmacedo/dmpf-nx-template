@@ -80,6 +80,30 @@ token pode fazer, não eleva o que o usuário pode. O `ci-runner-bot` precisa,
 portanto, de acesso de escrita ao repositório além das duas entradas nas
 whitelists.
 
+**Autorizar o bot nas whitelists não basta — o push precisa carregar a
+credencial dele.** Isso foi verificado empiricamente, e não apenas inferido. Um
+workflow descartável tentou empurrar uma tag anotada usando
+`secrets.GITHUB_TOKEN`, com o `ci-runner-bot` já nas três whitelists e já com
+permissão `owner` no repositório. O servidor recusou:
+
+```text
+remote: error: Tag temp-test-push-permission-4820 is protected
+ ! [remote rejected] (pre-receive hook declined)
+```
+
+O ator do token efêmero das Actions não é o `ci-runner-bot`, e também não é
+quem dispara o workflow — o run que originou esta decisão foi disparado por um
+membro de `Owners` e `tech-leads`, e ainda assim o push foi recusado. É uma
+identidade distinta, que não consta em nenhuma whitelist e não é nomeável nelas.
+Daí o `RELEASE_TOKEN`: ele é o único meio de o push sair com uma identidade que
+as whitelists reconhecem, sem afrouxar proteção nenhuma.
+
+Uma observação de contraste, para quem comparar repositórios: o
+`lidercap-platform-legacy` roda o mesmo fluxo de release com
+`secrets.GITHUB_TOKEN` e conclui sem erro — mas porque não tem branch protection
+nem tag protection alguma. A ausência de bloqueio não é uma configuração
+melhor; é a ausência do problema.
+
 **Itens do ADR-004 que esta decisão substitui**:
 
 | Item do ADR-004 | Situação |
