@@ -9,10 +9,14 @@ remover arquivos, atualize a tabela correspondente.
 
 | Diretório | Itens | Conteúdo |
 | --- | --- | --- |
-| `rules/` | 12 | Regras de conduta e de qualidade |
+| `rules/` | 13 | Regras de conduta e de qualidade |
 | `skills/` | 26 | Skills de domínio (mais 11 arquivos em `references/`) |
-| `agents/` | 49 | Agentes especializados |
-| `commands/` | 8 | Comandos de workspace (Nx e utilitários) |
+| `agents/` | 50 | Agentes especializados |
+| `commands/` | 9 | Comandos de workspace (Nx, DMPF e utilitários) |
+
+Os arquivos `dmpf-*` de `rules/`, `agents/` e `commands/` (e as skills `dmpf-*` de
+`.agents/skills/`) são saída do `init` do `@mateusmacedo/dmpf-plugin`: atualizam-se
+pelo `nx migrate` e não se editam à mão.
 
 Convenções gerais do repositório ficam em `AGENTS.md`, na raiz. Skills de
 workspace específicas de Nx ficam em `.agents/skills/`.
@@ -37,6 +41,7 @@ Carregadas como contexto de conduta. Descrevem o que é esperado em cada área.
 | Processo e qualidade | `rules/process-enforcement.md` | Quando exigir especificação e plano antes de implementar. |
 | Segurança | `rules/security.md` | Autenticação, autorização, sanitização e variáveis sensíveis. |
 | Convenções de teste | `rules/testing-conventions.md` | Estrutura, nomenclatura e cobertura dos testes. |
+| Bounded context DMPF | `rules/dmpf-bounded-context.md` | Normas para escrever um bounded context sobre o kernel DMPF (`apps/backend/**`). |
 
 ---
 
@@ -150,6 +155,7 @@ dos arquivos no disco.
 | graphql-architect | `agents/graphql-architect.md` | Schemas, federação e performance de queries. |
 | websocket-engineer | `agents/websocket-engineer.md` | Comunicação bidirecional em tempo real. |
 | microservices-architect | `agents/microservices-architect.md` | Decomposição de monolitos e padrões de comunicação. |
+| dmpf-context-author | `agents/dmpf-context-author.md` | Bounded context completo sobre o kernel DMPF a partir de uma spec de contexto. |
 
 ### Infraestrutura, CI/CD e segurança
 
@@ -215,3 +221,4 @@ dos arquivos no disco.
 | `nx-plugins` | `commands/nx-plugins.md` |
 | `nx-run-tasks` | `commands/nx-run-tasks.md` |
 | `nx-workspace` | `commands/nx-workspace.md` |
+| `dmpf-new-context` | `commands/dmpf-new-context.md` |

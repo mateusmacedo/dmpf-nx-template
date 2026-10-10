@@ -9,7 +9,9 @@
 #
 # Build a partir da RAIZ do repositório (o contexto precisa do workspace inteiro):
 #   docker build -f apps/<sua-app>/Dockerfile --build-arg APP_NAME=<projeto-nx> \
-#     --build-arg APP_OUTPUT_PATH=apps/<sua-app>/dist -t <sua-app> .
+#     --build-arg APP_OUTPUT_PATH=apps/<sua-app>/dist \
+#     --secret id=npmrc,src=$HOME/.npmrc --secret id=NODE_AUTH_TOKEN,env=NODE_AUTH_TOKEN \
+#     -t <sua-app> .
 #
 # PRÉ-REQUISITO — a app precisa expor os três targets de prune. O generator
 # `@nx/node:application` os cria quando a app nasce com suporte a Docker; se a sua
@@ -49,7 +51,9 @@ WORKDIR /workspace
 ARG APP_NAME
 ARG APP_OUTPUT_PATH
 COPY . .
-RUN pnpm install --frozen-lockfile
+RUN --mount=type=secret,id=npmrc,target=/root/.npmrc \
+    --mount=type=secret,id=NODE_AUTH_TOKEN,env=NODE_AUTH_TOKEN \
+    pnpm install --frozen-lockfile
 # `prune` já depende de `build` pelo grafo do Nx — não é preciso buildar antes.
 RUN pnpm nx prune "${APP_NAME}"
 # O `prune` deixa `catalog:`/`workspace:` e o placement dep/devDep dessincronizados

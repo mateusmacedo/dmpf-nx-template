@@ -19,6 +19,12 @@
       "{workspaceRoot}/biome.json",
       "{workspaceRoot}/pnpm-workspace.yaml",
       "{workspaceRoot}/pnpm-lock.yaml"
+    ],
+    "go": [
+      "{projectRoot}/**/*",
+      "!{projectRoot}/deploy/**/*",
+      "{workspaceRoot}/go.work",
+      "{workspaceRoot}/go.work.sum"
     ]
   },
   "plugins": [
@@ -68,7 +74,6 @@
   ],
   "release": {
     "projectsRelationship": "independent",
-    "projects": ["tag:type:lib"],
     "releaseTag": {
       "pattern": "{projectName}@{version}"
     },
@@ -87,13 +92,6 @@
       "automaticFromRef": true,
       "projectChangelogs": {
         "entryWhenNoChanges": "Initial release"
-      }
-    },
-    "docker": {
-      "registryUrl": "ghcr.io",
-      "versionSchemes": {
-        "production": "{currentDate|YYMM.DD}.{shortCommitSha}",
-        "hotfix": "{currentDate|YYMM.DD}.{shortCommitSha}-hotfix"
       }
     }
   },
@@ -123,6 +121,39 @@
     },
     "e2e": {
       "cache": true
+    },
+    "deploy-env": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "command": "[ -f deploy/.env ] || cp deploy/.env.example deploy/.env",
+        "cwd": "{projectRoot}"
+      }
+    },
+    "@nx-go/nx-go:generate": {
+      "options": {
+        "args": ["./..."]
+      }
+    },
+    "@nx-go/nx-go:lint": {
+      "inputs": ["go", "^go", "{workspaceRoot}/.golangci.yml"],
+      "options": {
+        "linter": "go",
+        "args": [
+          "run",
+          "github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.13.2",
+          "run",
+          "--allow-parallel-runners"
+        ]
+      }
+    },
+    "@nx-go/nx-go:test": {
+      "dependsOn": ["^build"],
+      "cache": true,
+      "inputs": ["go", "^go"],
+      "options": {
+        "cover": true
+      }
     }
   },
   "nxCloudId": "6a5d373ddbc8c8c89a15bb24"

@@ -47,7 +47,7 @@ on:
         description: "Filtro de projetos para build (ex: tag:type:lib)"
         required: false
         type: string
-        default: "tag:type:lib"
+        default: "tag:type:lib,!tag:stack:go"
       timeout_minutes:
         description: "Timeout em minutos"
         required: false
@@ -81,6 +81,11 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
+      - name: Credencial do GitHub Packages no .npmrc de usuário
+        run: |
+          printf '%s\n' '//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}' > "$RUNNER_TEMP/npmrc"
+          echo "NPM_CONFIG_USERCONFIG=$RUNNER_TEMP/npmrc" >> "$GITHUB_ENV"
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
@@ -93,6 +98,8 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
         run: pnpm install --frozen-lockfile
 
       - name: Build libs
