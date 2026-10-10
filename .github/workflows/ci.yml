@@ -75,6 +75,7 @@ jobs:
         uses: ./.github/actions/setup-node-pnpm
         with:
           node-version: "24"
+          install: "false"
 
       - name: Setup Go
         uses: actions/setup-go@v6
