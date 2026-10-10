@@ -10,6 +10,9 @@ clonar, validar o ambiente e então gerar a primeira app ou lib do seu projeto.
 - Node.js `^24` (ver `.nvmrc` / `.node-version`).
 - `pnpm@11.14.0`, conforme `packageManager` em `package.json`.
 - Corepack habilitado, para usar exatamente a versão declarada do pnpm.
+- Go na diretiva do `go.work` (hoje `1.26.9`), exigido pelo `@mateusmacedo/dmpf-plugin`.
+- Token do GitHub com o escopo `read:packages`: o `@mateusmacedo/dmpf-plugin` vem do
+  GitHub Packages, que exige autenticação até para pacote público.
 
 Para o dia a dia com o workspace, tenha também estas ferramentas de linha de comando:
 
@@ -34,9 +37,18 @@ yq --version
 
 ## Instalação
 
+O `.npmrc` versionado só aponta o escopo `@mateusmacedo` para o GitHub Packages; a
+credencial fica no `.npmrc` do seu usuário, porque desde a 11.5.3 o pnpm ignora
+`${VAR}` em credencial do `.npmrc` do projeto (GHSA-3qhv-2rgh-x77r):
+
 ```bash
+echo '//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}' >> ~/.npmrc
+export NODE_AUTH_TOKEN=<token com read:packages>
 pnpm install
 ```
+
+Sem a credencial, o `pnpm install` falha com `ERR_PNPM_FETCH_401` em
+`npm.pkg.github.com`.
 
 O `pnpm install` também executa o script `prepare`, que instala o `lefthook`. O
 script é tolerante a falha (`lefthook install || true`), então a instalação não
