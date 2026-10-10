@@ -109,21 +109,106 @@ jobs:
             echo "No npm release tags found. Running bootstrap npm release with --first-release."
           fi
 
-      - name: Release — npm libs (first release)
+      - name: Release version — npm libs (first release)
         if: steps.npm-first-release.outputs.is_first_npm_release == 'true'
-        run: pnpm nx release --groups=npm-libs --first-release --yes
+        run: pnpm nx release version --groups=npm-libs --first-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Release — npm libs (standard)
+      - name: Release version — npm libs (standard)
         if: steps.npm-first-release.outputs.is_first_npm_release != 'true'
-        run: pnpm nx release --groups=npm-libs --yes
+        run: pnpm nx release version --groups=npm-libs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Collect release tags from current commit
+        id: release-tags
+        run: |
+          TAGS=$(git tag --points-at HEAD | tr '\n' ',' | sed 's/,$//')
+          if [[ -z "$TAGS" ]]; then
+            echo "has_release_tags=false" >> "$GITHUB_OUTPUT"
+            echo "tags_csv=" >> "$GITHUB_OUTPUT"
+            echo "::notice::No release tags created on HEAD. Treating this run as no-op and skipping npm publish."
+          else
+            echo "has_release_tags=true" >> "$GITHUB_OUTPUT"
+            echo "tags_csv=$TAGS" >> "$GITHUB_OUTPUT"
+            echo "Release tags created on HEAD: $TAGS"
+          fi
+
+      - name: Validate release tag pattern
+        if: steps.release-tags.outputs.has_release_tags == 'true'
+        run: |
+          IFS=',' read -ra TAG_ARRAY <<< "${{ steps.release-tags.outputs.tags_csv }}"
+          for TAG in "${TAG_ARRAY[@]}"; do
+            if [[ ! "$TAG" =~ ^@lideranca-sites/[^@]+@.+$ ]]; then
+              echo "::error::Invalid release tag format: $TAG"
+              exit 1
+            fi
+          done
+
+      - name: Publish npm libs (first release)
+        if: steps.release-tags.outputs.has_release_tags == 'true' && steps.npm-first-release.outputs.is_first_npm_release == 'true'
+        run: pnpm nx release publish --groups=npm-libs --first-release --yes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish npm libs (standard)
+        if: steps.release-tags.outputs.has_release_tags == 'true' && steps.npm-first-release.outputs.is_first_npm_release != 'true'
+        run: pnpm nx release publish --groups=npm-libs --yes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Validate GitHub releases for created tags
+        if: steps.release-tags.outputs.has_release_tags == 'true'
+        env:
+          TAGS_CSV: ${{ steps.release-tags.outputs.tags_csv }}
+          REPOSITORY: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          node -e "
+            const tags = (process.env.TAGS_CSV || '').split(',').map((tag) => tag.trim()).filter(Boolean);
+            if (tags.length === 0) {
+              throw new Error('Expected release tags, but none were provided to validation step.');
+            }
+            const repo = process.env.REPOSITORY;
+            const token = process.env.GITHUB_TOKEN;
+            (async () => {
+              for (const tag of tags) {
+                const encoded = encodeURIComponent(tag);
+                const url = 'https://api.github.com/repos/' + repo + '/releases/tags/' + encoded;
+                const response = await fetch(url, {
+                  headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Accept': 'application/vnd.github+json',
+                    'X-GitHub-Api-Version': '2022-11-28'
+                  }
+                });
+                if (!response.ok) {
+                  const body = await response.text();
+                  throw new Error('Missing GitHub release for tag ' + tag + '. Status: ' + response.status + '. Body: ' + body);
+                }
+              }
+              console.log('Validated GitHub release for tags:', tags.join(', '));
+            })().catch((error) => {
+              console.error(error.message);
+              process.exit(1);
+            });
+          "
+
+      - name: Release summary
+        if: always()
+        run: |
+          echo "first_release=${{ steps.npm-first-release.outputs.is_first_npm_release }}"
+          echo "has_release_tags=${{ steps.release-tags.outputs.has_release_tags }}"
+          echo "tags=${{ steps.release-tags.outputs.tags_csv }}"
 
       - name: Detect docker release candidates
         id: docker-candidates
