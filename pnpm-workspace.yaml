@@ -19,6 +19,8 @@ allowBuilds:
   unrs-resolver: true
 
 autoInstallPeers: true
+fetchRetries: 5
+fetchRetryMintimeout: 10000
 
 catalog:
   "@biomejs/biome": 2.4.16
