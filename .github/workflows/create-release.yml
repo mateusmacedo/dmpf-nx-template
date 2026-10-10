@@ -100,27 +100,24 @@ jobs:
           git checkout -b "$BRANCH"
           git push origin "$BRANCH"
 
-      - name: Open pull request
-        run: |
-          gh pr create \
-            --base master \
-            --head "release/${{ steps.version.outputs.value }}" \
-            --title "release: ${{ steps.version.outputs.value }}" \
-            --body "$(cat <<'EOF'
-          ## Release ${{ steps.version.outputs.value }}
-
-          **Bump type:** ${{ steps.bump.outputs.value }}
-
-          ### Checklist
-
-          - [ ] Features validadas em \`develop\`
-          - [ ] Features mergeadas nesta branch
-          - [ ] QA aprovado em homologação
-          - [ ] Changelog revisado
-
-          ---
-          > Branch criada automaticamente via workflow *Create Release Branch*
-          EOF
-          )"
+      - name: Open pull request (Gitea API)
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITEA_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.version.outputs.value }}"
+          BUMP="${{ steps.bump.outputs.value }}"
+
+          BODY=$(printf '## Release %s\n\n**Bump type:** %s\n\n### Checklist\n\n- [ ] Features validadas em `develop`\n- [ ] Features mergeadas nesta branch\n- [ ] QA aprovado em homologação\n- [ ] Changelog revisado\n\n---\n> Branch criada automaticamente via workflow *Create Release Branch*\n' "$VERSION" "$BUMP")
+
+          jq -n \
+            --arg base "master" \
+            --arg head "release/${VERSION}" \
+            --arg title "release: ${VERSION}" \
+            --arg body "$BODY" \
+            '{base: $base, head: $head, title: $title, body: $body}' \
+          | curl -fsS -X POST \
+              "${GITHUB_SERVER_URL}/api/v1/repos/${GITHUB_REPOSITORY}/pulls" \
+              -H "Authorization: token ${GITEA_TOKEN}" \
+              -H "Content-Type: application/json" \
+              -H "Accept: application/json" \
+              --data-binary @-
