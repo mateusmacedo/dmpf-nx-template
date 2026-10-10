@@ -7,6 +7,21 @@
       "matchManagers": ["github-actions"],
       "groupName": "github-actions",
       "schedule": ["before 6am on monday"]
+    },
+    {
+      "matchPackageNames": ["@mateusmacedo/dmpf-plugin", "@nx-go/nx-go"],
+      "enabled": false
+    },
+    {
+      "matchManagers": ["gomod"],
+      "matchPackageNames": ["github.com/mateusmacedo/dmpf{,/**}"],
+      "enabled": false
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "matchDepTypes": ["workflow"],
+      "matchPackageNames": ["mateusmacedo/dmpf"],
+      "enabled": false
     }
   ]
 }
