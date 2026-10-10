@@ -6,10 +6,9 @@ on:
       - master
       - develop
       - 'release/**'
-  push:
-    branches:
-      - master
-      - develop
+    paths-ignore:
+      - '**/*.md'
+      - '.github/ISSUE_TEMPLATE/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
