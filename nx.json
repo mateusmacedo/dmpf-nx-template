@@ -82,7 +82,8 @@
         },
         "changelog": {
           "projectChangelogs": {
-            "createRelease": "github"
+            "createRelease": "github",
+            "entryWhenNoChanges": "Initial release"
           }
         }
       }
