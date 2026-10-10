@@ -3,7 +3,10 @@
   "defaultBase": "main",
   "analytics": false,
   "namedInputs": {
-    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "default": [
+      "{projectRoot}/**/*",
+      "sharedGlobals"
+    ],
     "production": [
       "default",
       "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
@@ -23,7 +26,9 @@
     {
       "plugin": "@nx/js/typescript",
       "options": {
-        "typecheck": { "targetName": "typecheck" },
+        "typecheck": {
+          "targetName": "typecheck"
+        },
         "build": {
           "targetName": "build",
           "configName": "tsconfig.lib.json",
@@ -45,23 +50,34 @@
     },
     {
       "plugin": "@nx/jest/plugin",
-      "options": { "targetName": "test" }
+      "options": {
+        "targetName": "test"
+      }
     },
     {
       "plugin": "@nx/docker",
       "options": {
-        "buildTarget": { "name": "docker:build" },
-        "runTarget": { "name": "docker:run" }
+        "buildTarget": {
+          "name": "docker:build"
+        },
+        "runTarget": {
+          "name": "docker:run"
+        }
       }
-    }
+    },
+    "@nx-go/nx-go"
   ],
   "targetDefaults": {
     "build": {
-      "dependsOn": ["^build"],
+      "dependsOn": [
+        "^build"
+      ],
       "cache": true
     },
     "test": {
-      "dependsOn": ["^build"],
+      "dependsOn": [
+        "^build"
+      ],
       "cache": true
     },
     "lint": {
@@ -70,10 +86,15 @@
         "command": "biome lint {projectRoot}"
       },
       "cache": true,
-      "inputs": ["default", "{workspaceRoot}/biome.json"]
+      "inputs": [
+        "default",
+        "{workspaceRoot}/biome.json"
+      ]
     },
     "typecheck": {
-      "dependsOn": ["^typecheck"],
+      "dependsOn": [
+        "^typecheck"
+      ],
       "cache": true
     },
     "e2e": {
