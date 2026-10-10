@@ -102,7 +102,7 @@ deve divergir dele.
 | `go` | Projeto Go, gerenciado via `go.work` / `@nx-go/nx-go` |
 | `universal` | Sem dependência de runtime (tipos puros, utilitários de string/data) |
 
-As duas libs existentes usam `stack:node`. `scope:` acompanha a pasta de primeiro
+Libs sem dependência de runtime usam `stack:universal`; as que tocam APIs de Node ou frameworks de servidor usam `stack:node`. `scope:` acompanha a pasta de primeiro
 nível sob `libs/` ou `apps/` (`shared`, `backend`, `frontend`).
 
 ---
@@ -133,13 +133,9 @@ TypeScript Project References da raiz.
 `--linter=none` é deliberado: o lint deste workspace é o Biome, configurado em
 `targetDefaults` (ver `nx.json`), não um linter por projeto.
 
-> **Débito conhecido:** existe um generator interno em
-> `tools/generators/shared-lib`, declarado em `generators.json` e registrado no
-> `package.json` como `@nx-base-template/tools`. Ele **não está resolvível** pelo
-> Nx hoje — `pnpm nx list` não o exibe e a invocação falha com
-> `Cannot find module '@nx-base-template/tools/package.json'`, porque o Nx tenta
-> resolver o nome como um pacote instalado. Use os generators do Nx acima até que
-> o registro seja corrigido.
+`tools/generators/` fica vazio de propósito: é o destino de generators próprios
+do workspace, quando houver. Registre a coleção em `nx.generators` do
+`package.json` ao criar o primeiro.
 
 ### Manualmente
 
@@ -173,10 +169,10 @@ invalidam o cache desta task.
 
 ```bash
 # Ver a configuração completa resolvida de um projeto
-pnpm nx show project @lidercap-apps/shared-types
+pnpm nx show project @lidercap-apps/minha-lib
 
 # Versão visual no browser
-pnpm nx show project @lidercap-apps/shared-types --web
+pnpm nx show project @lidercap-apps/minha-lib --web
 
 # Limpar o cache local
 pnpm nx reset

@@ -2,5 +2,5 @@
   "extends": "./tsconfig.base.json",
   "compileOnSave": false,
   "files": [],
-  "references": [{ "path": "./libs/shared/utils" }, { "path": "./libs/shared/types" }]
+  "references": []
 }

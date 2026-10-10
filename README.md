@@ -51,8 +51,7 @@ nx-base-template/
 │   └── data-access/
 │       └── api-client/          # Client HTTP compartilhado
 ├── tools/
-│   ├── generators/              # Nx generators da organização
-│   │   └── shared-lib/          # nx g @nx-base-template/tools:shared-lib
+│   ├── generators/              # Nx generators do workspace (vazio)
 │   └── executors/               # Nx executors customizados
 ├── docs/
 │   └── adr/                     # Architecture Decision Records
@@ -85,8 +84,8 @@ Cada projeto deve declarar uma tag de cada dimensão:
 ## Comandos principais
 
 ```bash
-# Rodar testes da lib shared/utils
-pnpm nx test @lidercap-apps/shared-utils
+# Rodar testes de uma lib
+pnpm nx test @lidercap-apps/minha-lib
 
 # Rodar lint apenas nos projetos afetados pelo último commit
 pnpm nx affected -t lint
@@ -101,7 +100,10 @@ pnpm nx run-many -t build
 pnpm nx graph
 
 # Gerar nova shared lib
-pnpm nx g @nx-base-template/tools:shared-lib my-lib
+pnpm nx g @nx/js:lib libs/shared/minha-lib \
+  --importPath=@lidercap-apps/minha-lib \
+  --bundler=tsc --unitTestRunner=jest --linter=none \
+  --tags=type:lib,scope:shared,stack:node
 ```
 
 ## Adicionar uma nova app
@@ -140,7 +142,7 @@ Os testes usam Jest com transform via SWC (`.spec.swcrc`).
 
 ```bash
 # Testar uma lib específica
-pnpm nx test @lidercap-apps/shared-utils
+pnpm nx test @lidercap-apps/minha-lib
 
 # Testar apenas os projetos afetados
 pnpm nx affected -t test

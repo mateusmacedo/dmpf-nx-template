@@ -95,13 +95,14 @@ contra Gitea e a regra de base do plugin contraria o fluxo `develop` →
 pnpm nx show projects
 ```
 
-Hoje isso retorna apenas as duas libs compartilhadas e o metadado raiz:
+Hoje isso retorna apenas o metadado raiz:
 
 | Projeto Nx | Caminho |
 | --- | --- |
-| `@lidercap-apps/shared-types` | `libs/shared/types` |
-| `@lidercap-apps/shared-utils` | `libs/shared/utils` |
 | `@nx-base-template/source` | raiz (metadado, sem código) |
+
+O template não traz apps nem libs — `apps/*` e `libs/*` são diretórios de
+destino. Os projetos aparecem aqui conforme você os cria.
 
 ## Criar a primeira app ou lib
 
@@ -141,15 +142,15 @@ pnpm nx run-many -t lint
 pnpm nx run-many -t typecheck
 pnpm nx run-many -t test
 pnpm nx run-many -t build
-pnpm nx test @lidercap-apps/shared-utils
-pnpm nx build @lidercap-apps/shared-types
+pnpm nx test @lidercap-apps/minha-lib
+pnpm nx build @lidercap-apps/minha-lib
 ```
 
 Para rodar um único arquivo de teste, o passthrough vai direto ao Jest 30 — a flag
 é `--testPathPatterns`, no plural:
 
 ```bash
-pnpm nx test @lidercap-apps/shared-utils --testPathPatterns="string"
+pnpm nx test @lidercap-apps/minha-lib --testPathPatterns="string"
 ```
 
 ## Projetos afetados
