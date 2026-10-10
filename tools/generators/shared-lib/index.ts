@@ -1,5 +1,5 @@
 import { join } from 'node:path';
-import { type Tree, addProjectConfiguration, generateFiles, names, updateJson } from '@nx/devkit';
+import { addProjectConfiguration, generateFiles, names, type Tree, updateJson } from '@nx/devkit';
 
 interface SharedLibSchema {
   name: string;
@@ -10,9 +10,9 @@ interface SharedLibSchema {
 export default async function sharedLibGenerator(tree: Tree, options: SharedLibSchema) {
   const libNames = names(options.name);
   const stack = options.stack ?? 'node';
-  const projectName = `@lideranca-sites/shared-${libNames.fileName}`;
+  const projectName = `@Lidercap-apps/shared-${libNames.fileName}`;
   const projectRoot = `libs/shared/${libNames.fileName}`;
-  const importPath = `@lideranca-sites/shared-${libNames.fileName}`;
+  const importPath = `@Lidercap-apps/shared-${libNames.fileName}`;
 
   addProjectConfiguration(tree, projectName, {
     root: projectRoot,

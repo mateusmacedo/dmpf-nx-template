@@ -1,5 +1,5 @@
 {
-  "name": "@lideranca-sites/shared-utils",
+  "name": "@Lidercap-apps/shared-utils",
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/shared/utils/src",
   "projectType": "library",

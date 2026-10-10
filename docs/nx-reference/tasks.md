@@ -56,7 +56,7 @@ não cria novos):
 
 ```json
 {
-  "name": "@lideranca-sites/minha-lib",
+  "name": "@Lidercap-apps/minha-lib",
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/minha-lib/src",
   "projectType": "library",
@@ -102,10 +102,11 @@ Todo projeto deve ter **exatamente três tags**, uma de cada dimensão:
 ### Via generator (recomendado)
 
 ```bash
-pnpm nx g @lideranca-sites/source:shared-lib minha-lib
+pnpm nx g @Lidercap-apps/source:shared-lib minha-lib
 ```
 
 O generator pergunta o nome e a stack, e cria:
+
 - `libs/shared/<name>/` com tsconfig, package.json e src/index.ts
 - Tags corretas no `project.json`
 - Path alias em `tsconfig.base.json`
@@ -143,10 +144,10 @@ invalidam o cache desta task.
 
 ```bash
 # Ver a configuração completa resolvida de um projeto
-pnpm nx show project @lideranca-sites/shared-types
+pnpm nx show project @Lidercap-apps/shared-types
 
 # Versão visual no browser
-pnpm nx show project @lideranca-sites/shared-types --web
+pnpm nx show project @Lidercap-apps/shared-types --web
 
 # Limpar o cache local
 pnpm nx reset

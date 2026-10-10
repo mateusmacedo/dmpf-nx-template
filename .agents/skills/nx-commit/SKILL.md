@@ -12,7 +12,7 @@ correta de cada lib via conventional commits.
 ## Regra central
 
 > **O scope do commit = nome do projeto NX** (sem o prefixo de organização).
-> Ex.: `@lideranca-sites/shared-types` → scope `shared-types`.
+> Ex.: `@Lidercap-apps/shared-types` → scope `shared-types`.
 >
 > Commits que tocam arquivos de **projetos distintos** devem ser **commits distintos**.
 > Nunca misture arquivos de libs diferentes no mesmo commit.

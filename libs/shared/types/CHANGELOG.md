@@ -2,11 +2,11 @@
 
 ### 🚀 Features
 
-- **shared-types:** add SortInput, SortOrder and PaginatedSortedResponse types ([7456c70](https://github.com/lideranca-sites/nx-base-template/commit/7456c70))
+- **shared-types:** add SortInput, SortOrder and PaginatedSortedResponse types ([7456c70](https://github.com/Lidercap-apps/nx-base-template/commit/7456c70))
 
 ### 🩹 Fixes
 
-- **shared-types:** restaurar herança de cache e inputs do targetDefault no lint ([480e3c9](https://github.com/lideranca-sites/nx-base-template/commit/480e3c9))
+- **shared-types:** restaurar herança de cache e inputs do targetDefault no lint ([480e3c9](https://github.com/Lidercap-apps/nx-base-template/commit/480e3c9))
 
 ### ❤️ Thank You
 
@@ -16,9 +16,9 @@
 
 ### 🚀 Features
 
-- **shared-types:** add README.md for shared types library ([ebbae1c](https://github.com/lideranca-sites/nx-base-template/commit/ebbae1c))
-- **shared-types:** add publishConfig for GitHub package registry ([185caea](https://github.com/lideranca-sites/nx-base-template/commit/185caea))
-- **shared-types:** add shared types library ([e7a4b49](https://github.com/lideranca-sites/nx-base-template/commit/e7a4b49))
+- **shared-types:** add README.md for shared types library ([ebbae1c](https://github.com/Lidercap-apps/nx-base-template/commit/ebbae1c))
+- **shared-types:** add publishConfig for GitHub package registry ([185caea](https://github.com/Lidercap-apps/nx-base-template/commit/185caea))
+- **shared-types:** add shared types library ([e7a4b49](https://github.com/Lidercap-apps/nx-base-template/commit/e7a4b49))
 
 ### ❤️ Thank You
 
