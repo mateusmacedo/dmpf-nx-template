@@ -2,7 +2,7 @@
 id: SPEC-TXJ6A4XX
 slug: template-greenfield-dmpf
 title: Template greenfield DMPF — workspace pronto para consumir o DMPF por versão
-stage: building
+stage: done
 priority: P1
 depends_on: [SPEC-317RXZ73]
 ticket_url: https://linear.app/mmda/issue/DEVS-71/spec-txj6a4xx-template-greenfield-dmpf-workspace-pronto-para-consumir
