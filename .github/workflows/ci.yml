@@ -6,6 +6,10 @@ on:
       - master
       - develop
       - 'release/**'
+  push:
+    branches:
+      - master
+      - develop
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -27,19 +31,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup Node and pnpm
+        uses: ./.github/actions/setup-node-pnpm
         with:
-          version: 9
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+          node-version: '22'
+          pnpm-version: '9'
 
       - name: Set Nx SHAs for affected (base/head)
         uses: nrwl/nx-set-shas@v4
