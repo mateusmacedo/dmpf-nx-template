@@ -99,8 +99,8 @@ Hoje isso retorna apenas as duas libs compartilhadas e o metadado raiz:
 
 | Projeto Nx | Caminho |
 | --- | --- |
-| `@Lidercap-apps/shared-types` | `libs/shared/types` |
-| `@Lidercap-apps/shared-utils` | `libs/shared/utils` |
+| `@lidercap-apps/shared-types` | `libs/shared/types` |
+| `@lidercap-apps/shared-utils` | `libs/shared/utils` |
 | `@nx-base-template/source` | raiz (metadado, sem código) |
 
 ## Criar a primeira app ou lib
@@ -111,7 +111,7 @@ cria, está em `docs/nx-reference/tasks.md`.
 ```bash
 # lib compartilhada
 pnpm nx g @nx/js:lib libs/shared/<name> \
-  --importPath=@Lidercap-apps/shared-<name> \
+  --importPath=@lidercap-apps/shared-<name> \
   --bundler=tsc --unitTestRunner=jest --linter=none \
   --tags=type:lib,scope:shared,stack:node
 
@@ -141,15 +141,15 @@ pnpm nx run-many -t lint
 pnpm nx run-many -t typecheck
 pnpm nx run-many -t test
 pnpm nx run-many -t build
-pnpm nx test @Lidercap-apps/shared-utils
-pnpm nx build @Lidercap-apps/shared-types
+pnpm nx test @lidercap-apps/shared-utils
+pnpm nx build @lidercap-apps/shared-types
 ```
 
 Para rodar um único arquivo de teste, o passthrough vai direto ao Jest 30 — a flag
 é `--testPathPatterns`, no plural:
 
 ```bash
-pnpm nx test @Lidercap-apps/shared-utils --testPathPatterns="string"
+pnpm nx test @lidercap-apps/shared-utils --testPathPatterns="string"
 ```
 
 ## Projetos afetados
