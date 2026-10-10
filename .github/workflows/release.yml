@@ -86,8 +86,8 @@ jobs:
             echo "value=production" >> $GITHUB_OUTPUT
           fi
 
-      - name: Detect npm first release
-        id: npm-first-release
+      - name: Detect npm bootstrap mode
+        id: npm-bootstrap
         run: |
           HAS_NPM_RELEASE_TAG=$(
             node -e "
@@ -96,21 +96,38 @@ jobs:
                 .split('\n')
                 .map((tag) => tag.trim())
                 .filter(Boolean);
-              const hasProjectReleaseTag = tags.some((tag) => /^@[^/]+\/[^@]+@.+$/.test(tag));
+              const hasProjectReleaseTag = tags.some((tag) => /^@lideranca-sites\/[^@]+@.+$/.test(tag));
               process.stdout.write(hasProjectReleaseTag ? 'true' : 'false');
             "
           )
 
-          if [[ \"$HAS_NPM_RELEASE_TAG\" == \"true\" ]]; then
-            echo "is_first_npm_release=false" >> "$GITHUB_OUTPUT"
-            echo "Found existing npm release tags. Running standard npm release flow."
+          LIBS_JSON=$(pnpm nx show projects --projects=\"tag:type:lib\" --json)
+          PACKAGE_NAMES=$(node -e "
+            const projects = JSON.parse(process.argv[1] ?? '[]');
+            const names = projects.filter((name) => typeof name === 'string' && name.startsWith('@lideranca-sites/'));
+            process.stdout.write(names.join(','));
+          " "$LIBS_JSON")
+
+          HAS_PACKAGE_IN_REGISTRY=false
+          IFS=',' read -ra PACKAGES <<< "$PACKAGE_NAMES"
+          for PACKAGE_NAME in "${PACKAGES[@]}"; do
+            [[ -z "$PACKAGE_NAME" ]] && continue
+            if npm view "$PACKAGE_NAME" version --registry=https://npm.pkg.github.com >/dev/null 2>&1; then
+              HAS_PACKAGE_IN_REGISTRY=true
+              break
+            fi
+          done
+
+          if [[ "$HAS_NPM_RELEASE_TAG" == "false" && "$HAS_PACKAGE_IN_REGISTRY" == "false" ]]; then
+            echo "use_first_release=true" >> "$GITHUB_OUTPUT"
+            echo "Bootstrap mode enabled: no release tags and no package found in registry."
           else
-            echo "is_first_npm_release=true" >> "$GITHUB_OUTPUT"
-            echo "No npm release tags found. Running bootstrap npm release with --first-release."
+            echo "use_first_release=false" >> "$GITHUB_OUTPUT"
+            echo "Standard mode enabled: existing release tags or existing package detected in registry."
           fi
 
-      - name: Release version — npm libs (first release)
-        if: steps.npm-first-release.outputs.is_first_npm_release == 'true'
+      - name: Release version — npm libs (bootstrap)
+        if: steps.npm-bootstrap.outputs.use_first_release == 'true'
         run: pnpm nx release version --groups=npm-libs --first-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -118,7 +135,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Release version — npm libs (standard)
-        if: steps.npm-first-release.outputs.is_first_npm_release != 'true'
+        if: steps.npm-bootstrap.outputs.use_first_release != 'true'
         run: pnpm nx release version --groups=npm-libs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -150,8 +167,8 @@ jobs:
             fi
           done
 
-      - name: Publish npm libs (first release)
-        if: steps.release-tags.outputs.has_release_tags == 'true' && steps.npm-first-release.outputs.is_first_npm_release == 'true'
+      - name: Publish npm libs (bootstrap)
+        if: steps.release-tags.outputs.has_release_tags == 'true' && steps.npm-bootstrap.outputs.use_first_release == 'true'
         run: pnpm nx release publish --groups=npm-libs --first-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -159,7 +176,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish npm libs (standard)
-        if: steps.release-tags.outputs.has_release_tags == 'true' && steps.npm-first-release.outputs.is_first_npm_release != 'true'
+        if: steps.release-tags.outputs.has_release_tags == 'true' && steps.npm-bootstrap.outputs.use_first_release != 'true'
         run: pnpm nx release publish --groups=npm-libs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -206,7 +223,7 @@ jobs:
       - name: Release summary
         if: always()
         run: |
-          echo "first_release=${{ steps.npm-first-release.outputs.is_first_npm_release }}"
+          echo "first_release=${{ steps.npm-bootstrap.outputs.use_first_release }}"
           echo "has_release_tags=${{ steps.release-tags.outputs.has_release_tags }}"
           echo "tags=${{ steps.release-tags.outputs.tags_csv }}"
 
