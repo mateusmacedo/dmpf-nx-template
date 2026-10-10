@@ -66,13 +66,13 @@
   ],
   "release": {
     "projectsRelationship": "independent",
+    "git": {
+      "commit": true,
+      "tag": true,
+      "commitMessage": "chore(release): publish [skip ci]"
+    },
     "version": {
-      "conventionalCommits": true,
-      "git": {
-        "commit": true,
-        "tag": true,
-        "commitMessage": "chore(release): publish [skip ci]"
-      }
+      "conventionalCommits": true
     },
     "groups": {
       "npm-libs": {
