@@ -1,12 +1,12 @@
 packages:
-  - 'apps/*'
-  - 'libs/**'
-  - 'tools/*'
+  - "apps/*"
+  - "libs/**"
+  - "tools/*"
 allowBuilds:
-  '@biomejs/biome': true
-  '@nestjs/core': true
-  '@parcel/watcher': true
-  '@swc/core': true
+  "@biomejs/biome": true
+  "@nestjs/core": true
+  "@parcel/watcher": true
+  "@swc/core": true
   lefthook: true
   less: true
   nx: true
@@ -16,31 +16,31 @@ allowBuilds:
 autoInstallPeers: true
 
 catalog:
-  '@biomejs/biome': 2.4.16
-  '@nestjs/common': 12.0.0-alpha.5
-  '@nestjs/core': 12.0.0-alpha.5
-  '@nestjs/platform-express': 12.0.0-alpha.5
-  '@nestjs/schematics': 12.0.0-alpha.9
-  '@nestjs/testing': 12.0.0-alpha.5
-  '@nx-go/nx-go': 4.0.0
-  '@nx/angular': 23.1.0
-  '@nx/docker': 23.1.0
-  '@nx/express': 23.1.0
-  '@nx/jest': 23.1.0
-  '@nx/js': 23.1.0
-  '@nx/nest': 23.1.0
-  '@nx/next': 23.1.0
-  '@nx/node': 23.1.0
-  '@nx/react': 23.1.0
-  '@nx/web': 23.1.0
-  '@nx/webpack': 23.1.0
-  '@nx/workspace': 23.1.0
-  '@swc-node/register': 1.11.1
-  '@swc/core': 1.15.40
-  '@swc/helpers': 0.5.23
-  '@swc/jest': 0.2.39
-  '@types/jest': 30.0.0
-  '@types/node': 25.9.1
+  "@biomejs/biome": 2.4.16
+  "@nestjs/common": 11.1.28
+  "@nestjs/core": 11.1.28
+  "@nestjs/platform-express": 11.1.28
+  "@nestjs/schematics": 11.1.0
+  "@nestjs/testing": 11.1.28
+  "@nx-go/nx-go": 4.0.0
+  "@nx/angular": 23.1.0
+  "@nx/docker": 23.1.0
+  "@nx/express": 23.1.0
+  "@nx/jest": 23.1.0
+  "@nx/js": 23.1.0
+  "@nx/nest": 23.1.0
+  "@nx/next": 23.1.0
+  "@nx/node": 23.1.0
+  "@nx/react": 23.1.0
+  "@nx/web": 23.1.0
+  "@nx/webpack": 23.1.0
+  "@nx/workspace": 23.1.0
+  "@swc-node/register": 1.11.1
+  "@swc/core": 1.15.40
+  "@swc/helpers": 0.5.23
+  "@swc/jest": 0.2.39
+  "@types/jest": 30.0.0
+  "@types/node": 25.9.1
   axios: 1.16.1
   jest: 30.4.2
   jest-environment-node: 30.4.1
