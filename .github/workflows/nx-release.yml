@@ -37,6 +37,8 @@ jobs:
       )
     runs-on: ubuntu-26.04
     timeout-minutes: 30
+    env:
+      NODE_AUTH_TOKEN: ${{ github.token }}
     outputs:
       version_sha: ${{ steps.push.outputs.version_sha }}
       has_npm: ${{ steps.push.outputs.has_npm }}

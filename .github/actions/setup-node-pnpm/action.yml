@@ -8,6 +8,12 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Credencial do GitHub Packages no .npmrc de usuário
+      shell: bash
+      run: |
+        printf '%s\n' '//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}' > "$RUNNER_TEMP/npmrc"
+        echo "NPM_CONFIG_USERCONFIG=$RUNNER_TEMP/npmrc" >> "$GITHUB_ENV"
+
     # Sem `version`: o pnpm/action-setup infere a versão do campo `packageManager`
     # do package.json (fonte única). Passar ambos causa ERR_PNPM_BAD_PM_VERSION.
     - name: Setup pnpm

@@ -72,6 +72,8 @@ jobs:
     name: Publish libs (nx release publish)
     runs-on: ${{ inputs.runner }}
     timeout-minutes: ${{ inputs.timeout_minutes }}
+    env:
+      NODE_AUTH_TOKEN: ${{ github.token }}
 
     steps:
       - name: Checkout (commit versionado da tag)
@@ -80,6 +82,11 @@ jobs:
           ref: ${{ inputs.ref }}
           fetch-depth: 0
           fetch-tags: true
+
+      - name: Credencial do GitHub Packages no .npmrc de usuário
+        run: |
+          printf '%s\n' '//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}' > "$RUNNER_TEMP/npmrc"
+          echo "NPM_CONFIG_USERCONFIG=$RUNNER_TEMP/npmrc" >> "$GITHUB_ENV"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
