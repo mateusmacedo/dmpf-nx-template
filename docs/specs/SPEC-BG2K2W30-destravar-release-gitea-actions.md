@@ -14,13 +14,14 @@ created: 2026-08-11
 
 ## Resumo
 
-O workflow `Release` versiona as libs compartilhadas corretamente, mas não consegue empurrar o resultado para o remoto: o Gitea recusa as três refs (`master` e as duas tags de versão) porque o token efêmero das Actions não pertence a nenhum time autorizado nas whitelists de proteção. Como mantenedor do template, quero que o release conclua de ponta a ponta com uma identidade de automação explicitamente autorizada, para que as libs voltem a ser versionadas e publicadas sem intervenção manual e sem enfraquecer as proteções que valem para pessoas.
+O workflow `Release` versiona as libs compartilhadas corretamente, mas não consegue empurrar o resultado para o remoto: o Gitea recusa as três refs (`master` e as duas tags de versão) porque o token efêmero das Actions não pertence a nenhum time autorizado nas whitelists de proteção. Como mantenedor do template, quero que o release conclua de ponta a ponta e que o `release.yml` fique em paridade com o `lidercap-platform-legacy`, workflow de referência da organização, para que as libs voltem a ser versionadas e publicadas sem intervenção manual e sem credencial dedicada a manter.
 
 ## Contexto
 
 - **Problema**: o run 4803 (job 6300, disparado pelo merge do PR #4 de `release/0.0.1` para `master`) falhou no step `Nx Release (skip publish)` com exit code 1. O `nx release` executou bump `0.0.1` para `0.0.2` nas duas libs, gerou changelogs, commitou e criou as tags — e foi recusado no push com `pre-receive hook declined` nas três refs. Nenhuma tag jamais existiu no remoto, e as libs seguem em `0.0.1`.
 - **Impacto**: enquanto não for resolvido, nenhuma lib do template pode ser versionada nem publicada, e o fluxo de release descrito no ADR-004 permanece inoperante. O template deixa de cumprir uma das funções que documenta.
-- **Causa raiz**: o release escreve em três refs protegidas usando uma identidade que não está em nenhuma whitelist. A branch protection de `master` tem `enable_push_whitelist: true` com os times `Owners` e `tech-leads`; a tag protection #1012, com `name_pattern: "*"`, cobre toda e qualquer tag e admite apenas `Owners`. Ambas têm `whitelist_usernames` vazio. O ator do push é o token efêmero das Actions do Gitea, que não é membro de nenhum time da organização — logo, não existe caminho pelo qual seja aceito. O bloqueio é de identidade, não de conteúdo: um mantenedor pertencente a `Owners` executaria o mesmo push sem rejeição.
+- **Causa raiz**: o release escrevia em três refs protegidas usando uma identidade que não estava em nenhuma whitelist. A branch protection de `master` tinha `enable_push_whitelist: true` com os times `Owners` e `tech-leads`; a tag protection #1012, com `name_pattern: "*"`, cobria toda e qualquer tag e admitia apenas `Owners`. Ambas com `whitelist_usernames` vazio. O ator do push é o token efêmero das Actions do Gitea, que não é membro de nenhum time — logo, não havia caminho pelo qual fosse aceito. O bloqueio era de identidade, não de conteúdo.
+- **Identidade do ator, medida**: duas hipóteses foram testadas e descartadas. O ator não é quem dispara o workflow (o run 4803 partiu de um membro de `Owners` e `tech-leads` e foi recusado) e não é o `ci-runner-bot` (o run 4820 empurrou uma tag com o token efêmero, já com o bot nas três whitelists e com permissão `owner`, e recebeu `Tag ... is protected`). É uma identidade distinta, não nomeável em whitelist.
 - **Causa contribuinte**: o `release.yml` foi escrito assumindo que o step `Nx Release (skip publish)` apenas versiona, e que o push seria feito pelo step dedicado `Push version commit and tags`. O que liga o push automático, porém, é a chave `changelog.projectChangelogs.createRelease` do `nx.json` — o `nx release` deriva `shouldPush` da presença dela, não de um default do comando. Com `createRelease: "github"` declarado, o push saiu de dentro do step de versionamento e o step dedicado nunca executou.
 - **Obstáculo latente**: a mesma chave faz o Nx tentar se comunicar com `api.github.com` a respeito de um repositório que existe apenas no Gitea. O Nx Release oferece os providers `github`, `github-enterprise-server` e `gitlab` — não há provider para Gitea. Removê-la resolve as duas coisas de uma vez, e por isso as duas edições do `nx.json` ficam acopladas: declarar `release.git.push: false` mantendo `createRelease` faz o Nx abortar com `GIT_PUSH_FALSE_WITH_CREATE_RELEASE`.
 - **Obstáculo adicional**: a mensagem de commit do release carrega `[skip ci]`. No Gitea, as skip strings são avaliadas contra o commit apontado pela tag, então o push das tags de versão não dispararia o `publish-libs.yml` — o pipeline concluiria verde e nada seria publicado no Verdaccio.
@@ -34,10 +35,10 @@ O workflow `Release` versiona as libs compartilhadas corretamente, mas não cons
   - Ticket de trabalho: https://lider-cap.atlassian.net/browse/ARQ-462
 
 <constraints>
-- [P0] NUNCA enfraquecer as proteções que valem para contribuidores humanos: `required_approvals: 2`, as whitelists de times e a tag protection permanecem intactas.
-- [P0] NUNCA conceder ao token de CI permissão de `Owner` na organização — a autorização deve ser por nome de usuário, com o menor escopo que resolve.
-- [P0] Segredos NUNCA são versionados: o `RELEASE_TOKEN` existe apenas como secret do Gitea, referenciado por expressão no workflow.
+- [P0] NUNCA conceder ao token de CI permissão de `Owner` na organização.
+- [P0] Segredos NUNCA são versionados nem impressos em log.
 - [P0] NUNCA usar `--no-verify` nem desabilitar hooks para contornar validação.
+- [P0] O `release.yml` DEVE seguir o `lidercap-platform-legacy` como referência; toda divergência DEVE ter causa declarada.
 - [P1] O push ao remoto DEVE acontecer em exatamente um step do workflow, e esse step DEVE ser `Push version commit and tags`.
 </constraints>
 
@@ -45,12 +46,13 @@ O workflow `Release` versiona as libs compartilhadas corretamente, mas não cons
 
 ### Funcionais
 
-- [ ] **[P0] Autorizar a identidade de automação nas refs protegidas**: o usuário `ci-runner-bot` DEVE ter permissão base `Code: Write` no repositório e constar em `push_whitelist_usernames` da branch protection de `master` e em `whitelist_usernames` da tag protection #1012 (pattern `*`).
-  - A permissão base é pré-requisito das whitelists, não consequência delas: o Gitea avalia a ACL do usuário sobre o repositório ANTES das allowlists de proteção. Hoje o bot está apenas no time `desenvolvedores` com permissão `none`, e nem constar nas whitelists nem portar um PAT de escopo `write:repository` eleva essa ACL — o escopo restringe o que o token faz, não o que o usuário pode.
-  - A autorização é por nome de usuário, não por promoção a time.
-  - Configuração feita no painel do Gitea ou via API autenticada como `Owner` — fora do repositório, portanto não versionável.
-  - Edge case: se `ci-runner-bot` for removido da organização, o release volta a falhar com a mesma mensagem; o relacionamento DEVE estar registrado no ADR.
-- [ ] **[P0] Prover o token da automação ao workflow**: um token pessoal de `ci-runner-bot` com escopo `write:repository` DEVE existir como secret `RELEASE_TOKEN`, e o `actions/checkout` do step `Checkout master` DEVE usá-lo no lugar de `secrets.GITHUB_TOKEN`.
+- [x] **[P0] Destravar o push das refs**: o repositório NÃO DEVE ter proteção de branch nem de tag que barre o ator do push do CI. As proteções foram removidas, e com isso o token efêmero das Actions passa a empurrar sem credencial adicional.
+  - Verificado empiricamente: com as proteções ativas, o push de uma tag descartável com `secrets.GITHUB_TOKEN` foi recusado (run 4820, `Tag ... is protected`); sem elas, o mesmo teste passou (run 4831, `* [new tag]`).
+  - O ator do token efêmero não é o `ci-runner-bot` nem quem dispara o workflow — ambas as hipóteses foram testadas e descartadas. Enquanto houvesse whitelist, o push exigiria a credencial de um usuário autorizado.
+  - A ausência de proteção é estado do servidor, não código versionado: um repositório derivado deste template não a herda.
+  - Trade-off assumido e registrado no ADR-008: `master` deixa de exigir os dois approvals e qualquer tag pode ser criada ou removida.
+- [ ] **[P0] Manter o workflow em paridade com a referência**: o `release.yml` DEVE usar `secrets.GITHUB_TOKEN` no checkout, o mesmo nome de job, a mesma identidade git e o mesmo comando de push do `lidercap-platform-legacy`.
+  - Divergências permitidas, com causa: versões de Node e pnpm (ADR-003) e steps de release Docker (ADR-004).
 - [ ] **[P0] Separar versionamento de push**: a chave `changelog.projectChangelogs.createRelease` DEVE ser removida do `nx.json` e `"push": false` DEVE ser declarado no bloco `release.git`, na mesma edição. Remover `createRelease` é o que de fato desliga o push do `nx release` — e elimina o provider incompatível; `push: false` entra como guardrail contra a reintrodução do comportamento. O step `Push version commit and tags` volta a ser o único ponto de escrita no remoto, com o mesmo comando usado pelo `lidercap-platform-legacy`.
   - As duas chaves são inseparáveis: `push: false` mantendo `createRelease` faz o Nx abortar com `GIT_PUSH_FALSE_WITH_CREATE_RELEASE`.
   - Nenhum dos providers suportados pelo Nx (`github`, `github-enterprise-server`, `gitlab`) atende ao Gitea.
@@ -61,7 +63,7 @@ O workflow `Release` versiona as libs compartilhadas corretamente, mas não cons
 
 ### Não-funcionais
 
-- [ ] Segurança: nenhuma permissão administrativa sobre a organização DEVE ser concedida ao CI. A permissão base do bot DEVE ficar restrita ao repositório `nx-base-template`, e as whitelists o autorizam apenas em `master` e nas tags. O escopo `write:repository` do PAT, porém, não é granular por ref nem por repositório: ele cobre operações de escrita onde quer que o bot tenha acesso, e o `actions/checkout` o persiste no runner até o post-job. Essa superfície residual é trade-off aceito e está registrada no ADR-008; reduzi-la (`persist-credentials: false`, credencial escopada ao step de push, expiração e rotação do PAT) fica para iteração posterior.
+- [ ] Segurança: nenhuma permissão administrativa sobre a organização DEVE ser concedida ao CI, e nenhum PAT de usuário DEVE ser persistido no runner. Com o token efêmero das Actions, a credencial é emitida por execução e expira com ela — superfície menor que a de um PAT em secret. Em contrapartida, a remoção das proteções elimina o controle de escrita do lado do servidor: `master` aceita push direto e qualquer tag pode ser criada ou removida. Trade-off assumido, registrado no ADR-008.
 - [ ] Compatibilidade: as mudanças DEVEM funcionar com Nx `23.1.0`, pnpm `11.14.0` e Node `^24`, conforme as versões fixadas no workspace.
 - [ ] Reversibilidade: as três frentes (plataforma, `nx.json`, `release.yml`) DEVEM ser revertíveis de forma independente entre si. Dentro do `nx.json`, porém, `createRelease` e `push` são acopladas e revertem juntas — reverter apenas uma reintroduz o push indevido ou o erro `GIT_PUSH_FALSE_WITH_CREATE_RELEASE`.
 
@@ -70,8 +72,8 @@ O workflow `Release` versiona as libs compartilhadas corretamente, mas não cons
 | Camada | Afetada? | Descrição |
 |--------|----------|-----------|
 | Configuração do workspace (`nx.json`) | [x] | `changelog.projectChangelogs.createRelease` é removida; `release.git.push` passa a `false`; `[skip ci]` sai do `commitMessage` |
-| CI/CD (`.github/workflows/`) | [x] | `release.yml` passa a usar `secrets.RELEASE_TOKEN` no checkout e alinha nome do job, identidade git e comando de push ao `lidercap-platform-legacy` |
-| Plataforma (Gitea) | [x] | Whitelists de branch e tag protection recebem `ci-runner-bot`; secret `RELEASE_TOKEN` criado — fora do repositório |
+| CI/CD (`.github/workflows/`) | [x] | `release.yml` alinha nome do job, identidade git e comando de push ao `lidercap-platform-legacy`, e mantém `secrets.GITHUB_TOKEN` no checkout |
+| Plataforma (Gitea) | [x] | Proteções de branch e de tag removidas do repositório — fora do repositório, não versionável |
 | Documentação (`docs/adr/`) | [x] | ADR registrando a identidade de automação e a ausência de provider Gitea |
 | Libs (`libs/shared/*`) | [ ] | Nenhuma mudança de código; apenas voltam a ser versionadas pelo pipeline |
 | Apps | [ ] | Não há apps no template |
@@ -89,15 +91,16 @@ nx-base-template/
 **Arquivos a modificar**:
 
 - `nx.json` — remover `changelog.projectChangelogs.createRelease`; adicionar `"push": false` em `release.git`; remover `[skip ci]` do `commitMessage`
-- `.github/workflows/release.yml` — trocar `token: ${{ secrets.GITHUB_TOKEN }}` por `token: ${{ secrets.RELEASE_TOKEN }}` no step `Checkout master`; remover as envs `GITHUB_TOKEN`/`GH_TOKEN` do step de versionamento e o `env` de nível de job; alinhar nome do job, identidade git e comando de push ao `lidercap-platform-legacy`
+- `.github/workflows/release.yml` — remover as envs `GITHUB_TOKEN`/`GH_TOKEN` do step de versionamento e o `env` de nível de job; alinhar nome do job, identidade git e comando de push ao `lidercap-platform-legacy`. O `token:` do checkout permanece `secrets.GITHUB_TOKEN`
 - `docs/adr/008-identidade-automacao-release.md` — ADR novo (numeração seguinte ao ADR-007)
 - `docs/adr/README.md` — linha do ADR-008 no índice
 
 **Configuração externa** (não versionável, executada no Gitea):
 
-- Branch protection `master` — `push_whitelist_usernames` recebe `ci-runner-bot`
-- Tag protection #1012 (pattern `*`) — `whitelist_usernames` recebe `ci-runner-bot`
-- Secret `RELEASE_TOKEN` — token pessoal de `ci-runner-bot` com escopo `write:repository`
+- Branch protection de `master` — removida
+- Tag protections #1012 (pattern `*`) e #1013 (pattern `v*`) — removidas
+
+Nenhum secret é criado: o workflow usa o `secrets.GITHUB_TOKEN` que o Gitea injeta em cada execução.
 
 ## Design
 
@@ -106,7 +109,7 @@ nx-base-template/
 ```text
 Fluxo atual (quebrado)                Fluxo corrigido
 ──────────────────────                ───────────────
-checkout (GITHUB_TOKEN)               checkout (RELEASE_TOKEN)
+checkout (GITHUB_TOKEN)               checkout (GITHUB_TOKEN)
         │                                     │
 nx release --skip-publish             nx release --skip-publish
   ├─ version                            ├─ version
@@ -123,21 +126,20 @@ nx release --skip-publish             nx release --skip-publish
 ### Fluxo principal
 
 1. Merge de PR `release/*` ou `hotfix/*` para `master` dispara o workflow `Release`.
-2. `Checkout master` autentica com `RELEASE_TOKEN`, gravando o header de credencial usado nas operações git subsequentes.
+2. `Checkout master` autentica com o `secrets.GITHUB_TOKEN` emitido para a execução, gravando o header de credencial usado nas operações git subsequentes.
 3. `Nx Release (skip publish)` resolve o bump pelos Conventional Commits, escreve os manifestos, gera changelogs, commita e cria as tags — sem empurrar.
-4. `Push version commit and tags` executa `git push --follow-tags origin master`. O pre-receive do Gitea reconhece `ci-runner-bot` nas whitelists e aceita as três refs.
+4. `Push version commit and tags` executa `git push --follow-tags origin master`. Sem proteção de branch ou de tag, o pre-receive aceita as três refs.
 5. As tags criadas disparam `publish-libs.yml`, que publica no Verdaccio conforme o ADR-004.
 
 ### Ordem de aplicação
 
-A configuração no Gitea é pré-requisito das mudanças de código: sem ela, o workflow continua falhando no mesmo ponto, apenas em outro step. A ordem recomendada é configurar as whitelists e o secret primeiro, validar com uma tag descartável, e só então mergear as mudanças de `nx.json` e `release.yml`.
+A remoção das proteções é pré-requisito: com elas ativas, o workflow continua falhando no push, agora no step dedicado. A ordem aplicada foi remover as proteções, validar com uma tag descartável e só então alinhar `release.yml` e `nx.json`.
 
 ## Decisões técnicas
 
-- **Autorizar `ci-runner-bot` por nome de usuário**: escolhido porque concede exatamente a permissão necessária — push em `master` e criação de tags neste repositório — preservando `required_approvals: 2` e as whitelists de times para pessoas.
-  Alternativa descartada: adicionar o bot ao time `Owners`, porque concederia poder administrativo sobre toda a organização a um token de CI, muito além do necessário.
-- **Reutilizar `ci-runner-bot` em vez de criar um usuário novo**: escolhido porque o usuário já existe na organização (id 57, hoje apenas no time `desenvolvedores` com permissão `none`), evitando proliferação de identidades de automação.
-  Alternativa descartada: criar um `release-bot` dedicado, porque um segundo bot de CI só se justifica se as permissões precisarem divergir — o que não é o caso hoje.
+- **Remover as proteções em vez de autorizar uma identidade**: escolhido por alinhar o repositório ao `lidercap-platform-legacy`, que roda o mesmo fluxo sem proteção alguma, e por dispensar credencial dedicada — nada a criar, rotacionar ou manter em whitelist. O custo é perder o controle de escrita do lado do servidor, registrado nas Consequências do ADR-008.
+  Alternativa descartada: manter as proteções e autorizar `ci-runner-bot` por nome, com PAT no secret `RELEASE_TOKEN`. Chegou a ser implementada e revertida — funciona, mas cria dependência viva fora do código e um segredo de rotação manual.
+  Alternativa descartada: adotar o padrão `/actions/GITEA_DEPLOY_TOKEN` via SSM, usado por sete templates do `actions-templates`, porque exigiria OIDC, AWS CLI e assume-role no `release.yml`, e o dono do token não tinha acesso a este repositório. Continua indicado caso as proteções voltem.
 - **Desligar o push do Nx em vez de remover o step dedicado**: escolhido porque alinha o código à intenção já declarada nos comentários do `release.yml` e concentra a escrita no remoto em um ponto único, mais simples de diagnosticar e de tornar idempotente. O desligamento vem da remoção do `createRelease`; `push: false` fica como guardrail.
   Alternativa descartada: manter o push dentro do `nx release` e remover o step, porque a falha voltaria a ocorrer no meio do comando, com commit e tags já criados e sem controle sobre a retentativa.
 - **Remover `createRelease` em vez de trocar de provider**: escolhido porque o Nx Release não oferece provider para Gitea e nenhum dos existentes (`github`, `github-enterprise-server`, `gitlab`) aponta para o servidor correto.
@@ -154,18 +156,18 @@ A configuração no Gitea é pré-requisito das mudanças de código: sem ela, o
 
 ### Critérios de aceite
 
-- [ ] `ci-runner-bot` consegue empurrar uma tag descartável para o repositório, e a tag é removida em seguida.
+- [x] O token efêmero das Actions empurra uma tag descartável para o repositório, e a tag é removida em seguida (run 4831).
 - [ ] O workflow `Release` conclui com `conclusion: success`, com o commit de versão presente em `master` e as tags `{projectName}@{version}` visíveis em `GET /api/v1/repos/lidercap-apps/nx-base-template/tags`.
 - [ ] O push ao remoto ocorre exclusivamente no step `Push version commit and tags`; o step `Nx Release (skip publish)` não emite a linha `NX Pushing to git remote "origin"`.
-- [ ] O `publish-libs.yml` é disparado pelas tags geradas.
-- [ ] `GET /repos/lidercap-apps/nx-base-template/branch_protections` continua reportando `required_approvals: 2` e os times `Owners` e `tech-leads` nas whitelists.
-- [ ] Validação do projeto passando: `pnpm biome ci .` e `pnpm nx affected -t lint,typecheck,test,build --exclude=@nx-base-template/source`.
+- [ ] O `publish-libs.yml` é disparado pelas tags geradas e conclui com sucesso.
+- [x] O `release.yml` diverge do `lidercap-platform-legacy` apenas nos pontos com causa declarada: versões de Node e pnpm (ADR-003) e steps de release Docker (ADR-004).
+- [x] Validação do projeto passando: `pnpm biome ci .` e `pnpm nx affected -t lint,typecheck,test,build --exclude=@nx-base-template/source`.
 
 ### Cenários de teste
 
 ```text
-DADO que ci-runner-bot consta nas whitelists de branch e tag protection
-  E que nx.json define release.git.push como false
+DADO que o repositório não tem proteção de branch nem de tag
+  E que nx.json não declara createRelease e define release.git.push como false
 QUANDO um PR de release/* é mergeado para master
 ENTÃO o workflow Release conclui com sucesso
   E o commit de versão e as tags {projectName}@{version} existem no remoto
@@ -175,17 +177,17 @@ QUANDO o step Nx Release (skip publish) executa
 ENTÃO a flag --first-release é aplicada
   E o changelog de cada lib é gerado a partir do histórico completo
 
-DADO que ci-runner-bot NÃO consta nas whitelists
+DADO que uma proteção com whitelist é reintroduzida no repositório
 QUANDO o step Push version commit and tags executa
 ENTÃO o push é recusado com pre-receive hook declined
-  E o job falha sem deixar commit nem tag no remoto, porque o push é atômico
+  E o release exige uma credencial de usuário autorizado, conforme o ADR-008
 ```
 
 <critical_constraints>
-- [P0] NUNCA enfraquecer as proteções que valem para contribuidores humanos: `required_approvals: 2`, as whitelists de times e a tag protection permanecem intactas.
-- [P0] NUNCA conceder ao token de CI permissão de `Owner` na organização — a autorização deve ser por nome de usuário, com o menor escopo que resolve.
-- [P0] Segredos NUNCA são versionados: o `RELEASE_TOKEN` existe apenas como secret do Gitea, referenciado por expressão no workflow.
+- [P0] NUNCA conceder ao token de CI permissão de `Owner` na organização.
+- [P0] Segredos NUNCA são versionados nem impressos em log.
 - [P0] NUNCA usar `--no-verify` nem desabilitar hooks para contornar validação.
+- [P0] O `release.yml` DEVE seguir o `lidercap-platform-legacy` como referência; toda divergência DEVE ter causa declarada.
 - [P1] O push ao remoto DEVE acontecer em exatamente um step do workflow, e esse step DEVE ser `Push version commit and tags`.
 </critical_constraints>
 
@@ -194,7 +196,7 @@ ENTÃO o push é recusado com pre-receive hook declined
 - **Criação de releases no Gitea via API**: substituir o `createRelease` removido por um step que chame `POST /api/v1/repos/{owner}/{repo}/releases` é capacidade nova, não correção do push. Pertence a uma spec própria, depois que o pipeline estiver verde.
 - **Publicação no Verdaccio**: o `publish-libs.yml` já existe e não muda; esta spec apenas restaura o gatilho (as tags) que o alimenta.
 - **Release de imagens Docker**: os steps `Detect docker release candidates` e `Release — docker apps` permanecem como estão. O template não tem apps com `tag:type:app`, então eles seguem sendo pulados.
-- **Revisão das regras de proteção do repositório**: a tag protection com pattern `*` restrita a `Owners` é ampla — cobre toda e qualquer tag deste repositório, e não apenas as de release. Avaliar se esse escopo é o desejado é discussão de plataforma, fora desta correção.
+- **Modelo de proteção do repositório daqui em diante**: se e como reintroduzir branch e tag protection — por exemplo com whitelist por time, como o `lidercap-infra` mantém — é discussão de plataforma. Esta spec apenas registra o estado atual e o caminho de volta (ADR-008, alternativas descartadas).
 - **Automação da configuração do Gitea**: versionar as regras de proteção como código (Terraform ou script idempotente) é melhoria de plataforma, não requisito para destravar o release.
 
 ## Checklist de qualidade da spec
