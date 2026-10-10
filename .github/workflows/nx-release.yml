@@ -111,7 +111,7 @@ jobs:
             FIRST_RELEASE="--first-release"
           fi
           git tag | sort > /tmp/tags-before.txt
-          pnpm nx release --skip-publish $FIRST_RELEASE
+          pnpm nx release --skip-publish --projects="tag:type:lib" $FIRST_RELEASE
 
       - name: Push version commit and tags
         id: push

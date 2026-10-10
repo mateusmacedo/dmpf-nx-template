@@ -10,7 +10,9 @@ WORK=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --work) WORK="$2"; shift 2 ;;
+    --work)
+      [[ $# -ge 2 ]] || { echo "--work exige um diretório" >&2; exit 2; }
+      WORK="$2"; shift 2 ;;
     *) echo "argumento desconhecido: $1" >&2; exit 2 ;;
   esac
 done
@@ -43,13 +45,14 @@ copiar_working_tree() {
 passo "cópia do working tree em $WORK"
 copiar_working_tree
 cd "$WORK"
-# Com CI definido, o tb.Env do kernel reprova os testes que dependem de infra em vez
-# de pulá-los, e o smoke não sobe infra.
+# Com CI definido, o tb.Env do kernel (libs/backend/go/testkit/tb/tb.go do platform)
+# reprova os testes que dependem de infra em vez de pulá-los, e o smoke não sobe infra.
 unset CI
 export NX_DAEMON=false NX_NO_CLOUD=true NX_TUI=false
 git init -q
 git add -A
-git -c user.name=template-smoke -c user.email=template-smoke@example.com commit -q -m "chore: template-smoke"
+git -c user.name=template-smoke -c user.email=template-smoke@example.com \
+  -c commit.gpgsign=false -c core.hooksPath=/dev/null commit -q -m "chore: template-smoke"
 pnpm install --frozen-lockfile
 
 passo "bounded-context recusa o prefixo reservado"
@@ -70,7 +73,8 @@ pnpm nx run-many -t tidy
 CONFORMANCE="$(versao_instalada conformance)"
 KERNEL_VERSION="$(versao_instalada kernel)"
 go run "$KERNEL/tools/dmpf-conformance/cmd/conformance@$CONFORMANCE" --root . --write-baseline
-# O generator deixa o .proto para o autor do contexto, e contrato vazio reprova no buf.
+# O generator deixa o .proto para o autor do contexto, e contrato vazio reprova no buf
+# (mesmo passo de tools/external-consumer.sh do platform).
 proto="apps/backend/$CONTEXT/contract/proto/company/$CONTEXT/service/v1"
 mkdir -p "$proto"
 printf '%s\n' 'syntax = "proto3";' '' "package company.$CONTEXT.service.v1;" '' \
@@ -78,10 +82,9 @@ printf '%s\n' 'syntax = "proto3";' '' "package company.$CONTEXT.service.v1;" '' 
   'message PingRequest {}' '' 'message PingResponse {}' > "$proto/${CONTEXT}_service.proto"
 
 passo "gates (kernel $KERNEL_VERSION, conformance $CONFORMANCE)"
-mapfile -t pacotes < <(go list -m -f '{{.Path}}/...')
-go build "${pacotes[@]}"
-go vet "${pacotes[@]}"
-go test "${pacotes[@]}"
+go list -m -f '{{.Path}}/...' | xargs go build
+go list -m -f '{{.Path}}/...' | xargs go vet
+go list -m -f '{{.Path}}/...' | xargs go test
 while read -r dir; do
   (cd "$dir" && go mod edit -json) | jq -e --arg k "$KERNEL/" --arg v "$KERNEL_VERSION" \
     '([.Replace[]? | select(.Old.Path | startswith($k))] | length == 0)
