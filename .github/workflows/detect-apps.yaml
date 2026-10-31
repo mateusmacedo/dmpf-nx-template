@@ -54,13 +54,18 @@ jobs:
         shell: bash
         env:
           MARKER_FILE: ${{ inputs.marker_file }}
+        # WHY: a lista vai para uma variável, e não para `< <(...)`, porque a falha
+        # numa substituição de processo não aciona o `set -e`: o job sairia verde
+        # com `apps=[]` e o CD não faria deploy de nada.
         run: |
           set -euo pipefail
+          projetos="$(pnpm --silent nx show projects --affected --type app --json | jq -r '.[]')"
           apps=()
           while IFS= read -r projeto; do
+            [ -n "$projeto" ] || continue
             raiz="$(pnpm --silent nx show project "$projeto" --json | jq -r .root)"
             [ -f "$raiz/$MARKER_FILE" ] && apps+=("$raiz")
-          done < <(pnpm --silent nx show projects --affected --type app --json | jq -r '.[]')
+          done <<<"$projetos"
           if [ ${#apps[@]} -eq 0 ]; then
             echo "apps=[]" >> "$GITHUB_OUTPUT"
           else

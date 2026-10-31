@@ -71,6 +71,20 @@ dela; entram só as que têm o `marker_file` (padrão `Dockerfile`). A traduçã
 O `contains` recebe o array do `fromJSON`, e não a string: sobre a string, ele casa por
 substring, e `apps/backend/foo` casaria `apps/backend/foo-bar`.
 
+### Base do affected
+
+O `nrwl/nx-set-shas` usa como base o último run verde do `cd-dev-hmg.yml` na mesma
+branch e no mesmo evento, sem distinguir o ambiente. Disso decorre:
+
+- Um dispatch em `hmg` no commit já implantado em `dev` devolve `apps=[]`. Para
+  promover, informe a app no input `app`.
+- Um run com `app` preenchido pula o `detect`, mas termina verde e avança a base: as
+  outras apps alteradas antes dele deixam de ser detectadas.
+- Sem run verde anterior, a base é `origin/<branch>~1`, ou seja, só o último commit.
+
+Se o projeto precisar de base por ambiente, troque o `nrwl/nx-set-shas` por uma tag por
+ambiente (por exemplo, `deployed/<env>`), movida a cada deploy, e use-a como base.
+
 Não há job `resolve` nem `strategy.matrix`, e isso é deliberado: a restrição à
 matriz em job reutilizável (`uses:`) era do runner anterior, e o modelo foi mantido
 por ser mais legível. Cada app nova entra como um job novo — o custo é um bloco por
@@ -164,7 +178,7 @@ não são duplicadas no recurso da app.
 
 | Sintoma | Verificação |
 | --- | --- |
-| `apps=[]` no detect | Nenhuma app afetada desde o último run verde na branch, ou a app não tem `Dockerfile` |
+| `apps=[]` no detect | Nenhuma app afetada desde o último run verde na branch (ver "Base do affected"), ou a app não tem `Dockerfile` |
 | App detectada não faz deploy | Não existe job `deploy-<app>` para esse path; adicione o bloco no `cd-dev-hmg.yml` |
 | `AWS_ACCOUNT_ID` vazio | Configure a var no repositório do projeto |
 | Deploy com `project` errado | `project`/`ecr` do job `deploy-<app>` desatualizados |
