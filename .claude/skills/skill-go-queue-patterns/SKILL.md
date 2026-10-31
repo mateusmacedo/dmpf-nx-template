@@ -10,6 +10,8 @@ model: opus
 
 # Go queues — padrões
 
+> **Override DMPF.** Num bounded context deste workspace, a forma é a de `.claude/rules/dmpf-bounded-context.md`, que prevalece sobre o genérico descrito aqui: o evento de integração vai para a outbox na mesma transação do estado, por `usecase.Enqueue`, e quem o publica é o relay do kernel, não o caso de uso.
+
 ## Objetivo
 
 Compilar padrões comuns ao usar filas em Go: setup, workers, tipagem de jobs, estratégias de retry e tratamento de erros.

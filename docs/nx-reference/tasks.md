@@ -29,6 +29,11 @@ apenas para *exceções* ou opções que variam por projeto (ex: `passWithNoTest
 | `typecheck` | `dependsOn: ["^typecheck"]`, `cache: true` |
 | `e2e` | `cache: true` |
 
+Os projetos Go têm defaults chaveados por executor (`@nx-go/nx-go:lint` e
+`@nx-go/nx-go:test`, no `nx.json`). O default por executor **substitui** o default
+por nome: ao mexer nele, repita `dependsOn` e `cache`, senão o `test` do Go perde o
+`^build` e o cache que `targetDefaults.test` fornece.
+
 ### O que o plugin `@nx/js/typescript` já infere automaticamente
 
 Para targets `build` e `typecheck`, o plugin lê o `tsconfig.lib.json` e infere:
@@ -136,6 +141,19 @@ workspace, declare também o grupo `libs` no `nx.json` (ver
 
 `--linter=none` é deliberado: o lint deste workspace é o Biome, configurado em
 `targetDefaults` (ver `nx.json`), não um linter por projeto.
+
+Lib Go compartilhada:
+
+```bash
+pnpm nx g @nx-go/nx-go:library libs/backend/go/<name> \
+  --tags=type:lib,scope:backend,stack:go \
+  --skipFormat
+```
+
+Passe sempre o `--skipFormat`: sem ele, o generator chama `formatFiles()`, que, com
+o Prettier instalado e configurado, reformata o `nx.json` inteiro com largura 80, e o
+`biome ci` (largura 100) reprova em seguida. O template não tem Prettier hoje; a
+flag evita depender disso.
 
 `tools/generators/` fica vazio de propósito: é o destino de generators próprios
 do workspace, quando houver. Registre a coleção em `nx.generators` do

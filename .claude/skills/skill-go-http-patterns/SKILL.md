@@ -10,6 +10,8 @@ model: opus
 
 # Go HTTP — padrões
 
+> **Override DMPF.** Num bounded context deste workspace, a forma é a de `.claude/rules/dmpf-bounded-context.md`, que prevalece sobre o genérico descrito aqui: o contexto serve só gRPC, em `app/rpc`, com a cadeia de interceptors do kernel; `app/http` num contexto reprova no check do plugin, e o REST público é do `bff`.
+
 ## Objetivo
 
 Reunir padrões de aplicações HTTP em Go: organização de handlers, dependency injection, middleware, autenticação, autorização e tratamento de erros padronizado.

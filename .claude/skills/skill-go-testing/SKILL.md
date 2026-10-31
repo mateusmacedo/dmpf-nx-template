@@ -14,6 +14,8 @@ model: opus
 
 # Go testing (backend)
 
+> **Override DMPF.** Num bounded context deste workspace, a forma é a de `.claude/rules/dmpf-bounded-context.md`, que prevalece sobre o genérico descrito aqui: cada teste roda num banco `<projeto>_test_<id>`, que o `tb/pg` cria no servidor de `PG_DSN` e apaga ao fim, e não num container por suíte nem num banco compartilhado.
+
 ## Objetivo
 
 Testes em Go backend: setup do toolchain, table-driven idiomático, testes de use cases/handlers/repositórios e padrões de mock.

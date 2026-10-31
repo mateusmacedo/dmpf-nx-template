@@ -6,6 +6,8 @@ paths:
 
 # Organização de arquivos
 
+> **Override DMPF.** Num bounded context deste workspace, a forma é a de `.claude/rules/dmpf-bounded-context.md`, que prevalece sobre o genérico descrito aqui: um package por bloco (`domain`, `port`, `application`, `provider`, `app`, `contract`) no módulo único do contexto, com a borda gRPC em `app/rpc`.
+
 ## Princípio de colocalização
 
 1. Crie funções, tipos e utilitários próximos de quem os usa.

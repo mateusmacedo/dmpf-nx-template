@@ -166,17 +166,17 @@ Linear, uma branch, um plano e um PR para `develop`.
 
 #### Onda 2 — bump do DMPF `rc.3` → `rc.7`
 
-- [ ] **[P0] BKP-14 `nx migrate`**: rodar
+- [x] **[P0] BKP-14 `nx migrate`**: rodar
   `pnpm nx migrate @mateusmacedo/dmpf-plugin@1.0.0-rc.7`, `pnpm install` e
   `pnpm nx migrate --run-migrations`, sem `--force`.
   - O diff fica restrito a: arquivos do `dmpf.rendered.json` (13 novos e 19
     alterados), pins do catalog e do `minimumReleaseAgeExclude`, `go.work`
     `1.26.10`, `golangci-lint` `v2.15.0` no `nx.json` e `workflowRef`
     `ddd3d0c` no `dmpf-ci.yml`.
-- [ ] **[P0] BKP-04 `.env.*.example`**: acrescentar `!.env.*.example` logo
+- [x] **[P0] BKP-04 `.env.*.example`**: acrescentar `!.env.*.example` logo
   depois de `!.env.example`, no mesmo PR do BKP-14, depois de conferir que
   nenhum `.env.*.example` carrega segredo.
-- [ ] **[P0] BKP-15 Passos manuais do bump**:
+- [x] **[P0] BKP-15 Passos manuais do bump**:
   - acrescentar `- compose/keycloak.yml` ao `include` de
     `infra/local/docker-compose.yml`, depois do `swagger-ui.yml`;
   - rodar `go run github.com/mateusmacedo/dmpf/tools/dmpf-conformance/cmd/infrasync@v1.0.0-rc.7 --root . --write`
@@ -185,12 +185,12 @@ Linear, uma branch, um plano e um PR para `develop`.
     `README.md`, `docs/onboarding.md` e
     `docs/guides/primeiro-bounded-context.md` (`5def4d2` → `ddd3d0c`).
     A ADR-011 e a SPEC-TXJ6A4XX ficam como histórico.
-- [ ] **[P1] BKP-16 Premissa do `dmpf-ci.yml` vermelho**: abrir o PR da onda
+- [x] **[P1] BKP-16 Premissa do `dmpf-ci.yml` vermelho**: abrir o PR da onda
   como draft e observar o check `DMPF / DMPF`.
   - Reescrever os trechos de `AGENTS.md` (seção CI), `README.md` e
     `docs/ci-cd/README.md` conforme o resultado observado.
   - Registrar o resultado num addendum da ADR-011.
-- [ ] **[P1] BKP-17 Docs DMPF/Go**:
+- [x] **[P1] BKP-17 Docs DMPF/Go**:
   - `primeiro-bounded-context.md`: dar `git add` no contexto antes do gate;
   - `docs/specs/README.md`: seção "Specs de bounded context", com o template
     da skill `dmpf-bounded-context` e `/dmpf-new-context SPEC-<id>`;
@@ -464,10 +464,10 @@ senão: pular com notice
   maior que zero.
 - [x] Onda 1: `--timeout 120` do `monitor-ci` resulta em 7200 segundos no
   script.
-- [ ] Onda 2: `pnpm-workspace.yaml` fixa a `1.0.0-rc.7`,
+- [x] Onda 2: `pnpm-workspace.yaml` fixa a `1.0.0-rc.7`,
   `git check-ignore deploy/.env.migrator.example` não devolve nada e o
   `template-smoke` passa.
-- [ ] Onda 2: o check `DMPF / DMPF` do PR draft tem resultado registrado no
+- [x] Onda 2: o check `DMPF / DMPF` do PR draft tem resultado registrado no
   addendum da ADR-011.
 - [ ] Onda 3: um PR só com `docs/**/*.md` recebe o check `CI` verde, com
   `main` e `template-smoke` pulados.
