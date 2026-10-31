@@ -109,4 +109,4 @@ jobs:
 
           git checkout -b "$BRANCH"
           git push origin "$BRANCH"
-          echo "::notice::$BRANCH criada a partir de master. Abra o PR para master com a sua conta: PR aberto pelo GITHUB_TOKEN não dispara o CI."
+          echo "::notice::$BRANCH criada a partir de master. Abra o PR para master com a sua conta depois do primeiro push com commits: execuções disparadas pelo GITHUB_TOKEN terminam sem nenhum job."

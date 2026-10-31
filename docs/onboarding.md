@@ -168,7 +168,8 @@ o pipeline e precisam de revisão humana.
   Packages, que roda no job `publish` encadeado ao mesmo run. O
   `nx-publish-libs.yml` só republica, por disparo manual.
 - O `create-release.yml` cria a branch `release/X.Y.Z` e avisa para abrir o PR
-  para `master` com a sua conta: PR aberto pelo `GITHUB_TOKEN` não dispara o CI.
+  para `master` com a sua conta depois do primeiro push com commits: as execuções
+  disparadas pelo `GITHUB_TOKEN` terminam sem nenhum job.
 
 ## CD (deploy)
 
