@@ -63,7 +63,13 @@
       "plugin": "@nx/docker",
       "options": {
         "buildTarget": {
-          "name": "docker:build"
+          "name": "docker:build",
+          "cwd": ".",
+          "args": [
+            "-f {projectRoot}/Dockerfile",
+            "--secret id=npmrc,src=${NPM_CONFIG_USERCONFIG:-$HOME/.npmrc}",
+            "--secret id=NODE_AUTH_TOKEN,env=NODE_AUTH_TOKEN"
+          ]
         },
         "runTarget": {
           "name": "docker:run"
