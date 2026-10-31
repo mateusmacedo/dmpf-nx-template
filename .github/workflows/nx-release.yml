@@ -14,6 +14,10 @@ on:
           - production
           - hotfix
         default: production
+      version:
+        description: "Versão explícita para as libs (ex.: 1.2.0); vazio deriva dos commits"
+        type: string
+        required: false
 
 concurrency:
   group: release-${{ github.workflow }}-${{ github.event.pull_request.base.ref || github.ref_name }}
@@ -37,8 +41,11 @@ jobs:
       )
     runs-on: ubuntu-26.04
     timeout-minutes: 30
+    # WHY: o `prepare` do pnpm instala o lefthook no runner, e o pre-push dele
+    # rodaria no `git push --atomic` da release e a abortaria.
     env:
       NODE_AUTH_TOKEN: ${{ github.token }}
+      LEFTHOOK: "0"
     outputs:
       version_sha: ${{ steps.push.outputs.version_sha }}
       has_npm: ${{ steps.push.outputs.has_npm }}
@@ -88,7 +95,7 @@ jobs:
       - name: Detect lib release candidates
         id: lib-candidates
         run: |
-          LIBS_JSON=$(pnpm nx show projects --projects="tag:type:lib" --json)
+          LIBS_JSON=$(pnpm --silent nx show projects --projects="tag:type:lib" --json)
           LIBS_COUNT=$(node -e "const projects = JSON.parse(process.argv[1] ?? '[]'); console.log(Array.isArray(projects) ? projects.length : 0);" "$LIBS_JSON")
 
           if [[ "$LIBS_COUNT" -gt 0 ]]; then
@@ -104,14 +111,26 @@ jobs:
       # continue-on-error uma falha do nx release não empurra tags.
       - name: Nx Release (skip publish)
         if: steps.lib-candidates.outputs.has_libs == 'true'
+        env:
+          MANUAL_VERSION: ${{ inputs.version }}
         run: |
+          set -euo pipefail
+          VERSION_ARG=""
+          if [ -n "${MANUAL_VERSION:-}" ]; then
+            if [[ ! "$MANUAL_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+              echo "::error::Input version '$MANUAL_VERSION' não é semver."
+              exit 1
+            fi
+            echo "Versão explícita $MANUAL_VERSION informada no dispatch."
+            VERSION_ARG="$MANUAL_VERSION"
+          fi
           FIRST_RELEASE=""
           if [ -z "$(git tag -l '*@*')" ]; then
             echo 'Nenhuma tag de release existente; usando --first-release.'
             FIRST_RELEASE="--first-release"
           fi
           git tag | sort > /tmp/tags-before.txt
-          pnpm nx release --skip-publish --projects="tag:type:lib" $FIRST_RELEASE
+          pnpm nx release $VERSION_ARG --skip-publish --projects="tag:type:lib" $FIRST_RELEASE
 
       - name: Push version commit and tags
         id: push
@@ -138,7 +157,7 @@ jobs:
       - name: Detect docker release candidates
         id: docker-candidates
         run: |
-          APPS_JSON=$(pnpm nx show projects --projects="tag:type:app,!tag:stack:go" --json)
+          APPS_JSON=$(pnpm --silent nx show projects --projects="tag:type:app,!tag:stack:go" --json)
           APPS_COUNT=$(node -e "const projects = JSON.parse(process.argv[1] ?? '[]'); console.log(Array.isArray(projects) ? projects.length : 0);" "$APPS_JSON")
           APPS_CSV=$(node -e "const projects = JSON.parse(process.argv[1] ?? '[]'); console.log(Array.isArray(projects) ? projects.join(',') : '');" "$APPS_JSON")
 
