@@ -10,6 +10,8 @@ paths:
 
 # Convenções de teste
 
+> **Override DMPF.** Num bounded context deste workspace, a forma é a de `.claude/rules/dmpf-bounded-context.md`, que prevalece sobre o genérico descrito aqui: cada teste Go roda num banco `<projeto>_test_<id>`, que o `tb/pg` cria no servidor de `PG_DSN` (a infra de testes) e apaga ao fim.
+
 ## Stack (exemplos)
 
 - **Runner**: Jest é comum em projetos Node/TypeScript; alternativas incluem Vitest.

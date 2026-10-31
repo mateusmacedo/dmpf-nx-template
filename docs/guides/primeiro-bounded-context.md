@@ -57,6 +57,11 @@ message PingResponse {}
 
 ## 3. Rodar os gates
 
+Antes dos gates, dê `git add` no contexto gerado (`git add apps/backend/<name>`). O
+`dmpf-gate-check.sh` do plugin, que o `dmpf-ci.yml` roda, só enxerga os `dmpf-units.json`
+rastreados (`git ls-files '*dmpf-units.json'`); sem o `git add`, o contexto novo fica fora
+da verificação.
+
 A mesma sequência do `tools/template-smoke.sh`:
 
 ```bash

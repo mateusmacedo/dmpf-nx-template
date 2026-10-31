@@ -9,6 +9,8 @@ model: opus
 
 # Go DB — padrões
 
+> **Override DMPF.** Num bounded context deste workspace, a forma é a de `.claude/rules/dmpf-bounded-context.md`, que prevalece sobre o genérico descrito aqui: a persistência fica no bloco `provider`, com o DDL em `provider/schema.sql` aplicado pelo composition root com `postgres.Migrate`, e cada caso de uso é um `Within` sobre a `UnitOfWork` do kernel.
+
 ## Objetivo
 
 Padronizar acesso a banco em Go: entities, repository pattern, queries, migrations e performance.
