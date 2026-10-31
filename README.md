@@ -216,8 +216,9 @@ pela mudança (`nx affected`), na ordem:
 
 Os projetos Go (`tag:stack:go`) ficam fora desse pipeline e passam pelo
 `.github/workflows/dmpf-ci.yml`, que chama o workflow reutilizável do platform fixado por
-SHA. No template, sem nenhum módulo Go, o gate de conformance desse workflow falha: ele não é
-check obrigatório e passa a valer no projeto derivado a partir do primeiro contexto.
+SHA. No template, sem nenhum módulo Go, esse workflow reprova no `modsync --check` quando o diff
+liga os gates globais (`package.json`, `pnpm-lock.yaml`, `go.work` ou `go.mod`): ele não é check
+obrigatório e passa a valer no projeto derivado a partir do primeiro contexto.
 
 O job `template-smoke` do `ci.yml` roda `tools/template-smoke.sh`, que copia o working tree
 para um repositório descartável, gera um bounded context e passa pelos gates do DMPF. Para

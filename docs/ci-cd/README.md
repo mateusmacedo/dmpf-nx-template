@@ -13,7 +13,7 @@ namespace, nome de secret) é versionado aqui — e não deve passar a ser.
 | Item | Estado no template |
 | --- | --- |
 | CI em PR (`ci.yml`) | **Ativo** — Nx affected de lint/typecheck/test/build/e2e (sem `tag:stack:go`) e job `template-smoke` |
-| CI Go do DMPF (`dmpf-ci.yml`) | **Ativo** — saída do `init` do `@mateusmacedo/dmpf-plugin`; vermelho no template sem módulo Go e fora dos checks obrigatórios (ADR-011) |
+| CI Go do DMPF (`dmpf-ci.yml`) | **Ativo** — saída do `init` do `@mateusmacedo/dmpf-plugin`; no template sem módulo Go, vermelho quando o diff toca dependências ou o `go.work` (`modsync --check`), e fora dos checks obrigatórios (addendum da ADR-011) |
 | Versionamento e publish de libs | **Ativo** — `create-release.yml`, `nx-release.yml` (publica no GitHub Packages pelo `publish-libs.yaml`) e `nx-publish-libs.yml` (republicação manual) |
 | CD (`cd-dev-hmg.yml`) | **Template** — só `workflow_dispatch`, parametrizado por placeholder |
 | Manifestos GitOps | **Ausentes** — vivem no repositório de infraestrutura, não aqui |
