@@ -120,10 +120,10 @@ Linear, uma branch, um plano e um PR para `develop`.
 
 #### Onda 1 — correções de baixo risco
 
-- [ ] **[P1] BKP-05 Ignorar artefatos locais**: `graphify-out/` e `.obsidian/`
+- [x] **[P1] BKP-05 Ignorar artefatos locais**: `graphify-out/` e `.obsidian/`
   no `.gitignore`, `!.obsidian` no `biome.json` (junto do BKP-06) e
   `golang.go` no `.vscode/extensions.json`.
-- [ ] **[P0] BKP-06 Biome**: acrescentar
+- [x] **[P0] BKP-06 Biome**: acrescentar
   `"vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true }`.
   - Ancorar na raiz as negações de diretórios-raiz (`!.claude`, `!.agents`,
     `!.nx`, `!plans`, `!tmp`, `!.remember`, `!.cursor`, `!.gemini`,
@@ -131,12 +131,12 @@ Linear, uma branch, um plano e um PR para `develop`.
   - Manter `**/` só em `dist`, `out-tsc`, `test-output`, `coverage`,
     `node_modules`, `pnpm-lock.yaml` e `*.swcrc`. Manter as quatro exclusões
     DMPF.
-- [ ] **[P1] BKP-07 `.nxignore`**: criar o arquivo com `**/testdata/**`.
-- [ ] **[P0] BKP-08 `monitor-ci`**: aplicar em `.agents/skills/monitor-ci/` e
+- [x] **[P1] BKP-07 `.nxignore`**: criar o arquivo com `**/testdata/**`.
+- [x] **[P0] BKP-08 `monitor-ci`**: aplicar em `.agents/skills/monitor-ci/` e
   `.github/skills/monitor-ci/` a conversão `* 60` do timeout.
   - Acrescentar `--elapsed-seconds` entre tentativas, o retorno
     `limitReached` e o `Number.parseInt`.
-- [ ] **[P0] BKP-09 Renovate**: `baseBranchPatterns: ["develop"]`,
+- [x] **[P0] BKP-09 Renovate**: `baseBranchPatterns: ["develop"]`,
   `:enableVulnerabilityAlerts` e `osvVulnerabilityAlerts: true`.
   - `ignorePaths` para `**/testdata/**`, `**/__fixtures__/**` e
     `**/examples/**`.
@@ -144,20 +144,20 @@ Linear, uma branch, um plano e um PR para `develop`.
     de vulnerabilidade a sobe.
   - Manter as regras que desligam o plugin DMPF, o `@nx-go/nx-go` e o
     `mateusmacedo/dmpf`.
-- [ ] **[P0] BKP-10 `nx-release.yml`**: `LEFTHOOK: "0"` no job `version`.
+- [x] **[P0] BKP-10 `nx-release.yml`**: `LEFTHOOK: "0"` no job `version`.
   - Usar `pnpm --silent nx show projects ... --json` nas linhas 91 e 141.
   - Acrescentar o input `version` no `workflow_dispatch`, validado pela regex
     semver `^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$`.
-- [ ] **[P1] BKP-11 Lefthook**: o pre-push roda uma única invocação de
+- [x] **[P1] BKP-11 Lefthook**: o pre-push roda uma única invocação de
   `nx affected -t lint,typecheck,test,build`.
   - A base é `@{push}` ou, na falta dele, `git merge-base HEAD origin/develop`.
   - O pre-commit roda `gofmt -l` só nos `.go` em stage e reprova quando a
     saída não é vazia ou quando o status é diferente de zero.
-- [ ] **[P1] BKP-12 Skills Go**: trocar `RunContainer`/`WithImage` pela API
+- [x] **[P1] BKP-12 Skills Go**: trocar `RunContainer`/`WithImage` pela API
   `Run` e por `testcontainers.CleanupContainer` em
   `.claude/skills/skill-go-testing/SKILL.md` e
   `.claude/skills/skill-unit-integration-testing/SKILL.md`.
-- [ ] **[P2] BKP-13 PR de release pelo `GITHUB_TOKEN`**: corrigir o
+- [x] **[P2] BKP-13 PR de release pelo `GITHUB_TOKEN`**: corrigir o
   `::notice::` do `create-release.yml`, o `CONTRIBUTING.md` e o
   `docs/guides/development-workflow.md`.
   - O texto correto é: o GitHub encerra sem jobs as execuções disparadas pelo
@@ -459,10 +459,10 @@ senão: pular com notice
 - [x] Onda 0: `git status` de `develop` sem os 45 arquivos de `.claude/` em
   WIP, `tsconfig.base.json` restaurado, `nx.json` sem `nxCloudId` e
   `AGENTS.md` sem afirmar ruleset inexistente.
-- [ ] Onda 1: `pnpm biome ci .` num worktree em `.claude/worktrees/<nome>`
+- [x] Onda 1: `pnpm biome ci .` num worktree em `.claude/worktrees/<nome>`
   checa o mesmo número de arquivos que no checkout principal, e esse número é
   maior que zero.
-- [ ] Onda 1: `--timeout 120` do `monitor-ci` resulta em 7200 segundos no
+- [x] Onda 1: `--timeout 120` do `monitor-ci` resulta em 7200 segundos no
   script.
 - [ ] Onda 2: `pnpm-workspace.yaml` fixa a `1.0.0-rc.7`,
   `git check-ignore deploy/.env.migrator.example` não devolve nada e o

@@ -13,17 +13,22 @@
  * Usage:
  *   node ci-poll-decide.mjs '<ci_info_json>' <poll_count> <verbosity> \
  *     [--wait-mode] [--prev-cipe-url <url>] [--expected-sha <sha>] \
- *     [--prev-status <status>] [--timeout <seconds>] [--new-cipe-timeout <seconds>] \
- *     [--env-rerun-count <n>] [--no-progress-count <n>] \
+ *     [--prev-status <status>] [--timeout <minutes>] [--new-cipe-timeout <minutes>] \
+ *     [--elapsed-seconds <n>] [--env-rerun-count <n>] [--no-progress-count <n>] \
  *     [--prev-cipe-status <status>] [--prev-sh-status <status>] \
  *     [--prev-verification-status <status>] [--prev-failure-classification <status>]
+ *
+ * Note: --timeout and --new-cipe-timeout are accepted in MINUTES (matching the
+ * skill's documented flags) and converted to seconds internally. --elapsed-seconds
+ * is the wall-clock time since monitoring began, carried across attempts by the
+ * orchestrator, and is the authoritative signal for the --timeout budget.
  */
 
 // --- Arg parsing ---
 
 const args = process.argv.slice(2);
 const ciInfoJson = args[0];
-const pollCount = parseInt(args[1], 10) || 0;
+const pollCount = Number.parseInt(args[1], 10) || 0;
 const verbosity = args[2] || 'medium';
 
 function getFlag(name) {
@@ -39,10 +44,16 @@ const waitMode = getFlag('--wait-mode');
 const prevCipeUrl = getArg('--prev-cipe-url');
 const expectedSha = getArg('--expected-sha');
 const prevStatus = getArg('--prev-status');
-const timeoutSeconds = parseInt(getArg('--timeout') || '0', 10);
-const newCipeTimeoutSeconds = parseInt(getArg('--new-cipe-timeout') || '0', 10);
-const envRerunCount = parseInt(getArg('--env-rerun-count') || '0', 10);
-const inputNoProgressCount = parseInt(getArg('--no-progress-count') || '0', 10);
+// Flags are documented in minutes; convert to seconds for internal comparison.
+const timeoutSeconds = Number.parseInt(getArg('--timeout') || '0', 10) * 60;
+const newCipeTimeoutSeconds =
+  Number.parseInt(getArg('--new-cipe-timeout') || '0', 10) * 60;
+// Wall-clock seconds since monitoring began (carried across attempts); null when
+// the orchestrator doesn't supply it (see isTimedOut for that fallback).
+const elapsedArg = getArg('--elapsed-seconds');
+const elapsedSeconds = elapsedArg !== null ? Number.parseInt(elapsedArg, 10) : null;
+const envRerunCount = Number.parseInt(getArg('--env-rerun-count') || '0', 10);
+const inputNoProgressCount = Number.parseInt(getArg('--no-progress-count') || '0', 10);
 const prevCipeStatus = getArg('--prev-cipe-status');
 const prevShStatus = getArg('--prev-sh-status');
 const prevVerificationStatus = getArg('--prev-verification-status');
@@ -125,6 +136,11 @@ function hasStateChanged() {
 
 function isTimedOut() {
   if (timeoutSeconds <= 0) return false;
+  // Prefer real wall-clock elapsed (carried across attempts) so --timeout caps
+  // total monitor duration, not a single invocation.
+  if (elapsedSeconds !== null && !Number.isNaN(elapsedSeconds))
+    return elapsedSeconds >= timeoutSeconds;
+  // Fallback: estimate elapsed from poll cadence within this invocation.
   const avgDelay = pollCount === 0 ? 0 : backoff(Math.floor(pollCount / 2));
   return pollCount * avgDelay >= timeoutSeconds;
 }
@@ -179,6 +195,10 @@ function classify() {
   // --- Wait mode ---
   if (waitMode) {
     if (isNewCipe()) return { action: 'poll', code: 'new_cipe_detected' };
+    // The total --timeout budget also caps time spent waiting for a new CI
+    // Attempt, so it must win over --new-cipe-timeout here; otherwise a long
+    // wait (or a sequence of apply→wait cycles) could run past --timeout.
+    if (isTimedOut()) return { action: 'done', code: 'polling_timeout' };
     if (isWaitTimedOut()) return { action: 'done', code: 'no_new_cipe' };
     return { action: 'wait', code: 'waiting_for_cipe' };
   }

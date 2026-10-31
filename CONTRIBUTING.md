@@ -64,8 +64,10 @@ O `create-release.yml` automatiza a criação da branch `release/X.Y.Z`: ele cal
 o próximo número a partir das releases já mergeadas em `master`, deriva o
 incremento dos commits em `origin/master..origin/develop` (ou usa o input
 `bump-type`), cria `release/X.Y.Z` a partir de `master` e a empurra. O PR de
-`release/X.Y.Z` para `master` é aberto por você, com a sua conta: um PR aberto
-pelo `GITHUB_TOKEN` não dispara o CI.
+`release/X.Y.Z` para `master` é aberto por você, com a sua conta, depois do
+primeiro push com commits (a branch nasce igual a `master`, e o GitHub recusa PR
+sem commits). Um PR aberto pelo `GITHUB_TOKEN` dispara execuções que o GitHub
+encerra sem nenhum job, então o CI não roda.
 
 ## Conventional Commits
 
