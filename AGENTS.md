@@ -112,6 +112,7 @@ nx-base-template/
 ├── docs/
 │   ├── adr/                        # ADR-0NN (baseline, tasks, hardening, release, plataforma, fechamento, fronteira, identidade de automação, libs, migração GitHub/Linear, consumo do DMPF)
 │   ├── specs/                      # catálogo e template de specs (SPEC-XXXX)
+│   ├── analises/                   # análises que embasam specs (backport dos derivados)
 │   ├── rules/                      # regras de domínio, com README de índice
 │   │   ├── business/               # regras de negócio (BIZ-)
 │   │   ├── application/            # regras de aplicação (APP-)
@@ -221,7 +222,7 @@ Scripts raiz (`pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm fo
 
 - **Plataforma:** **GitHub** (`github.com/mateusmacedo/dmpf-nx-template`, repositório marcado como template). O `gh` CLI opera normalmente contra ele. Decisão e contexto da migração em `docs/adr/010-migracao-github-linear.md` (ADR-010, que supersede a ADR-005).
 - **Tracker:** projeto [nx-base-template](https://linear.app/mmda/project/nx-base-template-db3f16eab767) no Linear (time DevTeam, chave `DEVS`). Cada spec tem uma issue, ligada pelo `ticket_url` do frontmatter; branch e título de PR levam a chave `DEVS-<n>`. Regras de sincronização: `docs/onboarding.md`.
-- **Branches protegidas:** `master` e `develop`, por rulesets do GitHub. `develop` exige PR e o check do CI verde, sem deleção e sem force push. `master` fica sem deleção e sem force push; o bot de release empurra nela o commit de versão e as tags. `defaultBase` do Nx é `master`.
+- **Branches protegidas:** `master` e `develop` são protegidas por convenção (nunca edite direto nelas), mas o repositório ainda não tem rulesets do GitHub. Os rulesets entram junto com o check agregador `CI` do `ci.yml`: `develop` vai exigir PR e o check `CI` verde, sem deleção e sem force push; `master` vai ficar sem deleção e sem force push, com bypass para o bot de release, que empurra nela o commit de versão e as tags. `defaultBase` do Nx é `master`.
 - **Fluxo (git-flow):** trabalho → `develop` (validação) → `release/X.Y.Z` (após validar) → `master`. Antes do PR para `develop`, a branch de trabalho mergeia `release/X.Y.Z` (updates já aprovados). PRs de feature comparam contra `origin/develop` por padrão.
 - **Anti-drift (duro):** ao promover para `release`, usar a **mesma árvore** já mergeada em `develop` (mesmo tip da feature). Não abrir promoção paralela com resolução/conteúdo diferente — isso faz o merge `release` → branch de trabalho reabrir os mesmos conflitos. Detalhe em `CONTRIBUTING.md`.
 - **Release:** Nx Release com versionamento **independente** por projeto, baseado em Conventional Commits; tag pattern `{projectName}@{version}`. O `nx.json` não declara `release.projects` nem grupos: os grupos `libs`, `apps` e `go-contract-*` nascem com o primeiro membro (ver "Release por grupos" em `docs/nx-reference/tasks.md`). A release é encadeada:

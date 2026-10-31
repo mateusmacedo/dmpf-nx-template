@@ -21,6 +21,7 @@ permissions:
 
 env:
   NODE_AUTH_TOKEN: ${{ github.token }}
+  NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
 
 jobs:
   main:
