@@ -1,12 +1,47 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended", "helpers:pinGitHubActionDigests"],
-  "baseBranchPatterns": ["master"],
+  "extends": ["config:recommended", "helpers:pinGitHubActionDigests", ":enableVulnerabilityAlerts"],
+  "baseBranchPatterns": ["develop"],
+  "osvVulnerabilityAlerts": true,
+  "ignorePaths": [
+    "**/node_modules/**",
+    "**/bower_components/**",
+    "**/vendor/**",
+    "**/examples/**",
+    "**/__tests__/**",
+    "**/test/**",
+    "**/tests/**",
+    "**/__fixtures__/**",
+    "**/testdata/**"
+  ],
   "packageRules": [
     {
       "matchManagers": ["github-actions"],
       "groupName": "github-actions",
       "schedule": ["before 6am on monday"]
+    },
+    {
+      "description": "Dependência indireta do go.mod: consultada para o alerta de vulnerabilidade",
+      "matchManagers": ["gomod"],
+      "matchDepTypes": ["indirect"],
+      "enabled": true
+    },
+    {
+      "description": "Dependência indireta do go.mod só sobe por alerta de vulnerabilidade, que força a atualização",
+      "matchManagers": ["gomod"],
+      "matchDepTypes": ["indirect"],
+      "matchUpdateTypes": [
+        "major",
+        "minor",
+        "patch",
+        "pin",
+        "digest",
+        "pinDigest",
+        "lockFileMaintenance",
+        "rollback",
+        "replacement"
+      ],
+      "enabled": false
     },
     {
       "matchPackageNames": ["@mateusmacedo/dmpf-plugin", "@nx-go/nx-go"],
