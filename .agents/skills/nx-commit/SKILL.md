@@ -119,14 +119,14 @@ git commit -m "feat(minha-lib): <descrição concisa em PT-BR>"
 ### Formato da mensagem
 
 ```
-<tipo>(<scope>): <descrição imperativa e concisa em PT-BR>
+<tipo>(<scope>): <descrição concisa em PT-BR, verbo no infinitivo>
 
 [corpo opcional: contexto do por quê, não do o quê — máx. 5 linhas]
 ```
 
 - Linha do título: ≤ 72 caracteres
 - Scope: nome do projeto NX sem prefixo de organização, ou categoria de infraestrutura
-- Descrição: imperativo presente ("adiciona", "corrige", "remove"), em PT-BR
+- Descrição: verbo no infinitivo ("adicionar", "corrigir", "remover"), em PT-BR, como no histórico do repositório
 - Corpo: apenas quando o motivo não é óbvio pela descrição
 
 ### Quando usar `git add -p` (patch)
