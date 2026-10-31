@@ -5,13 +5,19 @@ pre-commit:
       run: pnpm biome check --write --no-errors-on-unmatched {staged_files}
       stage_fixed: true
 
+    # WHY: gofmt -l sai com 0 mesmo listando arquivos fora do padrão e, com erro
+    # de sintaxe, sai 2 com stdout vazio; saída e status são checados em separado
+    # para o arquivo que nem compila também reprovar.
+    gofmt:
+      glob: "*.go"
+      run: saida="$(gofmt -l {staged_files} 2>&1)"; status=$?; [ $status -eq 0 ] || { printf '%s\n' "$saida" >&2; exit $status; }; [ -z "$saida" ] || { printf '%s\n' "$saida" >&2; exit 1; }
+
 pre-push:
   commands:
-    lint:
-      run: pnpm nx affected -t lint --parallel=3 --exclude=@nx-base-template/source
-    typecheck:
-      run: pnpm nx affected -t typecheck --parallel=3 --exclude=@nx-base-template/source
-    test:
-      run: pnpm nx affected -t test --parallel=3 --exclude=@nx-base-template/source
-    build:
-      run: pnpm nx affected -t build --parallel=3 --exclude=@nx-base-template/source
+    # WHY: uma invocação calcula o grafo uma vez, não quatro. A base é o que o
+    # remoto já tem (@{push}); branch sem upstream compara com origin/develop,
+    # e não com o defaultBase (master), que no git-flow inclui o não liberado.
+    affected:
+      run: |
+        base="$(git rev-parse --verify --quiet '@{push}' || git merge-base HEAD origin/develop)" || exit 1
+        pnpm nx affected -t lint,typecheck,test,build --base="$base" --head=HEAD --parallel=3 --exclude=@nx-base-template/source
