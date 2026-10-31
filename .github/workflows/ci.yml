@@ -44,7 +44,9 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           set -euo pipefail
-          mudados="$(git diff --name-only "$BASE_SHA"...HEAD)"
+          # WHY: --no-renames lista origem e destino; sem ele, mover tools/x.md para
+          # docs/ mostraria só o destino e o PR passaria como documentação.
+          mudados="$(git diff --name-only --no-renames "$BASE_SHA"...HEAD)"
           codigo="$(awk '!/^docs\// && !(/\.md$/ && !/^(tools|\.claude|\.agents)\//)' <<<"$mudados")"
           echo "code=$([ -n "$codigo" ] && echo true || echo false)" | tee -a "$GITHUB_OUTPUT"
 
