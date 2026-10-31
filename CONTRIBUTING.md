@@ -38,8 +38,10 @@ Trabalhe sempre fora de `master` e `develop`.
    `tipo(scope): [DEVS-<n>] descrição`, descrevendo o que muda e por quê.
    `master` recebe o trabalho pela branch `release/X.Y.Z`, não diretamente.
 
-PRs que tocam apenas arquivos Markdown não disparam o pipeline, por causa do
-`paths-ignore` configurado no `ci.yml`.
+Num PR só de documentação (`docs/**` e `*.md` fora de `tools/`, `.claude/` e
+`.agents/`), o job `Escopo` do `ci.yml` pula os jobs pesados, e o check `CI`, o
+obrigatório da `develop`, aprova sem rodá-los. A esteira por etapa está em
+`docs/ci-cd/README.md`.
 
 ### Modelo develop → release (anti-drift)
 
@@ -104,7 +106,8 @@ pnpm nx run-many -t lint typecheck test build    # tudo
 ```
 
 O hook de `pre-commit` roda `biome check --write` nos arquivos em stage; o de
-`pre-push` roda `lint`, `typecheck`, `test` e `build` nos projetos afetados.
+`pre-push` roda uma invocação de `nx affected -t lint,typecheck,test,build`, com
+base no que o remoto já tem.
 
 ## Padrões de código
 
