@@ -11,9 +11,12 @@ on:
       - pnpm-lock.yaml
       - pnpm-workspace.yaml
       - package.json
-  # WHY: o GitHub despeja o cache sem acesso há 7 dias; a passada semanal o mantém.
+  # WHY: o GitHub despeja o cache sem acesso há 7 dias, e o atraso do agendador
+  # pode estourar um intervalo de exatos 7 dias; por isso, duas passadas por
+  # semana. O agendado roda só na branch default (master); a develop se renova
+  # pelo push de dependência, pelos PRs que leem o cache e pelo dispatch manual.
   schedule:
-    - cron: "0 6 * * 1"
+    - cron: "0 6 * * 1,4"
   workflow_dispatch:
 
 concurrency:

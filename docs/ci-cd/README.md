@@ -32,7 +32,7 @@ Separação rígida: **CI não faz deploy**; **CD não substitui o CI**.
 | PR para `master` (de `release/**` ou `hotfix/*`) | O mesmo `ci.yml` e o `dmpf-ci.yml`, com a `master` como base |
 | Merge em `master` de `release/**` ou `hotfix/*` | `nx-release.yml`: versão, changelog e tags, release Docker quando há app fora de Go e publish das libs (`next` para pré-release, `latest` nos demais casos) |
 | Agendado (`dmpf-agendado.yml`) | `conformance` e `govulncheck` toda segunda às 09:00 UTC, porque os dois reprovam sem diff; sem `go.mod` no workspace, passa sem rodar gate |
-| `push` em `develop` ou `master` que muda dependência; agendado; manual (`cache-seed.yml`) | Semeia o cache do pnpm que os PRs leem da branch base |
+| `push` em `develop` ou `master` que muda dependência; agendado (segunda e quinta, só na `master`); manual (`cache-seed.yml`) | Semeia o cache do pnpm que os PRs leem da branch base |
 
 O ruleset da `develop` exige só o job `CI`: pulado conta como aprovado, falha ou
 cancelamento reprova. A `master` não tem check obrigatório; ela só recebe código já
