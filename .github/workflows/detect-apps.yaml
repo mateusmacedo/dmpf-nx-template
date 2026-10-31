@@ -1,18 +1,11 @@
 name: Detect Apps
 
+# WHY: as apps vivem em apps/<scope>/<app> (dois níveis), e o glob por diretório
+# devolvia sempre []. O grafo do Nx resolve o que mudou desde o último run verde
+# deste workflow na branch, inclusive via libs, sem lista de diretórios.
 on:
   workflow_call:
     inputs:
-      app_dirs:
-        description: "Diretórios de apps separados por vírgula (ex: 'apps,services,workers')"
-        required: false
-        type: string
-        default: "apps"
-      shared_dirs:
-        description: "Diretórios compartilhados que trigam deploy de tudo (ex: 'libs,packages')"
-        required: false
-        type: string
-        default: "libs"
       marker_file:
         description: "Arquivo que identifica uma app deployável (ex: 'Dockerfile')"
         required: false
@@ -25,16 +18,20 @@ on:
         default: "ubuntu-26.04"
     outputs:
       apps:
-        description: "JSON array de apps detectadas"
+        description: "JSON array com o root das apps detectadas (ex: [\"apps/backend/minha-app\"])"
         value: ${{ jobs.detect.outputs.apps }}
 
 permissions: {}
 
 jobs:
   detect:
-    permissions:
-      contents: read
     runs-on: ${{ inputs.runner }}
+    permissions:
+      actions: read
+      contents: read
+      packages: read
+    env:
+      NODE_AUTH_TOKEN: ${{ github.token }}
     outputs:
       apps: ${{ steps.set.outputs.apps }}
     steps:
@@ -42,47 +39,30 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup Node and pnpm
+        uses: ./.github/actions/setup-node-pnpm
+        with:
+          node-version: "24"
+
+      - name: Set Nx SHAs for affected (base/head)
+        uses: nrwl/nx-set-shas@afb73a62d26e41464e9254689e1fd6122ee683c1 # v5.0.1
+        with:
+          main-branch-name: ${{ github.ref_name }}
+          last-successful-event: ${{ github.event_name }}
+
       - id: set
         shell: bash
         env:
-          APP_DIRS_INPUT: ${{ inputs.app_dirs }}
-          SHARED_DIRS_INPUT: ${{ inputs.shared_dirs }}
           MARKER_FILE: ${{ inputs.marker_file }}
-          BEFORE: ${{ github.event.before }}
-          HEAD_SHA: ${{ github.sha }}
         run: |
-          IFS=',' read -ra APP_DIRS <<< "$APP_DIRS_INPUT"
-          IFS=',' read -ra SHARED_DIRS <<< "$SHARED_DIRS_INPUT"
-
-          if [ -n "$BEFORE" ] && [ "$BEFORE" != "0000000000000000000000000000000000000000" ] && git cat-file -e "${BEFORE}^{commit}" 2>/dev/null; then
-            CHANGED=$(git diff --name-only "$BEFORE" "$HEAD_SHA")
-          else
-            CHANGED=$(git diff-tree --no-commit-id --name-only -r "$HEAD_SHA")
-          fi
-
-          SHARED_CHANGED=false
-          for dir in "${SHARED_DIRS[@]}"; do
-            if echo "$CHANGED" | grep -q "^${dir}/"; then
-              SHARED_CHANGED=true
-              break
-            fi
-          done
-
-          APPS=()
-          for dir in "${APP_DIRS[@]}"; do
-            if [ "$SHARED_CHANGED" = "true" ]; then
-              for marker in "${dir}"/*/"${MARKER_FILE}"; do
-                [ -e "$marker" ] && APPS+=("$(dirname "$marker")")
-              done
-            else
-              for app in $(echo "$CHANGED" | grep -oP "^${dir}/\K[^/]+" | sort -u); do
-                [ -f "${dir}/${app}/${MARKER_FILE}" ] && APPS+=("${dir}/${app}")
-              done
-            fi
-          done
-
-          if [ ${#APPS[@]} -eq 0 ]; then
+          set -euo pipefail
+          apps=()
+          while IFS= read -r projeto; do
+            raiz="$(pnpm --silent nx show project "$projeto" --json | jq -r .root)"
+            [ -f "$raiz/$MARKER_FILE" ] && apps+=("$raiz")
+          done < <(pnpm --silent nx show projects --affected --type app --json | jq -r '.[]')
+          if [ ${#apps[@]} -eq 0 ]; then
             echo "apps=[]" >> "$GITHUB_OUTPUT"
           else
-            echo "apps=$(printf '%s\n' "${APPS[@]}" | jq -R . | jq -cs .)" >> "$GITHUB_OUTPUT"
+            echo "apps=$(printf '%s\n' "${apps[@]}" | sort | jq -R . | jq -cs .)" >> "$GITHUB_OUTPUT"
           fi
