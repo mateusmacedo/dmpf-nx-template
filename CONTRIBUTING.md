@@ -69,6 +69,16 @@ primeiro push com commits (a branch nasce igual a `master`, e o GitHub recusa PR
 sem commits). Um PR aberto pelo `GITHUB_TOKEN` dispara execuções que o GitHub
 encerra sem nenhum job, então o CI não roda.
 
+### Pré-release
+
+Para publicar uma pré-release, crie a branch com o sufixo semver no nome, por
+exemplo `release/1.2.0-rc.1`, e abra o PR dela para `master` como numa release
+normal. No merge, o `nx-release.yml` roda `nx release 1.2.0-rc.1` com a versão
+explícita, em vez de derivá-la dos commits, e o job `publish` publica com a
+dist-tag `next`; a `latest` só recebe versões sem `-`. Para refazer uma release
+que falhou, dispare o `nx-release.yml` em `master` com o input `version`
+(validado como semver).
+
 ## Conventional Commits
 
 As mensagens de commit seguem o padrão [Conventional Commits](https://www.conventionalcommits.org):

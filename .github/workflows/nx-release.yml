@@ -50,6 +50,7 @@ jobs:
     outputs:
       version_sha: ${{ steps.push.outputs.version_sha }}
       has_npm: ${{ steps.push.outputs.has_npm }}
+      dist_tag: ${{ steps.push.outputs.dist_tag }}
 
     steps:
       - name: Checkout master
@@ -114,6 +115,7 @@ jobs:
         if: steps.lib-candidates.outputs.has_libs == 'true'
         env:
           MANUAL_VERSION: ${{ inputs.version }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
         run: |
           set -euo pipefail
           VERSION_ARG=""
@@ -124,6 +126,9 @@ jobs:
             fi
             echo "Versão explícita $MANUAL_VERSION informada no dispatch."
             VERSION_ARG="$MANUAL_VERSION"
+          elif [[ "${HEAD_REF:-}" =~ ^release/([0-9]+\.[0-9]+\.[0-9]+-[0-9A-Za-z.-]+)$ ]]; then
+            echo "Branch de pré-release $HEAD_REF; versão explícita ${BASH_REMATCH[1]}."
+            VERSION_ARG="${BASH_REMATCH[1]}"
           fi
           FIRST_RELEASE=""
           if [ -z "$(git tag -l '*@*')" ]; then
@@ -146,12 +151,18 @@ jobs:
           mapfile -t novas < /tmp/tags-new.txt
           git push --atomic origin master "${novas[@]}"
 
+          # WHY: pré-release não pode virar a `latest` do registry; publica em `next`.
+          versoes="$(sed 's/.*@//' /tmp/tags-new.txt)"
           {
             echo "version_sha=$(git rev-parse HEAD)"
-            if [ -s /tmp/tags-new.txt ]; then
-              echo "has_npm=true"
-            else
+            if [ ! -s /tmp/tags-new.txt ]; then
               echo "has_npm=false"
+            elif [[ "$versoes" == *-* ]]; then
+              echo "has_npm=true"
+              echo "dist_tag=next"
+            else
+              echo "has_npm=true"
+              echo "dist_tag=latest"
             fi
           } >> "$GITHUB_OUTPUT"
 
@@ -201,6 +212,6 @@ jobs:
       node_version: "24"
       nx_exclude: "@nx-base-template/source"
       scope: "@mateusmacedo"
-      tag: latest
+      tag: ${{ needs.version.outputs.dist_tag || 'latest' }}
       build_projects_filter: "tag:type:lib,!tag:stack:go"
       ref: ${{ needs.version.outputs.version_sha }}
