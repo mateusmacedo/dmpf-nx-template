@@ -244,7 +244,7 @@ Gitea da contratante                          github.com/mateusmacedo/dmpf-nx-te
 - [x] `actionlint` com shellcheck sem achados nos workflows criados ou alterados por esta spec (os achados `info` em linhas antigas do `ci.yml` e do `create-release.yml` ficam fora).
 - [x] Projeto Linear `nx-base-template` com as 7 issues das specs do template, e cada `ticket_url` resolvendo para a issue de mesmo `SPEC-<id>`.
 - [x] `gh repo view mateusmacedo/dmpf-nx-template --json isTemplate,defaultBranchRef` retorna `true` e `master`.
-- [x] Rulesets ativos em `develop` e `master` (`gh api repos/mateusmacedo/dmpf-nx-template/rulesets`).
+- [x] Rulesets ativos em `develop` e `master` (`gh api repos/mateusmacedo/dmpf-nx-template/rulesets`). — *Nota (2026-10-31): a mesma chamada hoje devolve 0 rulesets; a SPEC-R2XAA4X4 os recria no BKP-20.*
 - [x] CI do PR desta spec verde em `ubuntu-26.04`.
 - [x] `pnpm biome ci .` e `pnpm nx run-many -t lint,typecheck,test,build --exclude=@nx-base-template/source` verdes.
 
