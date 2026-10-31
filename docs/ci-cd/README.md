@@ -12,7 +12,7 @@ namespace, nome de secret) é versionado aqui — e não deve passar a ser.
 
 | Item | Estado no template |
 | --- | --- |
-| CI em PR (`ci.yml`) | **Ativo** — Nx affected de lint/typecheck/test/build/e2e (sem `tag:stack:go`) e job `template-smoke` |
+| CI em PR (`ci.yml`) | **Ativo** — job `Escopo`, Nx affected de lint/typecheck/test/build/e2e (sem `tag:stack:go`), job `template-smoke` e o agregador `CI`, check obrigatório da `develop` |
 | CI Go do DMPF (`dmpf-ci.yml`) | **Ativo** — saída do `init` do `@mateusmacedo/dmpf-plugin`; no template sem módulo Go, vermelho quando o diff toca dependências ou o `go.work` (`modsync --check`), e fora dos checks obrigatórios (addendum da ADR-011) |
 | Versionamento e publish de libs | **Ativo** — `create-release.yml`, `nx-release.yml` (publica no GitHub Packages pelo `publish-libs.yaml`) e `nx-publish-libs.yml` (republicação manual) |
 | CD (`cd-dev-hmg.yml`) | **Template** — só `workflow_dispatch`, parametrizado por placeholder |
@@ -20,6 +20,24 @@ namespace, nome de secret) é versionado aqui — e não deve passar a ser.
 | Variáveis e secrets de deploy | **Ausentes** — configurados no repositório do projeto |
 
 Separação rígida: **CI não faz deploy**; **CD não substitui o CI**.
+
+## Esteira de CI por etapa
+
+| Etapa | O que roda |
+| --- | --- |
+| `pre-commit` (Lefthook) | `biome check --write` e `gofmt -l` nos arquivos em stage |
+| `pre-push` (Lefthook) | Uma invocação de `nx affected -t lint,typecheck,test,build`, com base no que o remoto já tem (`@{push}`, ou o merge-base com `origin/develop` na branch nova) |
+| PR para `develop` ou `release/**` | `ci.yml`: o job `Escopo` classifica o diff; `Nx Affected Pipeline` (`biome ci` e `nx affected` de lint, typecheck, test, build e e2e, sem `tag:stack:go`) e `Template smoke (DMPF)` rodam quando há código; o job `CI` agrega o resultado. `dmpf-ci.yml`: job `DMPF`, que roda só o que o diff alcança e fica fora dos obrigatórios no template |
+| PR só de documentação (`docs/**` e `*.md` fora de `tools/`, `.claude/` e `.agents/`) | Só o job `Escopo`; o `CI` aprova sem rodar o resto |
+| PR para `master` (de `release/**` ou `hotfix/*`) | O mesmo `ci.yml` e o `dmpf-ci.yml`, com a `master` como base |
+| Merge em `master` de `release/**` ou `hotfix/*` | `nx-release.yml`: versão, changelog e tags, release Docker quando há app fora de Go e publish das libs (`next` para pré-release, `latest` nos demais casos) |
+| Agendado (`dmpf-agendado.yml`) | `conformance` e `govulncheck` toda segunda às 09:00 UTC, porque os dois reprovam sem diff; sem `go.mod` no workspace, passa sem rodar gate |
+| `push` em `develop` ou `master` que muda dependência; agendado (segunda e quinta, só na `master`); manual (`cache-seed.yml`) | Semeia o cache do pnpm que os PRs leem da branch base |
+
+O ruleset da `develop` exige só o job `CI`: pulado conta como aprovado, falha ou
+cancelamento reprova. A `master` não tem check obrigatório; ela só recebe código já
+validado pelo PR de release. O Nx Cloud fica desligado no template
+(`neverConnectToCloud` no `nx.json`); o derivado se conecta depois de remover a flag.
 
 ## Modelo de referência
 

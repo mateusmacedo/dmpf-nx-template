@@ -143,8 +143,11 @@ O `lefthook.yml` define:
 
 - Pre-commit: `pnpm biome check --write` nos arquivos staged compatíveis, com
   `stage_fixed: true`.
-- Pre-push: `pnpm nx affected -t lint`, `typecheck`, `test` e `build`, com
-  `--parallel=3` e `--exclude=@nx-base-template/source`.
+- Pre-commit: `gofmt -l` nos `.go` em stage; reprova arquivo fora do padrão ou
+  com erro de sintaxe.
+- Pre-push: uma invocação de `pnpm nx affected -t lint,typecheck,test,build`,
+  com `--parallel=3` e `--exclude=@nx-base-template/source`, com base no que o
+  remoto já tem (`@{push}`, ou o merge-base com `origin/develop` na branch nova).
 
 Se um hook alterar arquivos no pre-commit, revise o diff antes de concluir o
 commit.
@@ -156,9 +159,10 @@ O workflow `.github/workflows/ci.yml` roda em PRs para `master`, `develop` e
 depois `nx affected` de lint, typecheck, test (com `--ci --coverage`), build e
 e2e.
 
-Nota importante: o CI ignora mudanças que sejam apenas Markdown (`paths-ignore`
-com `**/*.md` e `.github/ISSUE_TEMPLATE/**`). PRs só de documentação não disparam
-o pipeline e precisam de revisão humana.
+O job `Escopo` classifica o diff: num PR só de documentação (`docs/**` e `*.md`
+fora de `tools/`, `.claude/` e `.agents/`), os jobs pesados são pulados e o job
+`CI`, check obrigatório da `develop`, aprova sem rodá-los. A esteira completa por
+etapa está em `docs/ci-cd/README.md`.
 
 ## Release e plataforma
 

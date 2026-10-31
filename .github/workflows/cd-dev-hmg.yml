@@ -31,7 +31,7 @@ on:
           - dev
           - hmg
       app:
-        description: "Path da app (ex: apps/<app>). Vazio = detectadas"
+        description: "Path da app (ex: apps/backend/<app>). Vazio = detectadas"
         type: string
         required: false
 
@@ -42,17 +42,18 @@ permissions:
 jobs:
   detect:
     if: inputs.app == ''
+    permissions:
+      actions: read
+      contents: read
+      packages: read
     uses: ./.github/workflows/detect-apps.yaml
-    with:
-      app_dirs: "apps"
-      shared_dirs: "libs"
 # Deploy por app em jobs explícitos com `with` literal: a restrição à matriz era do
 # runner anterior, e o modelo foi mantido por ser mais legível. Cada app nova entra
 # como um job novo.
 #
 #  deploy-<app>:
 #    needs: [detect]
-#    if: always() && (contains(needs.detect.outputs.apps, 'apps/<app>') || inputs.app == 'apps/<app>')
+#    if: always() && (contains(fromJSON(needs.detect.outputs.apps || '[]'), 'apps/backend/<app>') || inputs.app == 'apps/backend/<app>')
 #    uses: ./.github/workflows/deploy-eks.yaml
 #    with:
 #      version: ${{ github.sha }}
@@ -62,6 +63,6 @@ jobs:
 #      path_project: <projeto>/${{ inputs.environment || 'dev' }}
 #      aws_account_id: ${{ vars.AWS_ACCOUNT_ID }}
 #      docker_context: "."
-#      dockerfile: apps/<app>/Dockerfile
+#      dockerfile: apps/backend/<app>/Dockerfile
 #      runner: ubuntu-26.04
 #    secrets: inherit

@@ -149,8 +149,8 @@ versionamento independente por projeto marcado com `type:lib`.
 - **Título do PR:** `tipo(scope): [DEVS-<n>] descrição`, com a issue do Linear.
 - Prefira PRs pequenos e focados: uma feature ou um fix por PR.
 - Descreva o que muda e por quê, com contexto suficiente para o revisor.
-- PRs que tocam apenas arquivos Markdown não disparam o pipeline, por causa do
-  `paths-ignore` do `ci.yml`.
+- Num PR só de documentação, o job `Escopo` pula os jobs pesados e o check `CI`
+  aprova sem rodá-los (ver a esteira em `docs/ci-cd/README.md`).
 
 ## Validação local antes do PR
 
@@ -164,8 +164,9 @@ pnpm nx affected -t lint,typecheck,test,build --exclude=@nx-base-template/source
 
 O `--exclude=@nx-base-template/source` retira o projeto raiz (targets `nx:noop`)
 das operações em lote. Os hooks reforçam a mesma validação: `pre-commit` roda
-`biome check --write` nos arquivos em stage e `pre-push` roda lint, typecheck,
-test e build nos projetos afetados. Confie nos hooks — mantenha-os ativos em vez
+`biome check --write` (e `gofmt -l` nos `.go`) nos arquivos em stage, e `pre-push`
+roda uma invocação de `nx affected -t lint,typecheck,test,build` contra o que o
+remoto já tem. Confie nos hooks — mantenha-os ativos em vez
 de contorná-los, pois eles são o que garante que todo push sai verde.
 
 ## Provisionamento das branches remotas

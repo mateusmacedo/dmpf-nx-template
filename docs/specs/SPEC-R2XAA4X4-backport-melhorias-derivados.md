@@ -203,13 +203,13 @@ Linear, uma branch, um plano e um PR para `develop`.
 
 #### Onda 3 — CI/CD estrutural
 
-- [ ] **[P1] BKP-18 Actions**: fixar por SHA, com o comentário da versão,
+- [x] **[P1] BKP-18 Actions**: fixar por SHA, com o comentário da versão,
   toda action de `ci.yml`, `create-release.yml`, `nx-release.yml`,
   `publish-libs.yaml`, `detect-apps.yaml` e do composite `setup-node-pnpm`.
   - Preferir actions com `runs.using: node24`.
   - Usar `permissions: {}` no topo e permissões por job; o job `main` tem
     `packages: read`.
-- [ ] **[P0] BKP-19 `@nx/docker`**: usar
+- [x] **[P0] BKP-19 `@nx/docker`**: usar
   `"buildTarget": { "name": "docker:build", "cwd": ".", "args": ["-f {projectRoot}/Dockerfile"] }`
   com os `--secret` `id=npmrc` e `id=NODE_AUTH_TOKEN` que o Dockerfile de
   referência pede. Não copiar o `runTarget` da plataforma.
@@ -225,12 +225,12 @@ Linear, uma branch, um plano e um PR para `develop`.
     (PR obrigatório, check `CI`, sem deleção e sem force push) e de `master`
     (sem deleção e sem force push, com bypass do bot de release). Alinhar o
     `AGENTS.md`.
-- [ ] **[P1] BKP-21 Semente de cache**: criar `.github/workflows/cache-seed.yml`.
+- [x] **[P1] BKP-21 Semente de cache**: criar `.github/workflows/cache-seed.yml`.
   - Gatilhos: `push` em `develop` e `master` filtrado por `pnpm-lock.yaml`,
     `pnpm-workspace.yaml` e `package.json`, `schedule` semanal e
     `workflow_dispatch`.
   - Passo único com o composite `setup-node-pnpm`.
-- [ ] **[P1] BKP-22 `detect-apps` pelo grafo**: usar
+- [x] **[P1] BKP-22 `detect-apps` pelo grafo**: usar
   `pnpm --silent nx show projects --affected --type app --json` após
   `nrwl/nx-set-shas` (`main-branch-name: ${{ github.ref_name }}`), filtrando
   pelo `marker_file`.
@@ -238,21 +238,21 @@ Linear, uma branch, um plano e um PR para `develop`.
   - O exemplo do `cd-dev-hmg.yml` usa
     `contains(fromJSON(needs.detect.outputs.apps || '[]'), 'apps/backend/<app>')`.
   - Atualizar o `docs/ci-cd/DEPLOY_APPLICATIONS.md`.
-- [ ] **[P1] BKP-23 `namedInputs`**: no `default`, excluir só
+- [x] **[P1] BKP-23 `namedInputs`**: no `default`, excluir só
   `!{projectRoot}/**/CHANGELOG.md`. No `go`, excluir
   `!{projectRoot}/**/*.md`, `!{projectRoot}/package.json` e
   `!{projectRoot}/Dockerfile`.
-- [ ] **[P1] BKP-24 Pré-release**: quando o head do PR casar
+- [x] **[P1] BKP-24 Pré-release**: quando o head do PR casar
   `^release/([0-9]+\.[0-9]+\.[0-9]+-[0-9A-Za-z.-]+)$`, rodar
   `nx release <versão>` explícito.
   - O output `dist_tag` é `next` quando alguma versão tiver `-` e `latest`
     nos demais casos, e o job `publish` o usa.
   - Combinar com o input `version` do BKP-10 e documentar a pré-release no
     `CONTRIBUTING.md`.
-- [ ] **[P1] BKP-25 Gates agendados**: workflow semanal de gates DMPF que
+- [x] **[P1] BKP-25 Gates agendados**: workflow semanal de gates DMPF que
   termina com sucesso, sem rodar gate, quando não existe `go.mod` no
   workspace.
-- [ ] **[P2] BKP-26 Esteira de CI por etapa**: tabela no
+- [x] **[P2] BKP-26 Esteira de CI por etapa**: tabela no
   `docs/ci-cd/README.md` cobrindo `pre-commit`, `pre-push`, PR para
   `develop` e `release/**`, PR só de documentação, PR para `master`, `push`
   em `master`, agendado e semente de cache.
@@ -471,8 +471,8 @@ senão: pular com notice
   addendum da ADR-011.
 - [ ] Onda 3: um PR só com `docs/**/*.md` recebe o check `CI` verde, com
   `main` e `template-smoke` pulados.
-- [ ] Onda 3: nenhum `uses:` de workflow ou composite aponta para tag móvel.
-- [ ] Onda 3: `detect-apps` devolve `["apps/backend/<app>"]` para uma app
+- [x] Onda 3: nenhum `uses:` de workflow ou composite aponta para tag móvel.
+- [x] Onda 3: `detect-apps` devolve `["apps/backend/<app>"]` para uma app
   afetada no layout de dois níveis.
 - [ ] Onda 4: `node tools/adr-verify.mjs` passa nos ADRs do template, e os
   testes de `tools/tests/adr-verify/` passam.
