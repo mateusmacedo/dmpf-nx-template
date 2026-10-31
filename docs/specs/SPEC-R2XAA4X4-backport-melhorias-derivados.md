@@ -213,7 +213,7 @@ Linear, uma branch, um plano e um PR para `develop`.
   `"buildTarget": { "name": "docker:build", "cwd": ".", "args": ["-f {projectRoot}/Dockerfile"] }`
   com os `--secret` `id=npmrc` e `id=NODE_AUTH_TOKEN` que o Dockerfile de
   referência pede. Não copiar o `runTarget` da plataforma.
-- [ ] **[P0] BKP-20 Escopo e check agregador**: remover o `paths-ignore` do
+- [x] **[P0] BKP-20 Escopo e check agregador**: remover o `paths-ignore` do
   `ci.yml`.
   - O job `Escopo` classifica o diff. Contam como documentação `docs/**` e
     `*.md` fora de `tools/`, `.claude/` e `.agents/`.
@@ -469,7 +469,7 @@ senão: pular com notice
   `template-smoke` passa.
 - [x] Onda 2: o check `DMPF / DMPF` do PR draft tem resultado registrado no
   addendum da ADR-011.
-- [ ] Onda 3: um PR só com `docs/**/*.md` recebe o check `CI` verde, com
+- [x] Onda 3: um PR só com `docs/**/*.md` recebe o check `CI` verde, com
   `main` e `template-smoke` pulados.
 - [x] Onda 3: nenhum `uses:` de workflow ou composite aponta para tag móvel.
 - [x] Onda 3: `detect-apps` devolve `["apps/backend/<app>"]` para uma app
