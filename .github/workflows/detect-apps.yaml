@@ -28,16 +28,17 @@ on:
         description: "JSON array de apps detectadas"
         value: ${{ jobs.detect.outputs.apps }}
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   detect:
+    permissions:
+      contents: read
     runs-on: ${{ inputs.runner }}
     outputs:
       apps: ${{ steps.set.outputs.apps }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           fetch-depth: 0
 
