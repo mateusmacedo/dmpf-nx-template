@@ -79,7 +79,14 @@ normal. No merge, o `nx-release.yml` roda `nx release 1.2.0-rc.1` com a versão
 explícita, em vez de derivá-la dos commits, e o job `publish` publica com a
 dist-tag `next`; a `latest` só recebe versões sem `-`. Para refazer uma release
 que falhou, dispare o `nx-release.yml` em `master` com o input `version`
-(validado como semver).
+(validado como semver). Na republicação manual (`nx-publish-libs.yml`), o input
+`tag` é obrigatório: use `next` para uma pré-release.
+
+A pré-release não conta como ciclo fechado: o `create-release.yml` ignora os
+merges de `release/X.Y.Z-*` ao calcular a próxima versão, então a release final
+`X.Y.Z` continua disponível. O release Docker não distingue a pré-release: a
+imagem sai no esquema `production` do `@nx/docker`
+(`{currentDate|YYMM.DD}.{shortCommitSha}`), como em qualquer merge na `master`.
 
 ## Conventional Commits
 
