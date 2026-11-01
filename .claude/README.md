@@ -37,6 +37,7 @@ Carregadas como contexto de conduta. Descrevem o que é esperado em cada área.
 | Organização de arquivos | `rules/file-organization.md` | Colocalização e separação em camadas. |
 | Limites de tamanho | `rules/file-size-limits.md` | Heurísticas de tamanho para arquivos e funções. |
 | Segurança Git | `rules/git-safety.md` | Hooks, force push seguro, revisão pré-commit e proteção das branches compartilhadas. |
+| Revisão de idioma | `rules/language-review.md` | Revisão de prosa PT-BR e EN uma vez, opcional, antes do PR. |
 | Performance | `rules/performance.md` | Banco de dados, cache, filas, N+1 e otimizações comuns. |
 | Processo e qualidade | `rules/process-enforcement.md` | Quando exigir especificação e plano antes de implementar. |
 | Segurança | `rules/security.md` | Autenticação, autorização, sanitização e variáveis sensíveis. |
