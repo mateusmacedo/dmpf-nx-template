@@ -84,7 +84,7 @@ O baseline cobre apenas `dev` e `hmg`. Produção é expansão explícita.
 | `version` | `github.ref_name` |
 | `environment` | `prod` |
 | `path_project` | `<projeto>/prod` |
-| Detect | frequentemente `shared_dirs: ""` (só apps tocadas na tag) — valide a política |
+| Detect | o grafo do Nx compara com o último run verde do workflow; numa tag, valide se a base cobre o que precisa ir para produção |
 
 Pré-requisitos:
 

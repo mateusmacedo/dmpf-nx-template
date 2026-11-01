@@ -38,8 +38,8 @@ function gate() {
   const gateType = getArg('--gate-type');
 
   if (gateType === 'local-fix') {
-    const count = parseInt(getArg('--local-verify-count') || '0', 10);
-    const max = parseInt(getArg('--local-verify-attempts') || '3', 10);
+    const count = Number.parseInt(getArg('--local-verify-count') || '0', 10);
+    const max = Number.parseInt(getArg('--local-verify-attempts') || '3', 10);
     if (count >= max) {
       return output({
         allowed: false,
@@ -55,7 +55,7 @@ function gate() {
   }
 
   if (gateType === 'env-rerun') {
-    const count = parseInt(getArg('--env-rerun-count') || '0', 10);
+    const count = Number.parseInt(getArg('--env-rerun-count') || '0', 10);
     if (count >= 2) {
       return output({
         allowed: false,
@@ -119,9 +119,9 @@ function postAction() {
 function cycleCheck() {
   const status = getArg('--code');
   const wasAgentTriggered = getFlag('--agent-triggered');
-  let cycleCount = parseInt(getArg('--cycle-count') || '0', 10);
-  const maxCycles = parseInt(getArg('--max-cycles') || '10', 10);
-  let envRerunCount = parseInt(getArg('--env-rerun-count') || '0', 10);
+  let cycleCount = Number.parseInt(getArg('--cycle-count') || '0', 10);
+  const maxCycles = Number.parseInt(getArg('--max-cycles') || '10', 10);
+  let envRerunCount = Number.parseInt(getArg('--env-rerun-count') || '0', 10);
 
   // Cycle classification: if previous cycle was agent-triggered, count it
   if (wasAgentTriggered) cycleCount++;
@@ -129,7 +129,9 @@ function cycleCheck() {
   // Reset env_rerun_count on non-environment status
   if (status !== 'environment_issue') envRerunCount = 0;
 
-  // Approaching limit gate
+  // Cycle limit gates. limitReached is a terminal stop; approachingLimit is an
+  // advisory warning emitted in the two cycles before the cap.
+  const limitReached = cycleCount >= maxCycles;
   const approachingLimit = cycleCount >= maxCycles - 2;
 
   output({
@@ -137,7 +139,10 @@ function cycleCheck() {
     agentTriggered: false,
     envRerunCount,
     approachingLimit,
-    message: approachingLimit
+    limitReached,
+    message: limitReached
+      ? `Cycle limit reached (${cycleCount}/${maxCycles}). Stopping.`
+      : approachingLimit
       ? `Approaching cycle limit (${cycleCount}/${maxCycles})`
       : null,
   });

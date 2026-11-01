@@ -3,7 +3,7 @@
   "defaultBase": "master",
   "analytics": false,
   "namedInputs": {
-    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "default": ["{projectRoot}/**/*", "sharedGlobals", "!{projectRoot}/**/CHANGELOG.md"],
     "production": [
       "default",
       "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
@@ -23,6 +23,9 @@
     "go": [
       "{projectRoot}/**/*",
       "!{projectRoot}/deploy/**/*",
+      "!{projectRoot}/**/*.md",
+      "!{projectRoot}/package.json",
+      "!{projectRoot}/Dockerfile",
       "{workspaceRoot}/go.work",
       "{workspaceRoot}/go.work.sum"
     ]
@@ -63,7 +66,13 @@
       "plugin": "@nx/docker",
       "options": {
         "buildTarget": {
-          "name": "docker:build"
+          "name": "docker:build",
+          "cwd": ".",
+          "args": [
+            "-f {projectRoot}/Dockerfile",
+            "--secret id=npmrc,src=${NPM_CONFIG_USERCONFIG:-$HOME/.npmrc}",
+            "--secret id=NODE_AUTH_TOKEN,env=NODE_AUTH_TOKEN"
+          ]
         },
         "runTarget": {
           "name": "docker:run"
@@ -141,7 +150,7 @@
         "linter": "go",
         "args": [
           "run",
-          "github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.13.2",
+          "github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.15.0",
           "run",
           "--allow-parallel-runners"
         ]
@@ -156,5 +165,5 @@
       }
     }
   },
-  "nxCloudId": "6a5d373ddbc8c8c89a15bb24"
+  "neverConnectToCloud": true
 }

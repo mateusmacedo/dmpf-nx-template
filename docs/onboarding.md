@@ -10,7 +10,7 @@ clonar, validar o ambiente e então gerar a primeira app ou lib do seu projeto.
 - Node.js `^24` (ver `.nvmrc` / `.node-version`).
 - `pnpm@11.14.0`, conforme `packageManager` em `package.json`.
 - Corepack habilitado, para usar exatamente a versão declarada do pnpm.
-- Go na diretiva do `go.work` (hoje `1.26.9`), exigido pelo `@mateusmacedo/dmpf-plugin`.
+- Go na diretiva do `go.work` (hoje `1.26.10`), exigido pelo `@mateusmacedo/dmpf-plugin`.
 - Token do GitHub com o escopo `read:packages`: o `@mateusmacedo/dmpf-plugin` vem do
   GitHub Packages, que exige autenticação até para pacote público.
 
@@ -143,8 +143,11 @@ O `lefthook.yml` define:
 
 - Pre-commit: `pnpm biome check --write` nos arquivos staged compatíveis, com
   `stage_fixed: true`.
-- Pre-push: `pnpm nx affected -t lint`, `typecheck`, `test` e `build`, com
-  `--parallel=3` e `--exclude=@nx-base-template/source`.
+- Pre-commit: `gofmt -l` nos `.go` em stage; reprova arquivo fora do padrão ou
+  com erro de sintaxe.
+- Pre-push: uma invocação de `pnpm nx affected -t lint,typecheck,test,build`,
+  com `--parallel=3` e `--exclude=@nx-base-template/source`, com base no que o
+  remoto já tem (`@{push}`, ou o merge-base com `origin/develop` na branch nova).
 
 Se um hook alterar arquivos no pre-commit, revise o diff antes de concluir o
 commit.
@@ -156,9 +159,10 @@ O workflow `.github/workflows/ci.yml` roda em PRs para `master`, `develop` e
 depois `nx affected` de lint, typecheck, test (com `--ci --coverage`), build e
 e2e.
 
-Nota importante: o CI ignora mudanças que sejam apenas Markdown (`paths-ignore`
-com `**/*.md` e `.github/ISSUE_TEMPLATE/**`). PRs só de documentação não disparam
-o pipeline e precisam de revisão humana.
+O job `Escopo` classifica o diff: num PR só de documentação (`docs/**` e `*.md`
+fora de `tools/`, `.claude/` e `.agents/`), os jobs pesados são pulados e o job
+`CI`, check obrigatório da `develop`, aprova sem rodá-los. A esteira completa por
+etapa está em `docs/ci-cd/README.md`.
 
 ## Release e plataforma
 
@@ -168,7 +172,8 @@ o pipeline e precisam de revisão humana.
   Packages, que roda no job `publish` encadeado ao mesmo run. O
   `nx-publish-libs.yml` só republica, por disparo manual.
 - O `create-release.yml` cria a branch `release/X.Y.Z` e avisa para abrir o PR
-  para `master` com a sua conta: PR aberto pelo `GITHUB_TOKEN` não dispara o CI.
+  para `master` com a sua conta depois do primeiro push com commits: as execuções
+  disparadas pelo `GITHUB_TOKEN` terminam sem nenhum job.
 
 ## CD (deploy)
 
@@ -221,6 +226,45 @@ O trabalho deste repositório é rastreado no Linear, no projeto
 - **Dependências:** o `depends_on` de cada spec vira relação *blocked by*.
 - **Branch e PR:** `tipo/DEVS-<n>-descricao-curta` e título
   `tipo(scope): [DEVS-<n>] descrição`.
+
+## Ao derivar deste template
+
+Um repositório criado a partir deste template herda a identidade dele. Antes do
+primeiro PR do derivado:
+
+1. **Nome do pacote raiz.** `@nx-base-template/source` aparece no `package.json`,
+   no `project.json`, no `lefthook.yml`, nos workflows (`ci.yml`, `nx-release.yml`,
+   `nx-publish-libs.yml`, `publish-libs.yaml`, `dmpf-agendado.yml`), no
+   `.github/PULL_REQUEST_TEMPLATE.md`, no `AGENTS.md`, neste guia e no
+   `docs/guides/development-workflow.md`. Os ADRs citam o nome como registro
+   histórico e ficam como estão. Para listar o que resta:
+
+   ```bash
+   git grep -l '@nx-base-template/source' -- ':!docs/adr' ':!docs/specs' ':!docs/analises'
+   git grep -lw 'nx-base-template' -- ':!docs/adr' ':!docs/specs' ':!docs/analises'
+   ```
+
+2. **Identidade DMPF.** Rode o `init` com o prefixo de módulo e o projeto Compose
+   do derivado (ver `docs/guides/primeiro-bounded-context.md`). O `init` reescreve
+   o `name:` do `infra/test/compose.yml` (arquivo gerenciado), mas o do
+   `infra/local/docker-compose.yml` (`nx-base-template-local`) é seed, que um
+   `init` repetido não toca: troque à mão.
+3. **Escopo npm.** Troque `@mateusmacedo` pelo owner do repositório no GitHub
+   Packages, com o mesmo casing no `package.json`, no `tsconfig.base.json` e no
+   input `scope` da publicação (ver o `AGENTS.md`).
+4. **Tracker.** Troque a linha do projeto do Linear neste guia e no `AGENTS.md`.
+5. **Nx Cloud.** O template sai com `neverConnectToCloud: true` no `nx.json`. Para
+   conectar, remova a flag e rode `pnpm nx connect`.
+6. **Rulesets.** Rulesets não são copiados para o repositório novo. Recrie os da
+   `develop` e da `master` como o `AGENTS.md` descreve (seção "Git e release").
+7. **ADRs.** Numere os ADRs do derivado a partir de `100`; a faixa `001-099` é do
+   template (ver `docs/adr/README.md`).
+8. **Inventário.** À medida que criar apps e libs, atualize a "Visão geral" do
+   `AGENTS.md` (que diz que o template não tem nenhuma) e a árvore do `README.md`.
+
+O job `Template smoke (DMPF)` do `ci.yml` só roda enquanto o `modulePrefix` do
+`dmpf.json` for o reservado `example.com/change-me`. Depois do `init` do
+derivado, o job fica inerte sem precisar editar o workflow.
 
 ## Onde continuar lendo
 

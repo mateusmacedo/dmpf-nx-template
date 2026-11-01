@@ -1,0 +1,104 @@
+name: DMPF agendado
+
+# WHY: dois gates reprovam sem mudança de código — o conformance, quando vence uma
+# exceção declarada (DMPF-X006), e o govulncheck, quando o banco ganha um aviso
+# novo. O dmpf-ci.yml roda pelo diff, e sem diff o escopo sai vazio, então eles
+# rodam aqui. Sem nenhum go.mod (o próprio template), o workflow passa sem gate.
+on:
+  schedule:
+    - cron: "0 9 * * 1"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+env:
+  NODE_AUTH_TOKEN: ${{ github.token }}
+
+jobs:
+  guard:
+    name: Guarda (workspace com Go)
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+    timeout-minutes: 5
+    outputs:
+      go: ${{ steps.go.outputs.go }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+
+      - name: Procurar go.mod
+        id: go
+        run: |
+          set -euo pipefail
+          if [ -n "$(git ls-files 'go.mod' '*/go.mod')" ]; then
+            echo "go=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "go=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Nenhum go.mod no workspace: gates agendados pulados."
+          fi
+
+  conformance:
+    name: conformance
+    needs: guard
+    if: needs.guard.outputs.go == 'true'
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+      packages: read
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+
+      - name: Setup Node and pnpm
+        uses: ./.github/actions/setup-node-pnpm
+        with:
+          node-version: "24"
+
+      - name: Setup Go
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        with:
+          go-version-file: go.work
+
+      - name: DMPF conformance gate
+        run: |
+          set -euo pipefail
+          CONFORMANCE="$(jq -r .conformance node_modules/@mateusmacedo/dmpf-plugin/versions.json)"
+          go run "github.com/mateusmacedo/dmpf/tools/dmpf-conformance/cmd/conformance@${CONFORMANCE}" --root .
+
+  govulncheck:
+    name: govulncheck
+    needs: guard
+    if: needs.guard.outputs.go == 'true'
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+      packages: read
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+
+      - name: Setup Node and pnpm
+        uses: ./.github/actions/setup-node-pnpm
+        with:
+          node-version: "24"
+
+      - name: Setup Go
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        with:
+          go-version-file: go.work
+
+      - name: govulncheck em todos os projetos Go
+        run: pnpm nx run-many -t govulncheck --parallel=3 --exclude=@nx-base-template/source

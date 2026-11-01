@@ -10,10 +10,12 @@ description: >-
   mencionar erros de tipo, generics, type assertion, type switch, channels,
   goroutines, errors.Is/As, embedding ou ao tipar entities, repositories, DTOs,
   use cases ou respostas de API em Go.
-model: sonnet
+model: opus
 ---
 
 # Go — padrões e convenções
+
+> **Override DMPF.** Num bounded context deste workspace, a forma é a de `.claude/rules/dmpf-bounded-context.md`, que prevalece sobre o genérico descrito aqui: um package por bloco (`domain`, `port`, `application`, `provider`, `app`, `contract`) no módulo único do contexto, em vez de `internal/` e `pkg/`, e configuração só do ambiente, sem prefixo `DMPF_`, pela forma `Defaults(role)`, `FromEnv` e `Validate`.
 
 Guia de referência com padrões idiomáticos de Go em backend. Adapte ao padrão vigente do projeto — quando houver divergência, preserve o padrão local.
 

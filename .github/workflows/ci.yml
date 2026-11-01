@@ -1,30 +1,71 @@
 name: CI
 
+# WHY: sem paths-ignore. O job `CI` é o check obrigatório do ruleset e precisa
+# reportar em todo PR, inclusive no só de documentação, em que ele aprova sem
+# rodar os jobs pesados.
 on:
   pull_request:
     branches:
       - master
       - develop
       - "release/**"
-    paths-ignore:
-      - "**/*.md"
-      - ".github/ISSUE_TEMPLATE/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-permissions:
-  actions: read
-  contents: read
-  packages: read
+permissions: {}
 
 env:
+  CI: "true"
   NODE_AUTH_TOKEN: ${{ github.token }}
+  NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
 
 jobs:
+  scope:
+    name: Escopo
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+    timeout-minutes: 5
+    outputs:
+      code: ${{ steps.scope.outputs.code }}
+      adr: ${{ steps.scope.outputs.adr }}
+      smoke: ${{ steps.scope.outputs.smoke }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          fetch-depth: 0
+
+      # WHY: o Markdown sob tools/, .claude/ e .agents/ é saída do init do DMPF e
+      # conta como código; alterá-lo faz o init propor mudança.
+      - name: Classificar o diff
+        id: scope
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          # WHY: --no-renames lista origem e destino; sem ele, mover tools/x.md para
+          # docs/ mostraria só o destino e o PR passaria como documentação.
+          mudados="$(git diff --name-only --no-renames "$BASE_SHA"...HEAD)"
+          codigo="$(awk '!/^docs\// && !(/\.md$/ && !/^(tools|\.claude|\.agents)\//)' <<<"$mudados")"
+          echo "code=$([ -n "$codigo" ] && echo true || echo false)" | tee -a "$GITHUB_OUTPUT"
+          adr="$(grep -E '^(docs/adr/|docs/specs/|tools/adr-verify\.mjs$|tools/tests/adr-verify/)' <<<"$mudados" || true)"
+          echo "adr=$([ -n "$adr" ] && echo true || echo false)" | tee -a "$GITHUB_OUTPUT"
+          # WHY: o smoke exige o modulePrefix reservado; no derivado, depois do init,
+          # ele reprovaria sempre. Fora do template o job fica inerte.
+          prefixo="$(jq -r '.modulePrefix // empty' dmpf.json 2>/dev/null || true)"
+          echo "smoke=$([ "$prefixo" = 'example.com/change-me' ] && echo true || echo false)" | tee -a "$GITHUB_OUTPUT"
+
   main:
     name: Nx Affected Pipeline
+    needs: scope
+    if: needs.scope.outputs.code == 'true'
+    permissions:
+      actions: read
+      contents: read
+      packages: read
     runs-on: ubuntu-26.04
     timeout-minutes: 30
     env:
@@ -32,7 +73,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           fetch-depth: 0
 
@@ -42,7 +83,7 @@ jobs:
           node-version: "24"
 
       - name: Set Nx SHAs for affected (base/head)
-        uses: nrwl/nx-set-shas@v5
+        uses: nrwl/nx-set-shas@afb73a62d26e41464e9254689e1fd6122ee683c1 # v5.0.1
 
       - name: Check formatting and linting
         run: pnpm biome ci .
@@ -64,12 +105,17 @@ jobs:
 
   template-smoke:
     name: Template smoke (DMPF)
+    needs: scope
+    if: needs.scope.outputs.code == 'true' && needs.scope.outputs.smoke == 'true'
+    permissions:
+      contents: read
+      packages: read
     runs-on: ubuntu-26.04
     timeout-minutes: 25
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       - name: Setup Node and pnpm
         uses: ./.github/actions/setup-node-pnpm
@@ -78,7 +124,7 @@ jobs:
           install: "false"
 
       - name: Setup Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
         with:
           go-version-file: go.work
           cache: true
@@ -88,3 +134,57 @@ jobs:
 
       - name: Template smoke
         run: bash tools/template-smoke.sh
+
+  # WHY: ADR é documentação e não liga o `main`; o verificador roda pelo próprio
+  # critério. Os ADRs 001-011 antecedem o verificador e passam só nas checagens
+  # estruturais (docs/adr/README.md, seção "Verificador").
+  adr:
+    name: ADR
+    needs: scope
+    if: needs.scope.outputs.adr == 'true'
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+
+      # WHY: o verificador não tem dependência e o job não instala o pnpm; sem
+      # package-manager-cache: false, o setup-node lê o packageManager do
+      # package.json e falha procurando o pnpm para o cache.
+      - name: Setup Node
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: "24"
+          package-manager-cache: false
+
+      - name: Verificar o acervo
+        run: |
+          set -euo pipefail
+          node tools/adr-verify.mjs --to 99 --check a1,a2,a3,a6,a7,a8
+          node tools/adr-verify.mjs --from 12 --to 99
+          node tools/adr-verify.mjs --from 100
+
+      - name: Testes do verificador
+        run: node --test tools/tests/adr-verify/verify.test.mjs
+
+  # WHY: único check obrigatório do ruleset. Job pulado conta como aprovado,
+  # porque o escopo só pula o que não se aplica ao PR; falha ou cancelamento
+  # reprova.
+  ci:
+    name: CI
+    needs: [scope, main, template-smoke, adr]
+    if: always()
+    runs-on: ubuntu-26.04
+    permissions: {}
+    timeout-minutes: 5
+    steps:
+      - name: Resultado dos jobs
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          jq -r 'to_entries[] | "\(.key): \(.value.result)"' <<<"$NEEDS"
+          jq -e 'all(.[]; .result == "success" or .result == "skipped")' <<<"$NEEDS" >/dev/null

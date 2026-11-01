@@ -1,0 +1,48 @@
+name: Semente de cache
+
+# WHY: o PR só lê o cache da própria ref, da branch base e da default. Sem
+# semente em develop e master, todo PR novo partia do cache frio do pnpm.
+on:
+  push:
+    branches:
+      - develop
+      - master
+    paths:
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - package.json
+  # WHY: o GitHub despeja o cache sem acesso há 7 dias, e o atraso do agendador
+  # pode estourar um intervalo de exatos 7 dias; por isso, duas passadas por
+  # semana. O agendado roda só na branch default (master); a develop se renova
+  # pelo push de dependência, pelos PRs que leem o cache e pelo dispatch manual.
+  schedule:
+    - cron: "0 6 * * 1,4"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+env:
+  NODE_AUTH_TOKEN: ${{ github.token }}
+
+jobs:
+  seed:
+    name: Semente
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+      packages: read
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+
+      - name: Setup Node and pnpm
+        uses: ./.github/actions/setup-node-pnpm
+        with:
+          node-version: "24"

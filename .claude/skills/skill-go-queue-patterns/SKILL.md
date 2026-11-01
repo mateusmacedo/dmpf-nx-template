@@ -5,10 +5,12 @@ description: |
   Cobre setup de queues, workers, tipagem de jobs, retry, dead-letter, monitoramento e
   graceful shutdown. Os padrões aplicam-se a sistemas baseados em Redis (asynq), Postgres
   (river) ou message brokers genéricos (watermill).
-model: sonnet
+model: opus
 ---
 
 # Go queues — padrões
+
+> **Override DMPF.** Num bounded context deste workspace, a forma é a de `.claude/rules/dmpf-bounded-context.md`, que prevalece sobre o genérico descrito aqui: o evento de integração vai para a outbox na mesma transação do estado, por `usecase.Enqueue`, e quem o publica é o relay do kernel, não o caso de uso.
 
 ## Objetivo
 

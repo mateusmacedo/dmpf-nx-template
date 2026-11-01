@@ -126,3 +126,23 @@ um arquivo gerado e quebre o registro de hashes do `init` ou o
 - ADR-047 do platform (versão dos módulos Go pelo `package.json` privado) —
   `github.com/mateusmacedo/dmpf/blob/5def4d2d749bf8d5b2ef683f3cdc97eadf354c26/docs/adr/047-tags-de-modulo-go-e-consumo-fora-do-workspace.md`
 - [ADR-009](./009-remocao-libs-exemplo.md) e [ADR-010](./010-migracao-github-linear.md)
+
+## Addendum — 2026-10-31
+
+Este addendum não altera o status nem a decisão. Ele registra o comportamento do
+`dmpf-ci.yml` com o plugin na `1.0.0-rc.7` (`workflowRef` `ddd3d0c`), observado
+no PR do bump (SPEC-R2XAA4X4, BKP-16).
+
+- O job passa a se chamar `DMPF / DMPF`. O `DMPF / Vetores negativos` fica pulado,
+  porque o input `self-tests` é `false` por padrão.
+- No PR do bump, o job reprovou no `modsync --check`, antes do `conformance`:
+  `go list -m -json all` falha com `no modules were found in the current workspace`,
+  porque o `go.work` não tem `use`.
+- O reutilizável roda só o que o diff alcança (`dmpf-scope`). No modo `version`, um
+  diff que toca `package.json` ou `pnpm-lock.yaml` liga todos os gates, e um diff em
+  `go.work`, `go.mod` ou `tools/dmpf-conformance/` liga o `modsync`. Sem módulo Go,
+  esses PRs ficam vermelhos. Pela mesma regra, um diff que não toca esses arquivos
+  nem projetos Go não liga o `modsync` nem o `conformance`.
+- A consequência negativa "vermelho em todo PR do template" passa a valer só para
+  os PRs cujo diff liga esses gates. O `dmpf-ci.yml` continua fora dos checks
+  obrigatórios, e num projeto derivado passa a valer a partir do primeiro contexto.

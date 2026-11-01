@@ -1,0 +1,3 @@
+# WHY: fixtures com go.mod próprio viram projetos do @nx-go/nx-go e quebram o
+# nx affected, porque não estão (nem devem estar) no go.work.
+**/testdata/**

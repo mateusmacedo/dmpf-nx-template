@@ -33,6 +33,30 @@ Um arquivo por decisão, numeração sequencial e slug em kebab-case:
 O número é o próximo livre na sequência (o último registrado abaixo é o
 `011`). O título dentro do arquivo repete o número: `# ADR-00N: <título>`.
 
+### Faixas de numeração
+
+A faixa `001-099` é do template. O projeto derivado numera os próprios ADRs a partir
+de `100`, para que um ADR novo do template, trazido por merge, não colida com os dele.
+Os ADRs herdados do template ficam como estão.
+
+### Verificador
+
+`tools/adr-verify.mjs` confere o acervo contra este guia: arquivo e título (A1),
+arquivo e índice (A2), numeração sem buraco (A3), seções do template (A4),
+alternativas e consequências (A5), pendência com owner (A6), referência sem número de
+linha (A7) e spec citada existente (A8). Os ADRs `001` a `011` são anteriores ao
+verificador e não seguem as seções do template; por isso o CI roda três chamadas:
+
+```bash
+node tools/adr-verify.mjs --to 99 --check a1,a2,a3,a6,a7,a8   # acervo do template
+node tools/adr-verify.mjs --from 12 --to 99                   # ADRs novos do template
+node tools/adr-verify.mjs --from 100                          # ADRs do derivado
+```
+
+O job `ADR` do `ci.yml` roda as três e os testes de `tools/tests/adr-verify/` quando o
+diff toca `docs/adr/`, `docs/specs/` (a A8 confere as specs citadas), o verificador ou
+os testes.
+
 ## Template
 
 Copie o esqueleto abaixo. O formato é local e **sem frontmatter** — o arquivo

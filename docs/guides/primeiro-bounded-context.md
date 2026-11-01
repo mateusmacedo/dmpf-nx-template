@@ -3,8 +3,8 @@
 Este guia cobre só o que é próprio de um projeto criado a partir do template. A
 referência completa de consumo do DMPF é o guia do platform na versão fixada pelo
 plugin:
-[`docs/guides/dmpf-consumo-externo.md`](https://github.com/mateusmacedo/dmpf/blob/5def4d2d749bf8d5b2ef683f3cdc97eadf354c26/docs/guides/dmpf-consumo-externo.md)
-(commit `5def4d2`, o `workflowRef` do `@mateusmacedo/dmpf-plugin` `1.0.0-rc.3`).
+[`docs/guides/dmpf-consumo-externo.md`](https://github.com/mateusmacedo/dmpf/blob/ddd3d0c4202879f168c7f6bfafaefadd94a3a621/docs/guides/dmpf-consumo-externo.md)
+(commit `ddd3d0c`, o `workflowRef` do `@mateusmacedo/dmpf-plugin` `1.0.0-rc.7`).
 
 ## Antes de começar
 
@@ -56,6 +56,11 @@ message PingResponse {}
 ```
 
 ## 3. Rodar os gates
+
+Antes dos gates, dê `git add` no contexto gerado (`git add apps/backend/<name>`). O
+`dmpf-gate-check.sh` do plugin, que o `dmpf-ci.yml` roda, só enxerga os `dmpf-units.json`
+rastreados (`git ls-files '*dmpf-units.json'`); sem o `git add`, o contexto novo fica fora
+da verificação.
 
 A mesma sequência do `tools/template-smoke.sh`:
 

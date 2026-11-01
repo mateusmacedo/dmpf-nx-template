@@ -52,18 +52,38 @@ Convenções do modelo de referência:
 
 ## Como o Modelo A resolve nomes
 
-`detect-apps` devolve paths `apps/<pasta>`, **não** o nome GitOps. A tradução para
+`detect-apps` devolve o root das apps afetadas (`apps/backend/<app>`), **não** o nome
+GitOps. Ele usa o grafo do Nx (`nx show projects --affected --type app`) desde o último
+run verde do workflow na branch, então uma mudança numa lib enfileira as apps que dependem
+dela; entram só as que têm o `marker_file` (padrão `Dockerfile`). A tradução para
 `project`/`ecr` é feita **literalmente em cada job** `deploy-<app>`, no `with:`:
 
 ```yaml
   deploy-<app>:
     needs: [detect]
-    if: always() && (contains(needs.detect.outputs.apps, 'apps/<app>') || inputs.app == 'apps/<app>')
+    if: always() && (contains(fromJSON(needs.detect.outputs.apps || '[]'), 'apps/backend/<app>') || inputs.app == 'apps/backend/<app>')
     with:
       project: <app>
       ecr: <app>
-      dockerfile: apps/<app>/Dockerfile
+      dockerfile: apps/backend/<app>/Dockerfile
 ```
+
+O `contains` recebe o array do `fromJSON`, e não a string: sobre a string, ele casa por
+substring, e `apps/backend/foo` casaria `apps/backend/foo-bar`.
+
+### Base do affected
+
+O `nrwl/nx-set-shas` usa como base o último run verde do `cd-dev-hmg.yml` na mesma
+branch e no mesmo evento, sem distinguir o ambiente. Disso decorre:
+
+- Um dispatch em `hmg` no commit já implantado em `dev` devolve `apps=[]`. Para
+  promover, informe a app no input `app`.
+- Um run com `app` preenchido pula o `detect`, mas termina verde e avança a base: as
+  outras apps alteradas antes dele deixam de ser detectadas.
+- Sem run verde anterior, a base é `origin/<branch>~1`, ou seja, só o último commit.
+
+Se o projeto precisar de base por ambiente, troque o `nrwl/nx-set-shas` por uma tag por
+ambiente (por exemplo, `deployed/<env>`), movida a cada deploy, e use-a como base.
 
 Não há job `resolve` nem `strategy.matrix`, e isso é deliberado: a restrição à
 matriz em job reutilizável (`uses:`) era do runner anterior, e o modelo foi mantido
@@ -102,10 +122,9 @@ No workflow de CD (`workflow_dispatch`):
 | Input | Exemplo |
 | --- | --- |
 | `environment` | `dev` ou `hmg` |
-| `app` | `apps/<app>` — vazio significa "apps detectadas" |
+| `app` | `apps/backend/<app>` — vazio significa "apps detectadas" |
 
-Mudança apenas em `libs/`, com `shared_dirs: libs`, enfileira **todas** as apps que
-tenham `Dockerfile`.
+Mudança apenas numa lib enfileira as apps que dependem dela no grafo e têm `Dockerfile`.
 
 ## Secrets externos
 
@@ -159,7 +178,7 @@ não são duplicadas no recurso da app.
 
 | Sintoma | Verificação |
 | --- | --- |
-| `apps=[]` no detect | O commit não tocou `apps/*` nem `libs/*`, ou a app não tem `Dockerfile` |
+| `apps=[]` no detect | Nenhuma app afetada desde o último run verde na branch (ver "Base do affected"), ou a app não tem `Dockerfile` |
 | App detectada não faz deploy | Não existe job `deploy-<app>` para esse path; adicione o bloco no `cd-dev-hmg.yml` |
 | `AWS_ACCOUNT_ID` vazio | Configure a var no repositório do projeto |
 | Deploy com `project` errado | `project`/`ecr` do job `deploy-<app>` desatualizados |

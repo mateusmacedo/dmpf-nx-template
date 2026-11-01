@@ -5,10 +5,12 @@ description: |
   Cobre roteamento, dependency injection (constructor + Wire/Fx), middleware, validação,
   autenticação JWT, autorização baseada em role, recover, structured errors, request lifecycle,
   graceful shutdown, structured logging com slog.
-model: sonnet
+model: opus
 ---
 
 # Go HTTP — padrões
+
+> **Override DMPF.** Num bounded context deste workspace, a forma é a de `.claude/rules/dmpf-bounded-context.md`, que prevalece sobre o genérico descrito aqui: o contexto serve só gRPC, em `app/rpc`, com a cadeia de interceptors do kernel; `app/http` num contexto reprova no check do plugin, e o REST público é do `bff`.
 
 ## Objetivo
 

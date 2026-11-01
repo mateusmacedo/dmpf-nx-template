@@ -177,6 +177,23 @@ DADO / QUANDO / ENTÃO
 - **[Feature X]**: justificativa
 ```
 
+## Specs de bounded context
+
+Uma spec de bounded context descreve **um modelo** (agregados, comandos,
+eventos, integração), não uma mudança. Ela segue um template próprio, guardado
+na skill que a consome:
+`.agents/skills/dmpf-bounded-context/references/template-bounded-context.md`.
+
+- O frontmatter é o mesmo de qualquer spec (nove campos), então
+  `spec-query.sh` a lista normalmente.
+- O catálogo a distingue pelo título, que começa com `Bounded context —`, e
+  pela seção **Identidade**, obrigatória.
+- O corpo tem dez seções fixas; `/dmpf-new-context SPEC-<id>` valida todas e
+  recusa a spec nomeando a que faltar.
+- A spec preenchida vive aqui, em `docs/specs/`, como as demais, no formato
+  `SPEC-<id>-<ctx>.md`. O passo a passo até o primeiro contexto verde está em
+  `docs/guides/primeiro-bounded-context.md`.
+
 ## Checklist de qualidade
 
 Antes de aprovar uma spec, verificar:

@@ -17,18 +17,19 @@ concurrency:
   group: create-release
   cancel-in-progress: false
 
-permissions:
-  contents: write
+permissions: {}
 
 jobs:
   create-release:
     name: Create Release Branch
+    permissions:
+      contents: write
     runs-on: ubuntu-26.04
     timeout-minutes: 10
 
     steps:
       - name: Checkout master
-        uses: actions/checkout@v4
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           ref: master
           fetch-depth: 0
@@ -39,8 +40,10 @@ jobs:
 
       - name: Resolve bump type
         id: bump
+        env:
+          BUMP_TYPE: ${{ inputs.bump-type }}
         run: |
-          BUMP="${{ inputs.bump-type }}"
+          BUMP="$BUMP_TYPE"
 
           if [[ "$BUMP" == "auto" ]]; then
             if ! git rev-parse --verify --quiet refs/remotes/origin/develop >/dev/null; then
@@ -73,7 +76,10 @@ jobs:
         run: |
           # WHY: release branches are deleted after the merge; master's history keeps the
           # cycle in the merge subject ("from <owner>/release/X.Y.Z" or "release: X.Y.Z").
+          # WHY: a pre-release (release/X.Y.Z-rc.N) does not close the X.Y.Z cycle;
+          # counting it would make the next run skip the final X.Y.Z.
           LATEST_CYCLE=$(git log origin/master --pretty=format:%s \
+            | grep -vE 'release(/|: )[0-9]+\.[0-9]+\.[0-9]+-' \
             | grep -oE 'release(/|: )[0-9]+\.[0-9]+\.[0-9]+' \
             | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' \
             | sort -V | tail -1 || echo "")
@@ -109,4 +115,4 @@ jobs:
 
           git checkout -b "$BRANCH"
           git push origin "$BRANCH"
-          echo "::notice::$BRANCH criada a partir de master. Abra o PR para master com a sua conta: PR aberto pelo GITHUB_TOKEN não dispara o CI."
+          echo "::notice::$BRANCH criada a partir de master. Abra o PR para master com a sua conta depois do primeiro push com commits: execuções disparadas pelo GITHUB_TOKEN terminam sem nenhum job."

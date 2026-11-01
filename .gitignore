@@ -52,6 +52,8 @@ plans
 .serena
 .tokensave/
 .headroom/
+.obsidian/
+graphify-out/
 
 # build info
 *.tsbuildinfo
@@ -63,6 +65,7 @@ plans
 .env
 .env.*
 !.env.example
+!.env.*.example
 
 # Next.js
 .next

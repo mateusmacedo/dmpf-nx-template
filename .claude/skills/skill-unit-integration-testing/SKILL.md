@@ -4,7 +4,7 @@ description: |
   Orientação para testes unitários e de integração: estrutura, nomenclatura,
   escolha entre tipos, isolamento e boas práticas. Framework-agnóstica.
   Referências específicas de Jest/RTL ficam em skill-jest.
-model: sonnet
+model: opus
 ---
 
 # Testes Unitários e de Integração
@@ -410,17 +410,21 @@ func TestUserRepo_Integration(t *testing.T) {
     }
 
     ctx := context.Background()
-    pg, err := postgres.RunContainer(ctx,
-        postgres.WithDatabase("test"),
-        postgres.WithUsername("test"),
-        postgres.WithPassword("test"),
+    // testcontainers-go >= v0.32: a imagem é argumento posicional de Run;
+    // RunContainer está deprecated (modules/postgres/postgres.go:139).
+    // Alias tcpostgres: o package do projeto também se chama postgres.
+    pg, err := tcpostgres.Run(ctx, "postgres:16-alpine",
+        tcpostgres.WithDatabase("test"),
+        tcpostgres.WithUsername("test"),
+        tcpostgres.WithPassword("test"),
+        tcpostgres.BasicWaitStrategies(),
     )
+    testcontainers.CleanupContainer(t, pg) // no-op com pg == nil; Terminate mesmo se Run falhar
     if err != nil {
         t.Fatal(err)
     }
-    t.Cleanup(func() { pg.Terminate(ctx) })
 
-    dsn, _ := pg.ConnectionString(ctx)
+    dsn, _ := pg.ConnectionString(ctx, "sslmode=disable")
     db, _ := sql.Open("postgres", dsn)
     runMigrations(t, db)
 
