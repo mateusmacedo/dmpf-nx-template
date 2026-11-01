@@ -228,7 +228,8 @@ SHA. No template, sem nenhum módulo Go, esse workflow reprova no `modsync --che
 liga os gates globais (`package.json`, `pnpm-lock.yaml`, `go.work` ou `go.mod`): ele não é check
 obrigatório e passa a valer no projeto derivado a partir do primeiro contexto.
 
-O job `template-smoke` do `ci.yml` roda `tools/template-smoke.sh`, que copia o working tree
+O job `template-smoke` do `ci.yml` roda `tools/template-smoke.sh` enquanto o `modulePrefix` do
+`dmpf.json` for o reservado `example.com/change-me` (no derivado, o job fica inerte). Ele copia o working tree
 para um repositório descartável, gera um bounded context e passa pelos gates do DMPF. Para
 rodar localmente: `bash tools/template-smoke.sh`.
 

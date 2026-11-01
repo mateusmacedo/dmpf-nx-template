@@ -259,6 +259,8 @@ primeiro PR do derivado:
    `develop` e da `master` como o `AGENTS.md` descreve (seção "Git e release").
 7. **ADRs.** Numere os ADRs do derivado a partir de `100`; a faixa `001-099` é do
    template (ver `docs/adr/README.md`).
+8. **Inventário.** À medida que criar apps e libs, atualize a "Visão geral" do
+   `AGENTS.md` (que diz que o template não tem nenhuma) e a árvore do `README.md`.
 
 O job `Template smoke (DMPF)` do `ci.yml` só roda enquanto o `modulePrefix` do
 `dmpf.json` for o reservado `example.com/change-me`. Depois do `init` do
