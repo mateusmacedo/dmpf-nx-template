@@ -54,7 +54,8 @@ node tools/adr-verify.mjs --from 100                          # ADRs do derivado
 ```
 
 O job `ADR` do `ci.yml` roda as três e os testes de `tools/tests/adr-verify/` quando o
-diff toca `docs/adr/`, o verificador ou os testes.
+diff toca `docs/adr/`, `docs/specs/` (a A8 confere as specs citadas), o verificador ou
+os testes.
 
 ## Template
 

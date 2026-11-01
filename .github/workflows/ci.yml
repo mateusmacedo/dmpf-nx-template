@@ -51,7 +51,7 @@ jobs:
           mudados="$(git diff --name-only --no-renames "$BASE_SHA"...HEAD)"
           codigo="$(awk '!/^docs\// && !(/\.md$/ && !/^(tools|\.claude|\.agents)\//)' <<<"$mudados")"
           echo "code=$([ -n "$codigo" ] && echo true || echo false)" | tee -a "$GITHUB_OUTPUT"
-          adr="$(grep -E '^(docs/adr/|tools/adr-verify\.mjs$|tools/tests/adr-verify/)' <<<"$mudados" || true)"
+          adr="$(grep -E '^(docs/adr/|docs/specs/|tools/adr-verify\.mjs$|tools/tests/adr-verify/)' <<<"$mudados" || true)"
           echo "adr=$([ -n "$adr" ] && echo true || echo false)" | tee -a "$GITHUB_OUTPUT"
           # WHY: o smoke exige o modulePrefix reservado; no derivado, depois do init,
           # ele reprovaria sempre. Fora do template o job fica inerte.
