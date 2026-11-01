@@ -40,8 +40,10 @@ jobs:
 
       - name: Resolve bump type
         id: bump
+        env:
+          BUMP_TYPE: ${{ inputs.bump-type }}
         run: |
-          BUMP="${{ inputs.bump-type }}"
+          BUMP="$BUMP_TYPE"
 
           if [[ "$BUMP" == "auto" ]]; then
             if ! git rev-parse --verify --quiet refs/remotes/origin/develop >/dev/null; then
