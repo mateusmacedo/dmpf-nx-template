@@ -39,6 +39,15 @@ cancelamento reprova. A `master` não tem check obrigatório; ela só recebe có
 validado pelo PR de release. O Nx Cloud fica desligado no template
 (`neverConnectToCloud` no `nx.json`); o derivado se conecta depois de remover a flag.
 
+## Consumir as libs publicadas
+
+As libs vão para o GitHub Packages (`https://npm.pkg.github.com`, escopo `@mateusmacedo`),
+publicadas no CI só com o `secrets.GITHUB_TOKEN` (`packages: write`). Quem as consome
+precisa de um token com `read:packages` no `~/.npmrc`
+(`//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}`) e de
+`@mateusmacedo:registry=https://npm.pkg.github.com` no `.npmrc` do projeto. A separação
+entre versionamento e publicação vem da ADR-004; o alvo e o runner atuais, da ADR-010.
+
 ## Modelo de referência
 
 | Campo | Valor de referência |

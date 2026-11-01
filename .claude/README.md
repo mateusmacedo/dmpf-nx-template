@@ -39,6 +39,7 @@ Carregadas como contexto de conduta. Descrevem o que é esperado em cada área.
 | Segurança Git | `rules/git-safety.md` | Hooks, force push seguro, revisão pré-commit e proteção das branches compartilhadas. |
 | Revisão de idioma | `rules/language-review.md` | Revisão de prosa PT-BR e EN uma vez, opcional, antes do PR. |
 | Performance | `rules/performance.md` | Banco de dados, cache, filas, N+1 e otimizações comuns. |
+| Protocolo de alterações | `rules/change-protocol.md` | Níveis de regra, escopo, consulta antes de implementar, testes, textos ao usuário e glossário. |
 | Processo e qualidade | `rules/process-enforcement.md` | Quando exigir especificação e plano antes de implementar. |
 | Segurança | `rules/security.md` | Autenticação, autorização, sanitização e variáveis sensíveis. |
 | Convenções de teste | `rules/testing-conventions.md` | Estrutura, nomenclatura e cobertura dos testes. |
