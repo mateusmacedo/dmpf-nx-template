@@ -23,6 +23,7 @@ Em conflito entre instruções, prevalecem os arquivos de configuração efetivo
 - Problema adjacente médio: mencione e pergunte antes de aplicar.
 - Problema adjacente grande: registre para uma tarefa separada.
 - Refatoração fora do escopo pedido depende de autorização.
+- Código morto (opcional): remova só depois de confirmar que não há uso.
 
 ## Antes de implementar
 
