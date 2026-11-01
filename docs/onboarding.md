@@ -227,6 +227,43 @@ O trabalho deste repositório é rastreado no Linear, no projeto
 - **Branch e PR:** `tipo/DEVS-<n>-descricao-curta` e título
   `tipo(scope): [DEVS-<n>] descrição`.
 
+## Ao derivar deste template
+
+Um repositório criado a partir deste template herda a identidade dele. Antes do
+primeiro PR do derivado:
+
+1. **Nome do pacote raiz.** `@nx-base-template/source` aparece no `package.json`,
+   no `project.json`, no `lefthook.yml`, nos workflows (`ci.yml`, `nx-release.yml`,
+   `nx-publish-libs.yml`, `publish-libs.yaml`, `dmpf-agendado.yml`), no
+   `.github/PULL_REQUEST_TEMPLATE.md`, no `AGENTS.md`, neste guia e no
+   `docs/guides/development-workflow.md`. Os ADRs citam o nome como registro
+   histórico e ficam como estão. Para listar o que resta:
+
+   ```bash
+   git grep -l '@nx-base-template/source' -- ':!docs/adr' ':!docs/specs' ':!docs/analises'
+   git grep -lw 'nx-base-template' -- ':!docs/adr' ':!docs/specs' ':!docs/analises'
+   ```
+
+2. **Identidade DMPF.** Rode o `init` com o prefixo de módulo e o projeto Compose
+   do derivado (ver `docs/guides/primeiro-bounded-context.md`). O `init` reescreve
+   o `name:` do `infra/test/compose.yml` (arquivo gerenciado), mas o do
+   `infra/local/docker-compose.yml` (`nx-base-template-local`) é seed, que um
+   `init` repetido não toca: troque à mão.
+3. **Escopo npm.** Troque `@mateusmacedo` pelo owner do repositório no GitHub
+   Packages, com o mesmo casing no `package.json`, no `tsconfig.base.json` e no
+   input `scope` da publicação (ver o `AGENTS.md`).
+4. **Tracker.** Troque a linha do projeto do Linear neste guia e no `AGENTS.md`.
+5. **Nx Cloud.** O template sai com `neverConnectToCloud: true` no `nx.json`. Para
+   conectar, remova a flag e rode `pnpm nx connect`.
+6. **Rulesets.** Rulesets não são copiados para o repositório novo. Recrie os da
+   `develop` e da `master` como o `AGENTS.md` descreve (seção "Git e release").
+7. **ADRs.** Numere os ADRs do derivado a partir de `100`; a faixa `001-099` é do
+   template (ver `docs/adr/README.md`).
+
+O job `Template smoke (DMPF)` do `ci.yml` só roda enquanto o `modulePrefix` do
+`dmpf.json` for o reservado `example.com/change-me`. Depois do `init` do
+derivado, o job fica inerte sem precisar editar o workflow.
+
 ## Onde continuar lendo
 
 - `README.md` — mapa do monorepo e visão multistack.
