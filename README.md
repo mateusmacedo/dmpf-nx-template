@@ -99,45 +99,53 @@ pnpm nx migrate --run-migrations
 
 ## Estrutura de diretórios
 
-```
+O template não traz apps nem libs: os diretórios de `apps/` e `libs/` são destinos, sem
+projeto Nx registrado. A fonte de verdade dos projetos é `pnpm nx show projects`.
+
+```text
 nx-base-template/
-├── apps/                        # Aplicações executáveis
-│   └── <stack>-<name>/
-│   └── <stack>-<name>-e2e/
+├── apps/
+│   ├── backend/                    # placeholder — sem projeto Nx
+│   ├── frontend/                   # placeholder — sem projeto Nx
+│   └── serverless/                 # placeholder — sem projeto Nx
 ├── libs/
-│   ├── shared/                  # Libs agnósticas de framework (scope:shared)
-│   │   ├── utils/               # Utilitários TypeScript puros
-│   │   ├── types/               # Tipos e interfaces compartilhados
-│   │   └── testing/             # Fixtures e helpers de teste
-│   ├── backend/                 # Libs de servidor (scope:backend)
-│   │   ├── domain/              # Lógica de domínio
-│   │   ├── nest/                # Módulos NestJS reutilizáveis
-│   │   └── infra/               # Adapters (DB, cache, queue)
-│   ├── frontend/                # Libs de UI (scope:frontend)
-│   │   ├── ui/                  # Componentes React/Next.js
-│   │   └── angular/             # Componentes Angular
-│   └── data-access/
-│       └── api-client/          # Client HTTP compartilhado
-├── tools/
-│   ├── generators/              # Nx generators do workspace (vazio)
-│   ├── executors/               # Nx executors customizados
-│   ├── dmpf-baseline/           # Baseline de conformidade (saída do dmpf-plugin)
-│   └── template-smoke.sh        # Smoke do template (gera e valida um contexto descartável)
-├── infra/                       # Infra local, k8s e observabilidade (saída do dmpf-plugin)
+│   ├── backend/                    # placeholder — sem projeto Nx
+│   ├── frontend/                   # placeholder — sem projeto Nx
+│   └── shared/                     # placeholder — sem projeto Nx
 ├── docs/
-│   └── adr/                     # Architecture Decision Records
-├── .github/workflows/ci.yml     # CI com nx affected + template-smoke
-├── .github/workflows/dmpf-ci.yml # CI Go do DMPF (workflow reutilizável do platform)
-├── dmpf.json                    # Configuração do DMPF (saída do init)
-├── go.work                      # Workspace Go (diretiva do dmpf-plugin)
+│   ├── adr/                        # ADRs (faixa 001-099 do template)
+│   ├── specs/                      # catálogo e template de specs (SPEC-XXXX)
+│   ├── analises/                   # análises que embasam specs
+│   ├── rules/                      # regras de domínio (BIZ-, APP-, PRD-)
+│   ├── guides/                     # fluxo de trabalho e primeiro bounded context
+│   ├── nx-reference/               # guia prático de tasks Nx e taxonomia de tags
+│   ├── ci-cd/                      # adoção de CI/CD e deploy
+│   └── onboarding.md               # setup local, primeiro PR e derivação
+├── infra/
+│   ├── docker/                     # Dockerfile de referência
+│   └── local/, k8s/, observability/, test/  # saída do dmpf-plugin — não editar à mão
+├── tools/
+│   ├── adr-verify.mjs              # verificador do acervo de ADRs
+│   ├── tests/adr-verify/           # testes do verificador
+│   ├── dmpf-baseline/              # baseline de conformidade (saída do dmpf-plugin)
+│   └── template-smoke.sh           # smoke do template (contexto descartável)
+├── .agents/skills/                 # skills de workspace (Nx) e dmpf-* (saída do dmpf-plugin)
+├── .claude/                        # agents, skills e rules para assistentes
+├── .github/workflows/              # CI, release, publish, cache, gates agendados e CD (template)
+├── dmpf.json                       # configuração do DMPF (saída do init)
+├── go.work                         # workspace Go (diretiva do dmpf-plugin)
+├── biome.json                      # Biome (lint + formatação)
+├── jest.preset.js                  # preset Jest com SWC
+├── .spec.swcrc                     # SWC dos testes (decorators)
+├── lefthook.yml
 ├── nx.json
-├── tsconfig.base.json           # TypeScript Project References (nodenext)
-├── pnpm-workspace.yaml          # apps/*, libs/**, tools/* + catalog de versões
-├── biome.json                   # Biome (lint + formatação)
-├── jest.config.ts               # Jest root
-├── jest.preset.js               # Preset SWC
-└── .spec.swcrc                  # Config SWC para testes (suporta decorators)
+├── package.json
+├── pnpm-workspace.yaml             # workspaces e catalog de versões
+└── tsconfig.base.json              # TypeScript Project References (nodenext)
 ```
+
+Apps Nest criadas a partir daqui seguem tipicamente `src/app/<feature>/` (controllers,
+services e DTOs colocalizados). Libs exportam pela `src/index.ts` do pacote.
 
 ## Convenção de tags (obrigatória em todo project.json)
 
@@ -220,7 +228,8 @@ SHA. No template, sem nenhum módulo Go, esse workflow reprova no `modsync --che
 liga os gates globais (`package.json`, `pnpm-lock.yaml`, `go.work` ou `go.mod`): ele não é check
 obrigatório e passa a valer no projeto derivado a partir do primeiro contexto.
 
-O job `template-smoke` do `ci.yml` roda `tools/template-smoke.sh`, que copia o working tree
+O job `template-smoke` do `ci.yml` roda `tools/template-smoke.sh` enquanto o `modulePrefix` do
+`dmpf.json` for o reservado `example.com/change-me` (no derivado, o job fica inerte). Ele copia o working tree
 para um repositório descartável, gera um bounded context e passa pelos gates do DMPF. Para
 rodar localmente: `bash tools/template-smoke.sh`.
 

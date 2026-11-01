@@ -86,8 +86,8 @@ isso sobrescreve as propriedades herdadas do default, incluindo `cache: true`.
 
 Todo projeto deve ter **exatamente três tags**, uma de cada dimensão:
 
-A fonte canônica desta taxonomia é o `AGENTS.md`; a tabela abaixo a repete e não
-deve divergir dele. Os projetos Go gerados pelo `bounded-context` do
+Esta tabela é a fonte canônica da taxonomia: o `AGENTS.md` aponta para ela, e o
+`README.md` a repete; em divergência, vale esta. Os projetos Go gerados pelo `bounded-context` do
 `@mateusmacedo/dmpf-plugin` levam, além das três, uma tag `layer:` (por exemplo,
 `layer:contract`, `layer:apps`), definida pelo plugin.
 

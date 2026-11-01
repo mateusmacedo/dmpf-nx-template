@@ -2,7 +2,7 @@
 id: SPEC-R2XAA4X4
 slug: backport-melhorias-derivados
 title: Backport das melhorias dos projetos derivados para o template
-stage: building
+stage: done
 priority: P1
 depends_on: [SPEC-TXJ6A4XX]
 ticket_url: https://linear.app/mmda/issue/DEVS-165/spec-r2xaa4x4-backport-das-melhorias-dos-projetos-derivados-para-o
@@ -261,7 +261,7 @@ Linear, uma branch, um plano e um PR para `develop`.
 
 #### Onda 4 — derivação e governança
 
-- [ ] **[P0] BKP-28 Roteiro de derivação**: seção "Ao derivar deste template"
+- [x] **[P0] BKP-28 Roteiro de derivação**: seção "Ao derivar deste template"
   no `docs/onboarding.md`, cobrindo:
   - os 13 arquivos com o nome do pacote raiz;
   - o `name:` do compose seed e a linha do tracker;
@@ -269,16 +269,16 @@ Linear, uma branch, um plano e um PR para `develop`.
     `pnpm nx connect`), os rulesets (BKP-02) e a faixa de ADR (BKP-29).
   - O job `template-smoke` roda só quando `jq -r .modulePrefix dmpf.json`
     devolver `example.com/change-me`.
-- [ ] **[P1] BKP-29 ADR**: a convenção do `docs/adr/README.md` reserva
+- [x] **[P1] BKP-29 ADR**: a convenção do `docs/adr/README.md` reserva
   `001-099` ao template; o derivado começa em `100` (decisão D4).
   - Portar o `tools/adr-verify.mjs` da plataforma com os testes de
     `tools/tests/adr-verify/`, sem o cabeçalho que cita a spec de origem.
   - Adotar com `--from` e ligar no CI pelo escopo do BKP-20.
-- [ ] **[P1] BKP-30 `AGENTS.md` enxuto**: deixar o arquivo com no máximo 150
+- [x] **[P1] BKP-30 `AGENTS.md` enxuto**: deixar o arquivo com no máximo 150
   linhas fora do bloco Nx autoatualizado.
   - Toda regra removida passa a existir em `.claude/rules/` ou num
     `README.md`.
-- [ ] **[P1] BKP-31 Rules de IA**:
+- [x] **[P1] BKP-31 Rules de IA**:
   - criar `.claude/rules/language-review.md` (revisão PT-BR e EN uma vez,
     opcional, antes do PR);
   - dar `skills:` e as ferramentas `Skill`, `AskUserQuestion`, `Bash`, `LSP`,
@@ -286,22 +286,25 @@ Linear, uma branch, um plano e um PR para `develop`.
   - remover as seções "Reutilização" e "Go: processo e cadeia de validação"
     do `process-enforcement.md`;
   - manter o `comment-discipline.md` atual (decisão D5).
-- [ ] **[P2] BKP-32 `.claude/settings.json`**: acrescentar ao
+- [x] **[P2] BKP-32 `.claude/settings.json`**: acrescentar ao
   `permissions.allow` o subconjunto read-only (`Bash(pnpm biome ci *)`,
   `Bash(gofmt -l *)`, `Bash(go vet ./...)`, `Bash(go version)`,
   `Bash(go doc *)` e `Bash(docker compose ls *)`).
   - Remover o `nx@nx-claude-plugins` do `enabledPlugins` só se ele duplicar
     as skills de `.agents/skills/` (decisão D6).
+  - Na implementação, `gofmt -l *` virou `gofmt -l .`: o curinga também casava
+    `gofmt -l -w`, que reescreve arquivos. O plugin ficou: ele entrega o
+    `nx-mcp` e o `ci-monitor-subagent`, que `.agents/skills/` não tem.
 
 ### Não-funcionais
 
-- [ ] Compatibilidade: Node `^24`, `pnpm@11.14.0`, Nx `23.1.0`; Go `1.26.10`
+- [x] Compatibilidade: Node `^24`, `pnpm@11.14.0`, Nx `23.1.0`; Go `1.26.10`
   e `golangci-lint` `v2.15.0` depois da Onda 2.
-- [ ] Segurança: nenhuma action por tag móvel depois do BKP-18; nenhum
+- [x] Segurança: nenhuma action por tag móvel depois do BKP-18; nenhum
   `${{ inputs.* }}` interpolado dentro de `run`; `pnpm config get *` fora do
   allowlist, porque pode imprimir token de registry.
-- [ ] Desempenho: o pre-push faz 1 cálculo do grafo affected em vez de 4.
-- [ ] Rastreabilidade: o corpo de cada commit cita o `BKP-NN` que implementa.
+- [x] Desempenho: o pre-push faz 1 cálculo do grafo affected em vez de 4.
+- [x] Rastreabilidade: o corpo de cada commit cita o `BKP-NN` que implementa.
 
 ### Pontos a verificar na implementação
 
@@ -474,10 +477,10 @@ senão: pular com notice
 - [x] Onda 3: nenhum `uses:` de workflow ou composite aponta para tag móvel.
 - [x] Onda 3: `detect-apps` devolve `["apps/backend/<app>"]` para uma app
   afetada no layout de dois níveis.
-- [ ] Onda 4: `node tools/adr-verify.mjs` passa nos ADRs do template, e os
+- [x] Onda 4: `node tools/adr-verify.mjs` passa nos ADRs do template, e os
   testes de `tools/tests/adr-verify/` passam.
-- [ ] Onda 4: `AGENTS.md` com no máximo 150 linhas fora do bloco Nx.
-- [ ] Validação do projeto passando ao fim de cada onda (constraint P0).
+- [x] Onda 4: `AGENTS.md` com no máximo 150 linhas fora do bloco Nx.
+- [x] Validação do projeto passando ao fim de cada onda (constraint P0).
 
 ### Cenários de teste
 

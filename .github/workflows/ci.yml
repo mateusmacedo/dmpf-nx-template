@@ -30,6 +30,8 @@ jobs:
     timeout-minutes: 5
     outputs:
       code: ${{ steps.scope.outputs.code }}
+      adr: ${{ steps.scope.outputs.adr }}
+      smoke: ${{ steps.scope.outputs.smoke }}
     steps:
       - name: Checkout
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
@@ -49,6 +51,12 @@ jobs:
           mudados="$(git diff --name-only --no-renames "$BASE_SHA"...HEAD)"
           codigo="$(awk '!/^docs\// && !(/\.md$/ && !/^(tools|\.claude|\.agents)\//)' <<<"$mudados")"
           echo "code=$([ -n "$codigo" ] && echo true || echo false)" | tee -a "$GITHUB_OUTPUT"
+          adr="$(grep -E '^(docs/adr/|docs/specs/|tools/adr-verify\.mjs$|tools/tests/adr-verify/)' <<<"$mudados" || true)"
+          echo "adr=$([ -n "$adr" ] && echo true || echo false)" | tee -a "$GITHUB_OUTPUT"
+          # WHY: o smoke exige o modulePrefix reservado; no derivado, depois do init,
+          # ele reprovaria sempre. Fora do template o job fica inerte.
+          prefixo="$(jq -r '.modulePrefix // empty' dmpf.json 2>/dev/null || true)"
+          echo "smoke=$([ "$prefixo" = 'example.com/change-me' ] && echo true || echo false)" | tee -a "$GITHUB_OUTPUT"
 
   main:
     name: Nx Affected Pipeline
@@ -98,7 +106,7 @@ jobs:
   template-smoke:
     name: Template smoke (DMPF)
     needs: scope
-    if: needs.scope.outputs.code == 'true'
+    if: needs.scope.outputs.code == 'true' && needs.scope.outputs.smoke == 'true'
     permissions:
       contents: read
       packages: read
@@ -127,12 +135,48 @@ jobs:
       - name: Template smoke
         run: bash tools/template-smoke.sh
 
+  # WHY: ADR é documentação e não liga o `main`; o verificador roda pelo próprio
+  # critério. Os ADRs 001-011 antecedem o verificador e passam só nas checagens
+  # estruturais (docs/adr/README.md, seção "Verificador").
+  adr:
+    name: ADR
+    needs: scope
+    if: needs.scope.outputs.adr == 'true'
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+
+      # WHY: o verificador não tem dependência e o job não instala o pnpm; sem
+      # package-manager-cache: false, o setup-node lê o packageManager do
+      # package.json e falha procurando o pnpm para o cache.
+      - name: Setup Node
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: "24"
+          package-manager-cache: false
+
+      - name: Verificar o acervo
+        run: |
+          set -euo pipefail
+          node tools/adr-verify.mjs --to 99 --check a1,a2,a3,a6,a7,a8
+          node tools/adr-verify.mjs --from 12 --to 99
+          node tools/adr-verify.mjs --from 100
+
+      - name: Testes do verificador
+        run: node --test tools/tests/adr-verify/verify.test.mjs
+
   # WHY: único check obrigatório do ruleset. Job pulado conta como aprovado,
   # porque o escopo só pula o que não se aplica ao PR; falha ou cancelamento
   # reprova.
   ci:
     name: CI
-    needs: [scope, main, template-smoke]
+    needs: [scope, main, template-smoke, adr]
     if: always()
     runs-on: ubuntu-26.04
     permissions: {}
