@@ -1,4 +1,14 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(pnpm biome ci *)",
+      "Bash(gofmt -l *)",
+      "Bash(go vet ./...)",
+      "Bash(go version)",
+      "Bash(go doc *)",
+      "Bash(docker compose ls *)"
+    ]
+  },
   "extraKnownMarketplaces": {
     "nx-claude-plugins": {
       "source": {
