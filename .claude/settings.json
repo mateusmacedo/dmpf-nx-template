@@ -2,7 +2,7 @@
   "permissions": {
     "allow": [
       "Bash(pnpm biome ci *)",
-      "Bash(gofmt -l *)",
+      "Bash(gofmt -l .)",
       "Bash(go vet ./...)",
       "Bash(go version)",
       "Bash(go doc *)",
