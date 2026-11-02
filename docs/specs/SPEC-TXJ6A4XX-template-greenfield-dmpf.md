@@ -414,7 +414,7 @@ github.com/mateusmacedo/dmpf (platform)          dmpf-nx-template (este repo)
 - [x] `go.work` com a diretiva Go de `versions.json` (1.26.9 na rc.3).
 - [x] `nx.json` sem `release.projects` e sem `release.docker`; `pnpm nx release --dry-run` passa no smoke, com o grupo Go gerado. (No template sem projetos o comando continua falhando por grupo vazio, como antes desta spec.)
 - [x] Nenhuma credencial em arquivo versionado; o `pnpm install` dos workflows e do `Dockerfile.node.example` autentica pelo npmrc de usuário.
-- [ ] `template-smoke` verde em PR, em até 25 min, sem arquivos novos versionados ao final.
+- [x] `template-smoke` verde em PR, em até 25 min, sem arquivos novos versionados ao final.
 - [x] `dmpf-ci.yml` fora dos checks obrigatórios dos rulesets de `develop` e `master`.
 - [x] ADR-011 publicada.
 - [ ] README com quickstart executado do zero em repositório criado pelo template, até o primeiro contexto verde.
@@ -425,6 +425,13 @@ github.com/mateusmacedo/dmpf (platform)          dmpf-nx-template (este repo)
 quickstart do zero depende do merge na `master`, porque o `gh repo create --template` usa
 a branch padrão do template. O repositório não tem rulesets hoje, então o `dmpf-ci.yml`
 não é obrigatório em nenhuma branch.
+
+**Verificação retroativa (2026-11-01):** o `template-smoke` passou no runner do GitHub no
+PR #5 (140 s) e depois nos PRs #8 (218 s) e #13 (195 s). O script trabalha numa cópia
+fora do repositório e recusa diretório de trabalho dentro dele, então o repositório não
+ganha arquivos. Os rulesets de `develop` e `master` passaram a existir na SPEC-R2XAA4X4 e
+exigem só o check `CI`. O quickstart do zero segue pendente: não há registro de um
+repositório criado pelo template e levado até o primeiro contexto verde.
 
 ### Cenários de teste
 
